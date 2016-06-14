@@ -46,20 +46,30 @@ function Round(game, turn){
    this.fsm = newTrucoFSM();
 
 /*incializacion de los callbacks:
- * Cuando se entra al estado truco, acumular los puntos del truco en la ronda (no son asignados hasta que se termine la ronda)
+ * Cuando se acepta truco/retruco/valecuatro (Ver *AceptandoTruco/Retruco/Valecuatro)
+ * sumar 1 punto al acumulador puntosTruco (no son asignados hasta que se termine la ronda)
+ *
  * Cuando se entra al estado envido, apilar 2 puntos a la pila que guarda los diferentes cantos de envido (@envidoStack)
- * Cuando se juega una carta (event play-card) cambiar el turno de quienJuega 
+ *
+ * Cuando se juega una carta (event play-card) cambiar el turno de quienJuega al jugador correspondiente
+ *
  * Antes de que se realize la transicion a quiero/no-quiero (onbeforequiero/no-quiero), calcular los puntos de lo que se estaba cantando (estado from)
  *  
+ * Cada vez que se entra al estado played_card evaluar si es fin de ronda
+  *
+*/
+/* *AceptandoTruco/Retruco/Valecuatro: Evaluado en onbeforequiero, si no vino @from ningun estado de envido acumula 1 punto de lo que se haya cantado
+ 	el truco/retruco/valecuatro acumulan puntos de la misma forma, no es necesario distinguirlos
 */
     var tround = this; //Guardar la referencia a la ronda
-	this.fsm.onafterplay_card=	function(event, from, to) {tround.quienJuega = switchPlayer(tround.quienJuega);};//
+	this.fsm.onafterplay_card=		function(event, from, to) {} //TODO: Cambiar al jugador correspondiente(depende del resultado de los duelos)
+	this.fsm.onenterplayed_card=	function(event, from, to) {if (tround.hasEnded()) {tround.fsm[finronda]};}//TODO: Cambiar al estado finronda si la ronda temrino 
 	this.fsm.onenterenvido=			function(event, from, to) {tround.pushEnvidoPlay(to);};//Si se canto envido, suma 2 a la pila de puntos 
 	this.fsm.onbeforequiero=		function(event, from, to) {valueOf[from]? tround.sumarPuntosDeEnvidoCon(true) : tround.puntosTruco++;};
 															  //Si vino de envido calcula los puntos con quiero, sino suma puntos al truco
 	this.fsm.onbeforeno_quiero=		function(event, from, to) {valueOf[from]? tround.sumarPuntosDeEnvidoCon(false) : tround.endRound();};
 															  //Si vino de envido calcula los puntos con no quiero, sino termina la ronda
-	this.fsm.onfinronda=			function(event, from, to) {}; //actualizar los puntos del juego });
+	this.fsm.onfinronda=			function(event, from, to) {tround.asignarPuntosAlGanador()}; //TODO: actualizar los puntos del juego });
 }
 
 //Puntos que dan el envido/realenvido/faltaenvido
@@ -82,7 +92,7 @@ function newTrucoFSM(){
     { name: 'quiero',    from: ['envido', 'truco'],              to: 'quiero'  },
     { name: 'no_quiero', from: 'envido',						 to: 'no_quiero' },
 	{ name: 'no_quiero', from: 'truco',							 to: 'finronda' },
-	{ name: 'finronda',  from: 'played-card',					 to: 'finronda' },
+	{ name: 'finronda',  from: 'played_card',					 to: 'finronda' },
   ],
   });
 
@@ -119,6 +129,25 @@ Round.prototype.changeTurn = function(evento){
 	}
 };
 
+/*
+ *Retorna true si la ronda termino
+ *Una ronda termina cuando: 
+ *  -Se jugaron las 6 cartas
+ *  -Primer duelo = empate, Segundo duelo != empate (gana el que gano este duelo)
+ *  -Primer duelo != empate, Segundo duelo = empate (gana el que gano el primer duelo)
+
+*/
+Round.prototype.hasEnded = function() {
+}
+
+/*
+ *Retorna "player1" si gano this.player1, "player2" si gano this.player2
+ *De acuerdo al resultado de los duelos se puede obtener el ganador:
+ *ganador del duelo 1 
+*/
+Round.prototype.ganadorDelTruco = function() {
+	return "ElGanador"
+}
 /*
  * returns the oposite player
  */
