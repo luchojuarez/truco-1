@@ -18,12 +18,12 @@ function Game(player1, player2){
   /*
    * Player 1
    */
-  this.player1 = new Player(player1);
+  this.player1 = new Player("player 1");
 
   /*
    * Player 2
    */
-  this.player2 = new Player(player2);
+  this.player2 = new Player("player 2");
 
   /*
    * sequence of previous Rounds
@@ -33,7 +33,7 @@ function Game(player1, player2){
   /*
    * Game's hand
    */
-  this.currentHand = player1;
+  this.currentHand = "player1";
 
   /*
    * Game's hand
