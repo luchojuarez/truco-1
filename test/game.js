@@ -42,4 +42,11 @@ describe('Game#play', function(){
 
     expect(game.score).to.deep.equal([0, 2]);
   });
+
+  it('plays [envido, no_quiero] should give 1 point to whoever chanted', function(){
+  	game.play('player1', 'envido');
+	game.play('player2', 'no_quiero');
+
+	expect(game.score).to.deep.equal([1,0]);
+   }); 
 });

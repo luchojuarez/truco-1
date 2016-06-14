@@ -44,6 +44,8 @@ function Game(player1, player2){
    * Game' score
    */
   this.score = [0, 0];
+
+  this.maxScore = 30;
 }
 
 /*
