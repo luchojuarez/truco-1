@@ -1,25 +1,23 @@
-/*
- * Represents a player in the game
- * @param name [String]: old state to intialize the new state
- */
 var _ = require('lodash');
+var mongoose = require('mongoose');
+var Schema = mongoose.Schema;
 
-function Player(name) {
-  /*
-   * the player's name
-   */
-  this.name = name;
+/*
+ * Player Schema
+ */
+var PlayerSchema = new Schema({
+  user: {
+    type: Schema.ObjectId,
+    ref: 'Player'
+  },
+  nickname: {
+    type: String,
+    required: true,
+    unique: true
+  },
+});
 
-  /*
-   * cards of this user
-   */
-  this.cards = [];
-
-  /*
-   * user envido points
-   */
-  this.envidoPoints = 0;
-}
+var Player = mongoose.model('Player', PlayerSchema);
 
 /*
  * Add cards to user and calculate the user points
@@ -43,8 +41,7 @@ Player.prototype.points = function(){
     return pair[0].envido(pair[1]);
   });
 
-  return _.max(pairValues);
+  return Math.max(pairValues);
 };
-
 
 module.exports.player = Player;
