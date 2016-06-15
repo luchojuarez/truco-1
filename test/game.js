@@ -35,7 +35,7 @@ describe('Game#play', function(){
 
     game.player2.setCards([
         new Card(6, 'copa'),
-        new Card(1, 'basto'),
+        new Card(7, 'basto'),
         new Card(2, 'basto')
     ]);
   });
@@ -65,20 +65,25 @@ describe('Game#play', function(){
   });
 
   it('plays [envido, quiero] should gives 2 points to winner', function(){
-    game.play('player1', 'cantoEnvido');
-    game.play('player2', 'envidoQuerido');
+    game.play('player1', 'envido');
+    game.play('player2', 'quiero');
 
-    expect(game.score).to.deep.equal([0, 2]);
+    expect(game.score[1]).to.equal(2);
+  });
+
+  it('plays [envido, no_quiero] should give 1 points to who ever chanted envido', function() {
+    game.play('player1', 'envido');
+    game.play('player2', 'no_quiero');
+    expect(game.score[0]).to.equal(1);
   });
 
     it('plays [truco, quiero] should gives 2 points to winner', function(){
-      game.play('player1', 'cantoTruco');
-      game.play('player2', 'trucoQuerido');
+      game.play('player1', 'truco');
+      game.play('player2', 'quiero');
       game.play('player1', 'playCard',game.player1.cards[0]);
       game.play('player2', 'playCard',game.player2.cards[1]);
       game.play('player1', 'playCard',game.player1.cards[1]);
       game.play('player2', 'playCard',game.player2.cards[2]);
-      console.log(game.score);
-      expect(game.score).to.deep.equal([0, 2]);
+      expect(game.score[1]).to.equal(2);
     });
 });
