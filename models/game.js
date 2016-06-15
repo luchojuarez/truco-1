@@ -25,6 +25,7 @@ var GameSchema = new Schema({
   currentHand:  { type: String, default: 'player1' },
   currentRound: Object,
   rounds:       { type : Array , default : [] },
+  maxScore:		{ type : Number , default : 30},
   score:        { type : Array , default : [0, 0] },
 });
 
@@ -39,6 +40,7 @@ Game.prototype.play = function(player, action, value){
 
   if(this.currentRound.fsm.cannot(action))
     throw new Error("[ERROR] INVALID MOVE...");
+ 
 
   return this.currentRound.play(action, value);
 };
