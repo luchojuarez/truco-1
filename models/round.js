@@ -234,7 +234,7 @@ Round.prototype.calculateEnvidoScore = function (quiso) {
  */
 Round.prototype.play = function(action, value) {
   // move to the next state
-  this.fsm[action]();
+  this.fsm[action](this,value);
 
 	return this.changeTurn(action);
 };
