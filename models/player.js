@@ -14,10 +14,11 @@ var PlayerSchema = new Schema({
     type: String,
     required: true,
     unique: true
-  },
+  }
 });
 
 var Player = mongoose.model('Player', PlayerSchema);
+
 
 /*
  * Add cards to user and calculate the user points
@@ -40,8 +41,7 @@ Player.prototype.points = function(){
   var pairValues = _.map(pairs, function(pair){
     return pair[0].envido(pair[1]);
   });
-
-  return Math.max(pairValues);
+  return _.max(pairValues);
 };
 
 module.exports.player = Player;
