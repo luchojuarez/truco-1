@@ -57,6 +57,18 @@ Game.prototype.newRound = function(){
   return this;
 }
 
+//Cuando se actualiza el score del juego, verifica si termina el juego y llama a terminar juego
+//
+Game.prototype.gameScoreUpdated = function() {
+  if (this.score[0] >= this.maxScore ||
+    this.score[1] >= this.maxScore) {
+    //si term
+    console.log("EL JUEGO TERMINO ..");
+    this.endTheGame();
+  }
+}
+//TODO: sin implementar
+Game.prototype.endTheGame = function () {};
 /*
  * returns the oposite player
  */
