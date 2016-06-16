@@ -46,7 +46,6 @@ function newTrucoFSM(){
             instanciaRonda.pushCardToBoard(carta);
         },
 
-        //TODO:
         /*Despues de hacer la transicion:
      //     *Verificar si el duelo termino (un duelo termina cuando (this.board[0].length + this.board.length[1]) == 2 || 4 || 6)
      //         >si termino guardar el resultado del duelo (resultado = "player1" || "player2" || "empate")
@@ -190,7 +189,7 @@ Round.prototype.calcularRonda = function(board, mano) {
                 quienAgano = "player2";
                 break;
             }
-        case (confrontResult = 0):
+        case (confrontResult == 0):
             {
                 quienAgano = "empate";
                 break;
