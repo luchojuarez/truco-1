@@ -22,7 +22,7 @@ var GameSchema = new Schema({
   name:         String,
   player1:      Object,
   player2:      Object,
-  currentHand:  { type: String, default: 'player1' },
+  currentHand:  { type: String },
   currentRound: Object,
   rounds:       { type : Array , default : [] },
   maxScore:		{ type : Number , default : 30},
@@ -49,9 +49,9 @@ Game.prototype.play = function(player, action, value){
  * Create and return a new Round to this game
  */
 Game.prototype.newRound = function(){
+  this.currentHand == undefined? this.currentHand= 'player1' : this.currentHand = switchPlayer(this.currentHand);
   var round = new Round(this, this.currentHand);
   this.currentRound = round;
-  this.currentHand = switchPlayer(this.currentHand);
   this.rounds.push(round);
 
   return this;
