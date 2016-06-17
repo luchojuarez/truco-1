@@ -14,7 +14,7 @@ var PlayerSchema = new Schema({
     type: String,
     required: true,
     unique: true
-  }
+  },
 });
 
 var Player = mongoose.model('Player', PlayerSchema);

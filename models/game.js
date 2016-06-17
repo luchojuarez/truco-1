@@ -50,7 +50,7 @@ Game.prototype.play = function(player, action, value){
  */
 Game.prototype.newRound = function(){
   this.currentHand == undefined? this.currentHand= 'player1' : this.currentHand = switchPlayer(this.currentHand);
-  var round = new Round(this, this.currentHand);
+  var round = new Round({game :this, currentTurn : this.currentHand});
   this.currentRound = round;
   this.rounds.push(round);
 
