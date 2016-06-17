@@ -9,44 +9,27 @@
 var _ = require('lodash');
 var playerModel = require("./player");
 var roundModel = require("./round");
-
+var mongoose = require('mongoose');
 
 var Player = playerModel.player;
 var Round  = roundModel.round;
+var Schema = mongoose.Schema;
 
-function Game(player1, player2){
-  /*
-   * Player 1
-   */
-  this.player1 = new Player("player 1");
+/*
+ * Game Schema
+ */
+var GameSchema = new Schema({
+  name:         String,
+  player1:      Object,
+  player2:      Object,
+  currentHand:  { type: String },
+  currentRound: Object,
+  rounds:       { type : Array , default : [] },
+  maxScore:		{ type : Number , default : 30},
+  score:        { type : Array , default : [0, 0] },
+});
 
-  /*
-   * Player 2
-   */
-  this.player2 = new Player("player 2");
-
-  /*
-   * sequence of previous Rounds
-   */
-  this.rounds = [];
-
-  /*
-   * Game's hand
-   */
-  this.currentHand = "player1";
-
-  /*
-   * Game's hand
-   */
-  this.currentRound = undefined;
-
-  /*
-   * Game' score
-   */
-  this.score = [0, 0];
-
-  this.maxScore = 30;
-}
+var Game = mongoose.model('Game', GameSchema);
 
 /*
  * Check if it's valid move and play in the current round
@@ -57,6 +40,7 @@ Game.prototype.play = function(player, action, value){
 
   if(this.currentRound.fsm.cannot(action))
     throw new Error("[ERROR] INVALID MOVE...");
+ 
 
   return this.currentRound.play(action, value);
 };
@@ -65,14 +49,26 @@ Game.prototype.play = function(player, action, value){
  * Create and return a new Round to this game
  */
 Game.prototype.newRound = function(){
+  this.currentHand == undefined? this.currentHand= 'player1' : this.currentHand = switchPlayer(this.currentHand);
   var round = new Round(this, this.currentHand);
   this.currentRound = round;
-  this.currentHand = switchPlayer(this.currentHand);
   this.rounds.push(round);
 
   return this;
 }
 
+//Cuando se actualiza el score del juego, verifica si termina el juego y llama a terminar juego
+//
+Game.prototype.gameScoreUpdated = function() {
+  if (this.score[0] >= this.maxScore ||
+    this.score[1] >= this.maxScore) {
+    //si term
+    console.log("EL JUEGO TERMINO ..");
+    this.endTheGame();
+  }
+}
+//TODO: sin implementar
+Game.prototype.endTheGame = function () {};
 /*
  * returns the oposite player
  */

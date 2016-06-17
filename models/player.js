@@ -1,30 +1,29 @@
-/*
- * Represents a player in the game
- * @param name [String]: old state to intialize the new state
- */
 var _ = require('lodash');
+var mongoose = require('mongoose');
+var Schema = mongoose.Schema;
 
-function Player(name) {
-  /*
-   * the player's name
-   */
-  this.name = name;
+/*
+ * Player Schema
+ */
+var PlayerSchema = new Schema({
+  user: {
+    type: Schema.ObjectId,
+    ref: 'Player'
+  },
+  nickname: {
+    type: String,
+    required: true,
+    unique: true
+  }
+});
 
-  /*
-   * cards of this user
-   */
-  this.cards = [];
+var Player = mongoose.model('Player', PlayerSchema);
 
-  /*
-   * user envido points
-   */
-  this.envidoPoints = 0;
-}
 
 /*
  * Add cards to user and calculate the user points
  */
-Player.prototype.setCards = function(cards){
+Player.prototype.setCards = function(cards) {
   this.cards = cards;
   this.envidoPoints = this.points();
 }
@@ -32,19 +31,17 @@ Player.prototype.setCards = function(cards){
 /*
  * Returns the user envido points
  */
-Player.prototype.points = function(){
+Player.prototype.points = function() {
   var pairs = [
     [this.cards[0], this.cards[1]],
     [this.cards[0], this.cards[2]],
     [this.cards[1], this.cards[2]],
   ];
 
-  var pairValues = _.map(pairs, function(pair){
+  var pairValues = _.map(pairs, function(pair) {
     return pair[0].envido(pair[1]);
   });
-
   return _.max(pairValues);
 };
-
 
 module.exports.player = Player;
