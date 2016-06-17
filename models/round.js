@@ -60,7 +60,7 @@ var valueOf = {
 
 function newTrucoFSM(){
   var fsm = StateMachine.create({
-  initial: 'init',final: 'finronda',
+  initial: 'init' ,final: 'finronda',
   events: [
 
     { name: 'playCard',     from: 'init',                           	to: 'primerCarta' },
@@ -141,11 +141,17 @@ function newTrucoFSM(){
         //Si no vino de envido le da los puntos acumulados del truco hasta el momento al jugador que canto truco
     }
 });
-
   return fsm;
 }
 
-
+Round.prototype.resetValues = function () {
+    this.fsm.current = 'init';
+    this.board = [[],[]];
+    this.nextTurn = null;
+    this.score = [0,0];
+    this.puntosTruco = 1;
+    this.envidoStack = [];
+}
 
 
 

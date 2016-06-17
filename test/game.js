@@ -45,8 +45,7 @@ describe('Game#play', function(){
     var game = new Game();
     player1 = new Player({ nickname: 'J' });
     player2 = new Player({ nickname: 'X' });
- 
-    player1.save(function(err, player1) { 
+    player1.save(function(err, player1) {
       if(err)
         done(err)
       game.player1 = player1;
@@ -62,13 +61,11 @@ describe('Game#play', function(){
           expect(model.player2.nickname).to.be.eq('X');
           done();
         });
-
       })
     });
   });
 
   it('plays [envido, quiero] should gives 2 points to winner', function(){
-
     game.play('player1', 'envido');
     game.play('player2', 'quiero');
 
