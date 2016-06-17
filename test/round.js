@@ -14,21 +14,21 @@ describe('Round', function(){
 
   beforeEach(function(){
     game = new Game();
-    game.player1 = new Player({name: 'J'});
-    game.player2 = new Player({name: 'X'});
+    game.player1 = new Player({nickname: 'D'});
+    game.player2 = new Player({nickname: 'E'});
     game.newRound();
   });
 
   describe("#deal", function(){
     it("should populate player1 cards", function(){
-      var round = new Round(game);
+      var round = game.currentRound;
       round.deal();
 
       expect(game.player1.cards.length).to.be.equal(3);
     });
 
     it("should populate player2 cards", function(){
-      var round = new Round(game);
+      var round = game.currentRound;
       round.deal();
 
       expect(game.player2.cards.length).to.be.equal(3);
