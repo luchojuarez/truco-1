@@ -50,7 +50,7 @@ describe('Game#save&restore', function(){
     cr = game.currentRound;
     cr.save(function(err,savedround) {
       if (err)
-        done(err)
+        done(err);
       savedRound = savedround;
       savedRoundId = savedround._id;
 
@@ -65,30 +65,16 @@ describe('Game#save&restore', function(){
     });
   });
 
-  it("Saved the id", function() {
-      var roundId;
-      var Game = gameModel.game;
-      var Round = roundModel.round;
-      Game.findOne({
-        _id: savedGameId
-      }, function(err, restored) {
-        if (err) {
-          console.error(err);
-        }
-        roundId = restored.currentRound;
-      })
-      Round.findOne({
-        _id: roundId
-      }, function(err, round) {
-        if (err) {
-          console.error(err)
-        }
-        console.log("The round is saved?", round);
-        console.log("Recovered round id: "
-          round._id);
-      })
-      expect(true).to.be.ok;
-    })
+  it("Populates the game", function() {
+	Game
+		.findOne({_id : savedGameId })
+		.populate("currentRound")
+		.exec(function (err,tgame) {
+			if (err) console.error(err);
+			console.log("Curent round of restored game ",tgame.currentRound);
+	});	
+	expect(true).to.be.ok;
+    });
     //return false;
     /*var Game = GameModel;
     Game.findOne({name : "mijuego" }, function(err,thegame) {
