@@ -19,7 +19,7 @@ var RoundSchema = new Schema({
   game: Object,
 
   /* next turn*/
-  currentTurn: { type: String }, 
+  currentTurn:  String, 
 
   /*here is a FSM to perform user's actions*/
   fsm: { type: Object , default : newTrucoFSM() },
