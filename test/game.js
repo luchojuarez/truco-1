@@ -24,9 +24,11 @@ describe('Game', function(){
 describe('Game#save&restore', function(){
 
   var savedGameId;
-  var savedGame;
-  var savedRound;
   var savedRoundId;
+  var savedRound;
+  var roundState;
+  var roundBoard;
+  var roundScore;
 
   beforeEach(function(done){
     game = new Game({name : "nuevoJuego" });
@@ -46,8 +48,22 @@ describe('Game#save&restore', function(){
         new Card(7, 'basto'),
         new Card(2, 'basto')
     ]);
-    
+
+	//Do some moves
+    game.play('player1', 'truco');
+    game.play('player2', 'quiero');
+    game.play('player1', 'playCard',game.player1.cards[0]); //juega 1 espada
+    game.play('player2', 'playCard',game.player2.cards[1]); //juega 4 basto
+    game.play('player1', 'playCard',game.player1.cards[1]); //juega 3 oro
+    game.play('player2', 'playCard',game.player2.cards[2]); //juega 2 basto
+
+//	Keep track of the original values
     cr = game.currentRound;
+	roundState = cr.fsm.current;
+	roundBoard = cr.board;
+	roundScore = cr.score;	
+
+	//save the game and round
     cr.save(function(err,savedround) {
       if (err)
         done(err);
@@ -64,17 +80,22 @@ describe('Game#save&restore', function(){
       });
     });
   });
+	//END OF CB
 
-  it("Populates the game", function() {
+  it("Geting a saved games restores all its atributes correctly", function() {
 	Game
 		.findOne({_id : savedGameId })
 		.populate("currentRound")
 		.exec(function (err,tgame) {
 			if (err) console.error(err);
-			console.log("Curent round of restored game ",tgame.currentRound);
+			var rround = tgame.currentRound;
+			expect(roundState).to.be.eq(rround.fsm.current);
+			expect(roundBoard[0].length).to.be.eq(rround.board[0].length);
+			expect(roundBoard[1].length).to.be.eq(rround.board[1].length);
+			expect(roundScore[0]).to.be.deep.eq(rround.score[0]);
+			expect(roundScore[1]).to.be.deep.eq(rround.score[1]);
 	});	
-	expect(true).to.be.ok;
-    });
+ });
     //return false;
     /*var Game = GameModel;
     Game.findOne({name : "mijuego" }, function(err,thegame) {
