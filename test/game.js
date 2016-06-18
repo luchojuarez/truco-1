@@ -1,9 +1,12 @@
 var utils = require('./utils');
+var mongoose = require('mongoose');
 var expect = require("chai").expect;
 var playerModel = require("../models/player");
 var gameModel   = require("../models/game");
+var roundModel  = require("../models/round");
 var gameCard    = require("../models/card");
 
+var Round = roundModel.round;
 var Game = gameModel.game;
 var Card = gameCard.card;
 var Player = playerModel.player;
@@ -17,11 +20,92 @@ describe('Game', function(){
   });
 });
 
+
+describe('Game#save&restore', function(){
+
+  var savedGameId;
+  var savedGame;
+  var savedRound;
+  var savedRoundId;
+
+  beforeEach(function(done){
+    game = new Game({name : "nuevoJuego" });
+    game.player1 = new Player({ nickname: 'J' });
+    game.player2 = new Player({ nickname: 'X' });
+    game.newRound({game : game, currentTurn : game.currentHand });
+
+    // Force to have the following cards and envidoPoints
+    game.player1.setCards([
+        new Card(1, 'espada'),
+        new Card(3, 'oro'),
+        new Card(7, 'espada')
+    ]);
+
+    game.player2.setCards([
+        new Card(7, 'oro'),
+        new Card(7, 'basto'),
+        new Card(2, 'basto')
+    ]);
+    
+    cr = game.currentRound;
+    cr.save(function(err,savedround) {
+      if (err)
+        done(err)
+      savedRound = savedround;
+      savedRoundId = savedround._id;
+
+      game.save(function(err, model) {
+            if (err) {
+              done(err);
+            }
+            savedGameId = model._id;
+            savedGame = model;
+            done();
+      });
+    });
+  });
+
+  it("Saved the id", function() {
+      var roundId;
+      var Game = gameModel.game;
+      var Round = roundModel.round;
+      Game.findOne({
+        _id: savedGameId
+      }, function(err, restored) {
+        if (err) {
+          console.error(err);
+        }
+        roundId = restored.currentRound;
+      })
+      Round.findOne({
+        _id: roundId
+      }, function(err, round) {
+        if (err) {
+          console.error(err)
+        }
+        console.log("The round is saved?", round);
+        console.log("Recovered round id: "
+          round._id);
+      })
+      expect(true).to.be.ok;
+    })
+    //return false;
+    /*var Game = GameModel;
+    Game.findOne({name : "mijuego" }, function(err,thegame) {
+              if(err) {
+                          console.log("Server status? =",mongoose.connection.readyState);
+                          console.error(err);
+              }
+              console.log("showing curr round ",thegame.currentRound);
+              expect(thegame.name).to.be.eq("mijuego");
+          });*/
+  });
+
 describe('Game#play', function(){
   var game;
 
   beforeEach(function(){
-    game = new Game();
+    game = new Game({name : "mijuego" });
     game.player1 = new Player({ nickname: 'J' });
     game.player2 = new Player({ nickname: 'X' });
     game.newRound({game : game, currentTurn : game.currentHand });
@@ -42,9 +126,11 @@ describe('Game#play', function(){
   });
 
   it('should save a game', function(done){
-    var game = new Game();
-    player1 = new Player({ nickname: 'J' });
-    player2 = new Player({ nickname: 'X' });
+    player1 = game.player1
+    player2 = game.player2
+    var theRound = game.currentRound;
+
+
     player1.save(function(err, player1) {
       if(err)
         done(err)
@@ -59,6 +145,7 @@ describe('Game#play', function(){
             done(err)
           expect(model.player1.nickname).to.be.eq('J');
           expect(model.player2.nickname).to.be.eq('X');
+          expect(model.currentRound).to.be.eq(theRound);  
           done();
         });
       })
