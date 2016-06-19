@@ -1,8 +1,33 @@
 extends layout
 
 block content
+  h1 Truco
+  // Interface jugador 1
   if (!user)
-    a(href="/login") Login
+    h3 Player 1
+    a(href="/login")
+      button.btn.btn-primary(type="button") Login 
+    a(href="/register")
+      button.btn.btn-primary(type="button") Register 
   if (user)
-    p You are currently logged in as #{user.username}
-    a(href="/logout") Logout
+    h3 #{user.username}
+    a(href="/logout") 
+      button.btn.btn-primary(type="button") Logout
+  
+  //interface jugador 2
+  if (!user2)
+    h3 Player 2
+    a(href="/login")
+      button.btn.btn-primary(type="button") Login
+    a(href="/register")
+      button.btn.btn-primary(type="button") Register
+  if (user2)
+    h3 #{user2.username}
+    a(href="/logout") 
+      button.btn.btn-primary(type="button") Logout
+
+  // si ambos estan logueados podemos arrancar
+  if (user && user2)
+    p dos usuarios logueados
+    a(href="/play") 
+      button.btn.btn-primary(type="button") Play

@@ -8,7 +8,7 @@ var Game = require("../models/game").game;
 /* GET home page. */
 router.get('/', function (req, res) {
   var game = new Game();
-  res.render('index', { user : req.user });
+  res.render('index', { user : req.user , user2 : req.user2});
 });
 
 router.get('/register', function(req, res) {
@@ -28,7 +28,7 @@ router.post('/register', function(req, res) {
 });
 
 router.get('/login', function(req, res) {
-    res.render('login', { user : req.user });
+    res.render('login', { user : req.player});
 });
 
 router.post('/login', passport.authenticate('local'), function(req, res) {
@@ -43,5 +43,9 @@ router.get('/logout', function(req, res) {
 router.get('/ping', function(req, res){
     res.status(200).send("pong!");
 });
+
+router.get('/play',function (req,res) {
+    res.render('play')
+})
 
 module.exports = router;
