@@ -12,7 +12,6 @@ describe('Users: models', function () {
       };
       User.create(u, function (err, createdUser) {
         // Confirm that that an error does not exist
-        console.log(err)
         expect(err).to.not.exist
 
         // verify that the returned user is what we expect
