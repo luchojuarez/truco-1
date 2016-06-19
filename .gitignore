@@ -2,3 +2,5 @@
 *.swp
 *.json
 *~
+.*
+npm-debug.log   

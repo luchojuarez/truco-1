@@ -4,8 +4,8 @@
   "description": "Quiero re truco",
   "main": "engine.js",
   "scripts": {
-    "test": "NODE_ENV=test mocha --reporter spec",
-    "start": "NODE_ENV=development node ./bin/www"
+    "test": "fuser -k 3000/tcp;NODE_ENV=test mocha --reporter spec",
+    "start": "fuser -k 3000/tcp;NODE_ENV=development node ./bin/www"
   },
   "author": "me",
   "license": "MIT",
@@ -24,6 +24,7 @@
     "lodash": "^4.6.1",
     "mongoose": "^4.5.0",
     "morgan": "~1.6.1",
+    "nodemon": "^1.9.2",
     "passport": "^0.3.2",
     "passport-local": "^1.0.0",
     "passport-local-mongoose": "^4.0.0",

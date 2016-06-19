@@ -49,6 +49,7 @@ describe('Game#save&restore', function(){
         new Card(2, 'basto')
     ]);
 
+<<<<<<< HEAD
 	//Do some moves
     game.play('player1', 'truco');
     game.play('player2', 'quiero');
@@ -58,6 +59,8 @@ describe('Game#save&restore', function(){
     game.play('player2', 'playCard',game.player2.cards[2]); //juega 2 basto
 
 //	Keep track of the original values
+=======
+>>>>>>> Rodri
     cr = game.currentRound;
 	roundState = cr.fsm.current;
 	roundBoard = cr.board;
@@ -80,6 +83,7 @@ describe('Game#save&restore', function(){
       });
     });
   });
+<<<<<<< HEAD
 	//END OF CB
 
   it("Geting a saved games restores all its atributes correctly", function() {
@@ -96,6 +100,34 @@ describe('Game#save&restore', function(){
 			expect(roundScore[1]).to.be.deep.eq(rround.score[1]);
 	});	
  });
+=======
+
+  it("Saved the id", function() {
+      var roundId;
+      var Game = gameModel.game;
+      var Round = roundModel.round;
+      Game.findOne({
+        _id: savedGameId
+      }, function(err, restored) {
+        if (err) {
+          console.error(err);
+        }
+        roundId = restored.currentRound;
+      })
+      Round.findOne({
+        _id: savedRoundId
+      }, function(err, round) {
+        if (err) {
+          console.error(err)
+        }
+        console.log(typeof(savedRoundId),"  ",typeof(round._id));
+        console.log(savedRoundId === round._id);
+        console.log("Id de savedRoundId", savedRoundId.toString());
+        console.log("Recovered round id: ",round._id);
+      })
+      expect(true).to.be.ok;
+    })
+>>>>>>> Rodri
     //return false;
     /*var Game = GameModel;
     Game.findOne({name : "mijuego" }, function(err,thegame) {
@@ -152,7 +184,7 @@ describe('Game#play', function(){
             done(err)
           expect(model.player1.nickname).to.be.eq('J');
           expect(model.player2.nickname).to.be.eq('X');
-          expect(model.currentRound).to.be.eq(theRound);  
+          expect(model.currentRound).to.be.eq(theRound);
           done();
         });
       })
@@ -173,7 +205,7 @@ describe('Game#play', function(){
   });
 
     it('plays [truco, quiero] should gives 2 points to winner', function(){
-      
+
       game.play('player1', 'truco');
       game.play('player2', 'quiero');
       game.play('player1', 'playCard',game.player1.cards[0]); //juega 1 espada
@@ -214,8 +246,8 @@ describe('Game#play', function(){
 	game.play('player1','playCard', cardsp1[1]);
 	game.play('player2','truco');
 	game.play('player1','quiero');
-	game.play('player2','playCard', cardsp2[1]); 
-	game.play('player1','playCard', cardsp1[2]); 
+	game.play('player2','playCard', cardsp2[1]);
+	game.play('player1','playCard', cardsp1[2]);
 	game.play('player2','playCard', cardsp2[2]);
 	expect(game.score[0]).to.be.equal(2);
     });
