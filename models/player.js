@@ -10,11 +10,15 @@ var PlayerSchema = new Schema({
     type: Schema.ObjectId,
     ref: 'Player'
   },
-  nickname: {
+  nickname: { 
     type: String,
     required: true,
     unique: true
-  }
+  },
+  cards : {
+    type: Array , default: []
+  },
+  envidoPoints : Number,
 });
 
 var Player = mongoose.model('Player', PlayerSchema);

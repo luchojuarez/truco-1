@@ -1,30 +1,23 @@
 var utils = require('./utils');
+var mongoose = require('mongoose');
 var expect = require("chai").expect;
 var playerModel = require("../models/player");
 var gameModel   = require("../models/game");
+var roundModel  = require("../models/round");
 var gameCard    = require("../models/card");
 
+var Round = roundModel.round;
 var Game = gameModel.game;
 var Card = gameCard.card;
 var Player = playerModel.player;
 
 describe('Game', function(){
-  var game = new Game();
-
-  it('Should have two players', function(){
-    expect(game).to.have.property('player1');
-    expect(game).to.have.property('player2');
-  });
-});
-
-describe('Game#play', function(){
-  var game;
 
   beforeEach(function(){
-    game = new Game();
+    game = new Game({name : "nuevoJuego" });
     game.player1 = new Player({ nickname: 'J' });
     game.player2 = new Player({ nickname: 'X' });
-    game.newRound();
+    game.newRound({game : game, currentTurn : game.currentHand });
 
     // Force to have the following cards and envidoPoints
     game.player1.setCards([
@@ -38,35 +31,19 @@ describe('Game#play', function(){
         new Card(7, 'basto'),
         new Card(2, 'basto')
     ]);
-
   });
 
-  it('should save a game', function(done){
-    var game = new Game({ currentHand: 'player1' });
-    player1 = new Player({ nickname: 'J' });
-    player2 = new Player({ nickname: 'X' });
 
-    player1.save(function(err, player1) {
-      if(err)
-        done(err)
-      game.player1 = player1;
-      player2.save(function(err, player2) {
-        if(err)
-          done(err)
-       game.player2 = player2;
-        game.save(function(err, model){
-          if(err)
-            done(err)
-          expect(model.player1.nickname).to.be.eq('J');
-          expect(model.player2.nickname).to.be.eq('X');
-          done();
-        });
-      })
-    });
+  it('Should have two players', function(){
+    expect(game).to.have.property('player1');
+    expect(game).to.have.property('player2');
   });
+
+
+describe('Game#play', function(){
+
 
   it('plays [envido, quiero] should gives 2 points to winner', function(){
-
     game.play('player1', 'envido');
     game.play('player2', 'quiero');
 
@@ -126,4 +103,6 @@ describe('Game#play', function(){
 	game.play('player2','playCard', cardsp2[2]);
 	expect(game.score[0]).to.be.equal(2);
     });
+});
+
 });

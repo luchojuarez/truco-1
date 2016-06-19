@@ -1,7 +1,7 @@
 /*
  *
  * Represents a game
- * @param player1 [String]: name of player 1
+ * @param player1.2 [String]: name of player 1
  * @param player2 [String]: name of player 2
  *
  */
@@ -23,7 +23,7 @@ var GameSchema = new Schema({
   player1:      Object,
   player2:      Object,
   currentHand:  { type: String },
-  currentRound: Object,
+  currentRound: { type: Schema.Types.ObjectId , ref: 'Round' },
   rounds:       { type : Array , default : [] },
   maxScore:		{ type : Number , default : 30},
   score:        { type : Array , default : [0, 0] },
@@ -50,7 +50,8 @@ Game.prototype.play = function(player, action, value){
  */
 Game.prototype.newRound = function(){
   this.currentHand == undefined? this.currentHand= 'player1' : this.currentHand = switchPlayer(this.currentHand);
-  var round = new Round(this, this.currentHand);
+  var round = new Round({game :this, currentTurn : this.currentHand});
+  round.resetValues();
   this.currentRound = round;
   this.rounds.push(round);
 

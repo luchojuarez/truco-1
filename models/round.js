@@ -10,11 +10,44 @@ var _ = require('lodash');
 var StateMachine = require("../node_modules/javascript-state-machine/state-machine.js");
 var deckModel = require("./deck");
 var Deck = deckModel.deck;
+var mongoose = require('mongoose');
+var Schema = mongoose.Schema;
 
-function asignarPuntos(jugador, puntos, instanciaRonda) {
-    jugador === "player1" ? instanciaRonda.score[0] += puntos : instanciaRonda.score[1] += puntos;
-    return instanciaRonda.score;
-}
+var RoundSchema = new Schema({
+
+  /*Game*/
+  game: Object,
+
+  /* next turn*/
+  currentTurn:  String, 
+
+  /*here is a FSM to perform user's actions*/
+  fsm: { type: Object , default : newTrucoFSM() },
+
+  status: { type: String, default : 'running' }, 
+
+  /* Round' score*/
+  score: { type: Array , default : [0, 0] },
+
+  /*Puntos que se estan jugando del truco/retruco/vale4*/
+  puntosTruco: { type: Number, default : 1 },
+
+  /* Resultados de cada duelo: empate/player1/player2 */
+  resultados: { type: Array , default : [] },
+
+  /* Puntos acumulados del envido hasta el momento */
+  envidoStack: { type: Array , default : [] },
+
+  /* Almacena el turno al que se debe cambiar luego de cantar quiero del envido/truco o luego de que termino un duelo */
+  nextTurn: { type: String },
+
+  /*Registro de cartas jugadas, board[0]: cartas del jugador 1, board[1]: cartas del jugador2 */
+  board: { type: Array , default: [[],[]]},
+
+});
+
+var Round = mongoose.model('Round', RoundSchema);
+
 
 //Puntos que dan el envido/realenvido/faltaenvido
 var valueOf = {
@@ -27,7 +60,7 @@ var valueOf = {
 
 function newTrucoFSM(){
   var fsm = StateMachine.create({
-  initial: 'init',final: 'finronda',
+  initial: 'init' ,final: 'finronda',
   events: [
 
     { name: 'playCard',     from: 'init',                           	to: 'primerCarta' },
@@ -66,14 +99,14 @@ function newTrucoFSM(){
                     instanciaRonda.nextTurn = resultado;
                 } else {
                     instanciaRonda.nextTurn = instanciaRonda.game.currentHand;
-                };
+                }
 
                 if (instanciaRonda.hasEnded()) {
                     instanciaRonda.updateRoundScore();
-                };
+                }
             } else { //Se sigue jugando el duelo, el proximo a jugar es el contrario del currentTurn
                 instanciaRonda.nextTurn = switchPlayer(instanciaRonda.currentTurn);
-            };
+            }
         },
 
         // Cuando se entra al estado envido: 
@@ -108,47 +141,27 @@ function newTrucoFSM(){
         //Si no vino de envido le da los puntos acumulados del truco hasta el momento al jugador que canto truco
     }
 });
-
   return fsm;
 }
 
-
-function Round(game, turn){
-  /*Game*/
-  this.game = game;
-
-  /* next turn*/
-  this.currentTurn = turn;
-
-  /*here is a FSM to perform user's actions*/
-  this.fsm = newTrucoFSM();
-
-  this.status = 'running';
-
-  /* Round' score*/
-  this.score = [0,0];
-
-  /*Puntos que se estan jugando del truco/retruco/vale4*/
-  this.puntosTruco = 1;
-
-  /* Resultados de cada duelo: empate/player1/player2 */
-  this.resultados = [];
-
-  /* Puntos acumulados del envido hasta el momento */
-  this.envidoStack = [];
-
-  /* Almacena el turno al que se debe cambiar luego de cantar quiero del envido/truco o luego de que termino un duelo */
-  this.nextTurn;
-
-  /*Registro de cartas jugadas, board[0]: cartas del jugador 1, board[1]: cartas del jugador2 */
-  this.board= [[],[]];
+Round.prototype.resetValues = function () {
+    this.fsm.current = 'init';
+    this.board = [[],[]];
+    this.nextTurn = null;
+    this.score = [0,0];
+    this.puntosTruco = 1;
+    this.envidoStack = [];
 }
+
 
 
 
 //Funciones
 
-
+function asignarPuntos(jugador, puntos, instanciaRonda) {
+    jugador === "player1" ? instanciaRonda.score[0] += puntos : instanciaRonda.score[1] += puntos;
+    return instanciaRonda.score;
+}
 
 //pre: un tablero con cartas
 //post: true si la cantidad de cartas jugadas es 2 o 4 o 6
@@ -245,10 +258,10 @@ Round.prototype.updateRoundScore = function() {
     };
     for (var i = 0; i < this.resultados.length; i++) {
         resultCount[this.resultados[i]]++;
-    };
+    }
 
     //Vemos los empates para saber quien gano
-    switch (resultCount["empate"]) {
+    switch (resultCount.empate) {
         case 3:
             { //3 empates, gana la mano
                 this.game.currentHand == "player1" ? this.score[0] += this.puntosTruco : this.score[1] += this.puntosTruco;
@@ -269,10 +282,11 @@ Round.prototype.updateRoundScore = function() {
             }
         case 0: //Si no hubo empates, gana el que tenga 2 victorias
             {
-                resultCount["player1"] > resultCount["player2"] ? this.score[0] += this.puntosTruco : this.score[1] += this.puntosTruco;
+                resultCount.player1 > resultCount.player2 ? this.score[0] += this.puntosTruco : this.score[1] += this.puntosTruco;
+				break;
             }
         default:
-    };
+    }
     //Actualizar el score del juego
     this.updateGameScore();
 };
@@ -282,7 +296,7 @@ Round.prototype.updateGameScore = function() {
 	this.game.score[0] += this.score[0];
     this.game.score[1] += this.score[1];
     this.game.gameScoreUpdated();
-}
+};
 
 Round.prototype.pushCardToBoard = function(carta) {
     if (this.currentTurn === "player1") {
@@ -290,10 +304,10 @@ Round.prototype.pushCardToBoard = function(carta) {
     } else {
         this.board[1].push(carta);
     }
-}
+};
 
 Round.prototype.sumarPuntosDeEnvidoCon = function(quiero) {
-        if (quiero == true) {
+        if (quiero === true) {
             var puntosConQuiero = this.calculateEnvidoScore(quiero);
             var comparePoints = this.game.player1.envidoPoints - this.game.player2.envidoPoints;
             switch (true) {
@@ -306,7 +320,7 @@ Round.prototype.sumarPuntosDeEnvidoCon = function(quiero) {
                 case (comparePoints = 0): //Empate, puntos van para la mano
                     this.game.currentHand === "player1" ? this.game.score[0] += puntosConQuiero : this.game.score[1] += puntosConQuiero;
                     break;
-            };
+            }
             this.game.gameScoreUpdated();
         } else { //quiero == false
             var puntosNoQuiero = this.calculateEnvidoScore(quiero);
@@ -315,7 +329,7 @@ Round.prototype.sumarPuntosDeEnvidoCon = function(quiero) {
 			//Decirle al juego que se actualizaron los puntos
             this.game.gameScoreUpdated();
         }
-    }
+    };
     /* ************************************************************************************************** */
     /* De acuerdo a lo que se canto, suma puntos a la pila de envido/realenvido/faltaenvido */
 Round.prototype.pushEnvidoPlay = function(tipodejugada) {
@@ -325,7 +339,7 @@ Round.prototype.pushEnvidoPlay = function(tipodejugada) {
     } else {
         this.envidoStack.push(valueOf[tipodejugada]);
     }
-}
+};
 
 /***************************************************************************************************** 
  * calculateEnvidoScore utiliza el stack de las jugadas de envido cantadas para calcular los puntos
@@ -347,7 +361,7 @@ Round.prototype.calculateEnvidoScore = function(quiso) {
             return 1;
         }
     }
-}
+};
 
 /******************************************************************************************************/
 
