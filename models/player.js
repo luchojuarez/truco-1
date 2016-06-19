@@ -15,6 +15,10 @@ var PlayerSchema = new Schema({
     required: true,
     unique: true
   },
+  cards : {
+    type: Array , default: []
+  },
+  envidoPoints : Number,
 });
 
 var Player = mongoose.model('Player', PlayerSchema);
