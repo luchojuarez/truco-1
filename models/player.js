@@ -8,9 +8,9 @@ var Schema = mongoose.Schema;
 var PlayerSchema = new Schema({
   user: {
     type: Schema.ObjectId,
-    ref: 'Player'
+    ref: 'User'
   },
-  nickname: { 
+  nickname: {
     type: String,
     required: true,
     unique: true
