@@ -43,12 +43,14 @@ router.post('/loginGuest',function (req,res) {
         player2:p2,
     });
     game.newRound();
-    console.log(p1);
-    console.log('______________________________________________________________________');
     game.currentRound.deal();
-    console.log(p1);
-    //game.save
-    res.redirect('/')
+    saveGame(game,function (err,savedgame) {
+        if (err){
+            console.error(err);
+            res.render('error',err);
+        }
+        res.redirect('/play?gameID='+savedgame._id);
+    })
 })
 
 router.get('/login', function(req, res) {
@@ -67,10 +69,47 @@ router.get('/logout', function(req, res) {
 
 
 router.get('/play',function (req,res) {
-    res.render('play',{user:req.user,guest:guest})
+    loadGameById(req.query.gameID,function (err,game) {
+        if (err)
+            console.error(err);
+        res.render('play',{
+            gameID:game._id,
+            user:req.user,
+            guest:guest,
+            currentTurn:game.currentRound.currentTurn,
+
+        })
+    })
+
 })
 router.post('/play',function (req,res) {
 
 })
+
+function saveGame(gameObject,cb) {
+    gameObject.currentRound.save(function(err, savedround) {
+        if (err)
+            cb(err);
+        gameObject.save(function(err, savedgame) {
+            if (err) {
+                cb(err);
+            }
+            cb(err,savedgame);
+        });
+    });
+}
+function loadGameById(gameId,cb) {
+Game
+    .findOne({_id : gameId })
+    .populate("currentRound")
+    .exec(function (err,tgame) {
+        if (err)
+            cb(err,undefined);
+
+        console.log("GAME LOADED: ",tgame._id);
+        cb(err,tgame);
+});
+}
+
 
 module.exports = router;

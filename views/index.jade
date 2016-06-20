@@ -15,12 +15,13 @@ block content
       button.btn.btn-primary(type="button") Logout
   
   //interface jugador 2
-  if (!guest)
-    h3 Player 2
-    a(href="/loginGuest")
-      button.btn.btn-primary(type="button") Login a guest
-  if (guest)
-    h3 #{guest.username}
+  if (user)
+    if (!guest)
+      h3 Player 2
+      a(href="/loginGuest")
+        button.btn.btn-primary(type="button") Login a guest
+    if (guest)
+      h3 #{guest.username}
 
   // si ambos estan logueados podemos arrancar
   if (user && guest)
