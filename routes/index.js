@@ -73,9 +73,10 @@ router.get('/play',function (req,res) {
         if (err)
             console.error(err);
         res.render('play',{
+            game:game,
             gameID:game._id,
-            user:req.user,
-            guest:guest,
+            user:{u:req.user, p:game.player1},
+            guest:{u:guest, p:game.player2},
             currentTurn:game.currentRound.currentTurn,
 
         })
@@ -83,7 +84,7 @@ router.get('/play',function (req,res) {
 
 })
 router.post('/play',function (req,res) {
-
+    console.log(req.body);
 })
 
 function saveGame(gameObject,cb) {
