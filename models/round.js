@@ -19,12 +19,12 @@ var RoundSchema = new Schema({
   game: Object,
 
   /* next turn*/
-  currentTurn:  String, 
+  currentTurn:  String,
 
   /*here is a FSM to perform user's actions*/
   fsm: { type: Object , default : newTrucoFSM() },
 
-  status: { type: String, default : 'running' }, 
+  status: { type: String, default : 'running' },
 
   /* Round' score*/
   score: { type: Array , default : [0, 0] },
@@ -82,10 +82,10 @@ function newTrucoFSM(){
         /*Despues de hacer la transicion:
      //     *Verificar si el duelo termino (un duelo termina cuando (this.board[0].length + this.board.length[1]) == 2 || 4 || 6)
      //         >si termino guardar el resultado del duelo (resultado = "player1" || "player2" || "empate")
-     //          y establecer el proximo turno al jugador que gano el duelo 
+     //          y establecer el proximo turno al jugador que gano el duelo
       //        >verificar si la ronda termino
       //            >si termino, asignar los puntos al ganador en game
-      //    *Si el duelo no termino, el proximo turno es el del jugador contrario   
+      //    *Si el duelo no termino, el proximo turno es el del jugador contrario
       */
 
         onafterplayCard: function(event, from, to, carta, instanciaRonda) {
@@ -109,9 +109,9 @@ function newTrucoFSM(){
             }
         },
 
-        // Cuando se entra al estado envido: 
+        // Cuando se entra al estado envido:
         //  *apilar 2 puntos a la pila que guarda los diferentes cantos de envido (@envidoStack)
-        //  *guardar la persona que canto el envido en this.nextTurn 
+        //  *guardar la persona que canto el envido en this.nextTurn
         onenterenvido: function(event, from, to, carta, tround) {
             tround.pushEnvidoPlay(to);
             tround.nextTurn = tround.currentTurn;
@@ -129,7 +129,7 @@ function newTrucoFSM(){
         //Si vino de envido le da los puntos al ganador, sino vino de envido suma puntos al truco
 
         onbeforeno_quiero: function(event, from, to, carta, tround) {
-			if (valueOf[from]) { 
+			if (valueOf[from]) {
 				tround.sumarPuntosDeEnvidoCon(false);
 			}
 			else {
@@ -169,7 +169,7 @@ function duelEnd(board) {
 
     var totalCartas = board[0].length + board[1].length;
     return (totalCartas == 2 ||
-            totalCartas == 4 || 
+            totalCartas == 4 ||
             totalCartas == 6);
 }
 /*
@@ -211,7 +211,7 @@ Round.prototype.calcularRonda = function(board, mano) {
     return quienAgano;
 };
 
-/*  
+/*
     La ronda termina cuando:
         -Se jugaron las 6 cartas (this.board[0].length + this.board.length[1] == 6)
         -Primer duelo = empate, Segundo duelo != empate (gana el del resultado del segundo duelo)
@@ -236,7 +236,7 @@ Round.prototype.hasEnded = function() {
                 return true;
                 break;
             }
-        case (this.resultados[0] == this.resultados[1] ): 
+        case (this.resultados[0] == this.resultados[1] ):
             {
                 return true;
                 break;
@@ -268,7 +268,7 @@ Round.prototype.updateRoundScore = function() {
                 break;
             }
         case 2:
-            { //2 empates, gana el 3er duelo 
+            { //2 empates, gana el 3er duelo
                 this.resultados[2] == "player1" ? this.score[0] += this.puntosTruco : this.score[1] += this.puntosTruco;
                 break;
             }
@@ -311,7 +311,7 @@ Round.prototype.sumarPuntosDeEnvidoCon = function(quiero) {
             var puntosConQuiero = this.calculateEnvidoScore(quiero);
             var comparePoints = this.game.player1.envidoPoints - this.game.player2.envidoPoints;
             switch (true) {
-                case (comparePoints > 0): //Gano player1 
+                case (comparePoints > 0): //Gano player1
                     this.game.score[0] += puntosConQuiero;
                     break;
                 case (comparePoints < 0): //Gano player2
@@ -341,7 +341,7 @@ Round.prototype.pushEnvidoPlay = function(tipodejugada) {
     }
 };
 
-/***************************************************************************************************** 
+/*****************************************************************************************************
  * calculateEnvidoScore utiliza el stack de las jugadas de envido cantadas para calcular los puntos
  * cuando un jugador quiere el envido/realenvido/faltaenvido se hace la sumatoria del arreglo
  * cuando un jugador no quiere el envido/realenvido/faltaenvido

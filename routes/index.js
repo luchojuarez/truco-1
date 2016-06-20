@@ -4,9 +4,11 @@ var User = require('../models/user');
 var router = express.Router();
 
 var Game = require("../models/game").game;
+var Card = require("../models/card").card;
 var Player = require("../models/player").player;
 var Round = require("../models/round").round;
 var guest;
+var currentGame;
 
 /* GET home page. */
 router.get('/', function (req, res) {
@@ -38,7 +40,7 @@ router.post('/loginGuest',function (req,res) {
     var p1 = new Player({user:req.user,nickname:req.user.username});
     var p2 = new Player({user:guest , nickname:guest.username});
     var game = new Game({
-        name:p1.username+ ' VS '+p2.username,
+        name:p1.nickname+ ' VS '+p2.nickname,
         player1:p1,
         player2:p2,
     });
@@ -51,6 +53,7 @@ router.post('/loginGuest',function (req,res) {
         }
         res.redirect('/play?gameID='+savedgame._id);
     })
+    currentGame=game;
 })
 
 router.get('/login', function(req, res) {
@@ -72,20 +75,54 @@ router.get('/play',function (req,res) {
     loadGameById(req.query.gameID,function (err,game) {
         if (err)
             console.error(err);
-        res.render('play',{
-            game:game,
-            gameID:game._id,
-            user:{u:req.user, p:game.player1},
-            guest:{u:guest, p:game.player2},
-            currentTurn:game.currentRound.currentTurn,
-
-        })
+        else {
+            res.render('play',{
+                game:game,
+                gameID:game._id,
+                user:{u:req.user, p:game.player1},
+                guest:{u:guest, p:game.player2},
+                currentTurn:game.currentRound.currentTurn,
+            })
+        }
     })
 
 })
 router.post('/play',function (req,res) {
-    console.log(req.body);
 })
+
+router.get('/changePlayer',function (req,res) {
+
+})
+
+router.post('/changePlayer',function (req,res) {
+    var carta;
+    var jugada;
+    if (!(undefined===req.body.playCard))
+        carta=req.body.playCard;
+    if (!(undefined===req.body.jugada))
+        jugada=req.body.jugada;
+
+    if (jugada){
+        console.log(currentGame.currentRound.fsm.current,currentGame.currentHand);
+        currentGame.play(currentGame.currentHand,jugada);
+        console.log(currentGame.currentRound.fsm.current,currentGame.currentHand);
+        res.render('changePlayer',{
+            player:currentGame.currentHand,
+            gameID:req.query.gameID
+        });
+    }
+    if (carta && currentGame.currentRound.fsm.can('playCard')) {
+        carta=parseCard(carta);
+        currentGame.play(currentGame.currentHand,'playCard',carta);
+        console.log(currentGame.currentRound.fsm.current,currentGame.currentHand);
+        res.render('changePlayer',{
+            player:currentGame.currentHand,
+            gameID:req.query.gameID
+        });
+    }
+
+})
+
 
 function saveGame(gameObject,cb) {
     gameObject.currentRound.save(function(err, savedround) {
@@ -100,17 +137,40 @@ function saveGame(gameObject,cb) {
     });
 }
 function loadGameById(gameId,cb) {
-Game
-    .findOne({_id : gameId })
-    .populate("currentRound")
-    .exec(function (err,tgame) {
-        if (err)
-            cb(err,undefined);
-
-        console.log("GAME LOADED: ",tgame._id);
-        cb(err,tgame);
-});
+    Game
+        .findOne({_id : gameId })
+        .populate("currentRound")
+        .exec(function (err,tgame) {
+            if (err){
+                cb(err,undefined);
+                console.error("GAME NOT LOADED: ",err);
+            }
+            cb(err,tgame);
+    });
 }
-
+function parseCard (carta) {
+    var number = parseInt(carta.split("",2)[0]+carta.split("",2)[1]);
+	var suit = carta.split("",7);
+	if (suit[5]===' ') {
+		suit=suit[6];
+	}else{
+		suit=suit[5]
+	}
+	switch (suit){
+		case 'e':
+			suit = 'espada';
+			break;
+		case 'b':
+			suit = 'basto';
+			break;
+		case 'c':
+			suit = 'copa'
+			break;
+		case 'o':
+			suit='oro'
+			break;
+	}
+    return new Card(number,suit);
+}
 
 module.exports = router;

@@ -2,3 +2,4 @@
 *.swo
 *~
 *.log
+.package.json.swo
