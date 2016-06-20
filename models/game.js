@@ -36,10 +36,10 @@ var Game = mongoose.model('Game', GameSchema);
  */
 Game.prototype.play = function(player, action, value){
   if(this.currentRound.currentTurn !== player)
-    throw new Error("[ERROR] INVALID TURN...");
+    return new Error("[ERROR] INVALID TURN...");
 
   if(this.currentRound.fsm.cannot(action))
-    throw new Error("[ERROR] INVALID MOVE...");
+    return new Error("[ERROR] INVALID MOVE...");
  
 
   return this.currentRound.play(action, value);

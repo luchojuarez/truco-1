@@ -1,20 +1,28 @@
 // en user.p tengo el objeto Player y en user.u el objeto User
 // y de la misma fotma con guest
 extends layout
+  
+
 block content
+  - var showCard = function(card) {
+  - return (card.number + " de " + card.suit);
+  - }
+
   h1 Gran truco Argentino
   h3 #{user.u.username} VS #{guest.u.username}
-  
+
   // es el turno del player 1
   - if (currentTurn=="player1")
     p es el turno de #{user.u.username}
-    
+    - var p1cards = user.p.cards
     
     form(role='form', action="/play",method="post", style='max-width: 300px;')
       .form-group
-        input.form-control(value="#{user.p.cards[0].suit} de #{user.p.cards[0].number}",type="submit",name="carta1")
-        input.form-control(value="#{user.p.cards[1].suit} de #{user.p.cards[1].number}",type="submit",name="carta2")
-        input.form-control(value="#{user.p.cards[2].suit} de #{user.p.cards[2].number}",type="submit",name="carta3")
+        // VER: probe cambiar el form-control por un boton porque no podia ponerle nombre al boton
+        // Cuando se hace submit se puede hacer que el req.body sea algo como {carta: lacarta, jugada: lajugada}?
+        button.btn(value=JSON.stringify(p1cards[0]),type="submit",name="carta") #{showCard(p1cards[0])}
+        input.form-control(value=JSON.stringify(p1cards[1]),type="submit",name="carta")
+        input.form-control(value="#{user.p.cards[2].suit} de #{user.p.cards[2].number}",type="submit",name="carta")
         br
         br
         input.form-control(value="truco",type="submit",name="jugada")
