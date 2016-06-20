@@ -6,8 +6,11 @@ var router = express.Router();
 var Game = require("../models/game").game;
 var Player = require("../models/player").player;
 var Round = require("../models/round").round;
+var Card = require("../models/card").card;
 var guest;
 var loadedGame;
+var FSM;
+var tablero;
 /* GET home page. */
 router.get('/', function (req, res) {
   res.render('index', { user : req.user , guest : guest});
@@ -43,11 +46,12 @@ router.post('/loginGuest',function (req,res) {
         player2:p2,
     });
     game.newRound();
-    game.currentRound.deal();
+    FSM = game.currentRound.fsm;
+    tablero = game.currentRound.board;
     saveGame(game,function (err,savedgame) {
         if (err){
             console.error(err);
-            res.render('error',err);
+            return res.render('error',err);
         }
         res.redirect('/play?gameID='+savedgame._id);
     })
@@ -70,9 +74,14 @@ router.get('/logout', function(req, res) {
 
 router.get('/play',function (req,res) {
     loadGameById(req.query.gameID,function (err,game) {
-        if (err)
-            console.error(err);
+        if (err) {
+            return res.render('error',err);
+        }
         loadedGame = game;
+        loadedGame.currentRound.fsm = FSM;
+        loadedGame.currentRound.board = tablero;
+        loadedGame.currentRound.game = loadedGame;
+
         res.render('play',{
             game:game,
             gameID:game._id,
@@ -84,31 +93,45 @@ router.get('/play',function (req,res) {
     })
 
 })
-router.post('/play',function (req,res) {
+router.post('/play', function(req, res, next) {
     //Cosas que hacen falta para usar el metodo play de game
     //el evento: "playCard" || "envido" || "truco" || "quiero" ..
     //el jugador que hace la jugada: game.currentRound.currentTurn
     //la carta si es playCard
-    var card = JSON.parse(req.body.carta);
-    console.log(card)
+    var parsedcard = JSON.parse(req.body.carta);
+    var card = new Card(parsedcard.number,parsedcard.suit);
+
     if (card) {
-        var err = loadedGame.play('player2','playCard',card)
+        var err = loadedGame.play(loadedGame.currentRound.currentTurn, 'playCard', card)
         if (err) { //Jugada invalida
-            res.send(err.toString());
+            return res.send(err.toString());
         }
         //Jugada de carta valida
-    }
-    else { //Otro evento
-        var err = loadedGame.play(loadedGame.currentRound.currentTunr,req.body.evento);
+        else
+            next(); //Deriva al siguiente callback
+    } else { //Otro evento
+        var err = loadedGame.play(loadedGame.currentRound.currentTunr, req.body.evento);
         if (err) { //Jugada invalida
             //responder con error
         }
         //Jugada valida
+        else
+            next(); //Deriva al siguiente callback
     }
+
+}, function(req, res) {
+    //Aca se tendria que ver si termino el juego?
     //Guardar el juego actualizado y forzar el get de play para que recargue el juego guardado
     //dentro del callback del save => res.redirect('/' + 'play')
-    console.log(JSON.parse(req.body.carta));
-    console.log(req.body);
+    tablero = loadedGame.currentRound.board;
+    saveGame(loadedGame, function(err, lastSaved) {
+        if (err) {
+            console.error(err);
+            return res.render('error', err);
+        }
+
+        res.redirect('/play?gameID=' + lastSaved._id);
+    })
 })
 
 function saveGame(gameObject,cb) {

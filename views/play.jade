@@ -34,3 +34,20 @@ block content
   //es el turno del player 2
   - if (currentTurn=="player2")
     p es el turno de #{guest.u.username}
+    - var p2cards = guest.p.cards
+    
+    form(role='form', action="/play",method="post", style='max-width: 300px;')
+      .form-group
+        // VER: probe cambiar el form-control por un boton porque no podia ponerle nombre al boton
+        // Cuando se hace submit se puede hacer que el req.body sea algo como {carta: lacarta, jugada: lajugada}?
+        button.btn(value=JSON.stringify(p2cards[0]),type="submit",name="carta") #{showCard(p2cards[0])}
+        input.form-control(value=JSON.stringify(p2cards[1]),type="submit",name="carta")
+        input.form-control(value="#{user.p.cards[2].suit} de #{user.p.cards[2].number}",type="submit",name="carta")
+        br
+        br
+        input.form-control(value="truco",type="submit",name="jugada")
+        input.form-control(value="envido",type="submit",name="jugada")
+        br
+        input.form-control(value="quiero",type="submit",name="jugada")
+        input.form-control(value="no-quiero",type="submit",name="jugada")
+      &nbsp;
