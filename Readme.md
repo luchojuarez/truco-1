@@ -11,8 +11,7 @@ Este es un proyecto para la asignatura "Análisis y Diseño de Sistemas"
 
  `npm start`
 
- ### play
-  [Play](http://localhost:3000/)
+[Play](http://localhost:3000/)
 
 ### Useful Links
 [Mocha](https://mochajs.org)
