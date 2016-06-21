@@ -135,7 +135,7 @@ function newTrucoFSM(){
 				tround.sumarPuntosDeEnvidoCon(false);
 			}
 			else {
-            	tround.currentPlayer === "player1" ? tround.score[0] += tround.puntosTruco : tround.score[1] += tround.puntosTruco;
+            	tround.currentTurn === "player1" ? tround.score[1] += tround.puntosTruco : tround.score[0] += tround.puntosTruco;
 				tround.endRound();
 			}
         },
