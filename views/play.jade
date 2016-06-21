@@ -4,39 +4,56 @@ extends layout
 block content
   h1 Gran truco Argentino
   h3 #{game.name}
-  
-  // es el turno del player 1
-  - if (currentTurn=="player1")
-    p es el turno de #{user.u.username}
-    
-    
-    form(role='form', action="/changePlayer?gameID="+gameID,method="post", style='max-width: 300px;')
-      .form-group
-        input.form-control(value="#{user.p.cards[0].number} de #{user.p.cards[0].suit}",type="submit",name="playCard") 
-        input.form-control(value="#{user.p.cards[1].number} de #{user.p.cards[1].suit}",type="submit",name="playCard")  
-        input.form-control(value="#{user.p.cards[2].number} de #{user.p.cards[2].suit}",type="submit",name="playCard") 
-        br
-        br
-        input.form-control(value="truco",type="submit",name="jugada")
-        input.form-control(value="envido",type="submit",name="jugada")
-        br
-        input.form-control(value="quiero",type="submit",name="jugada")
-        input.form-control(value="no-quiero",type="submit",name="jugada")
+  if (game.currentRound.board[0][0])
+    #left-column.column
+      h3 board
+      p cartas en la mesa de #{user.u.username}
+      p #{game.currentRound.board[0][0].show()}
+      if (game.currentRound.board[0][1])
+        p #{game.currentRound.board[0][1].show()}
+        if (game.currentRound.board[0][2])
+          p #{game.currentRound.board[0][2].show()}
 
-  //es el turno del player 2
-  - if (currentTurn=="player2")
-    p es el turno de #{guest.u.username}
+  if (game.currentRound.board[1][0])
+    #left-column.column
+    p cartas en la mesa de #{guest.u.username}
+    p #{game.currentRound.board[1][0].show()}
+    if (game.currentRound.board[1][1])
+      p #{game.currentRound.board[1][1].show()}
+      if (game.currentRound.board[1][2])
+        p #{game.currentRound.board[1][2].show()}
     
-    
-    form(role='form', action="/changePlayer?gameID="+gameID,method="post", style='max-width: 300px;')
-      .form-group
-        input.form-control(value="#{guest.p.cards[0].number} de #{guest.p.cards[0].suit}",type="submit",name="playCard") 
-        input.form-control(value="#{guest.p.cards[1].number} de #{guest.p.cards[1].suit}",type="submit",name="playCard")  
-        input.form-control(value="#{guest.p.cards[2].number} de #{guest.p.cards[2].suit}",type="submit",name="playCard") 
-        br
-        br
-        input.form-control(value="truco",type="submit",name="jugada")
-        input.form-control(value="envido",type="submit",name="jugada")
-        br
-        input.form-control(value="quiero",type="submit",name="jugada")
-        input.form-control(value="no-quiero",type="submit",name="jugada")
+  // es el turno del player 1
+  #right-column.column
+    - if (currentTurn=="player1")
+      p es el turno de #{user.u.username}
+      
+      
+      form(role='form', action="/changePlayer?gameID="+gameID,method="post", style='max-width: 300px;')
+        .form-group
+          input.form-control(value="#{user.p.cards[0].number} de #{user.p.cards[0].suit}",type="submit",name="playCard") 
+          input.form-control(value="#{user.p.cards[1].number} de #{user.p.cards[1].suit}",type="submit",name="playCard")  
+          input.form-control(value="#{user.p.cards[2].number} de #{user.p.cards[2].suit}",type="submit",name="playCard") 
+          br
+          br
+          input.form-control(value="truco",type="submit",name="jugada")
+          input.form-control(value="envido",type="submit",name="jugada")
+          br
+          input.form-control(value="quiero",type="submit",name="jugada")
+          input.form-control(value="no-quiero",type="submit",name="jugada")
+  
+    //es el turno del player 2
+    - if (currentTurn=="player2")
+      p es el turno de #{guest.u.username}
+      form(role='form', action="/changePlayer?gameID="+gameID,method="post", style='max-width: 300px;')
+        .form-group
+          input.form-control(value="#{guest.p.cards[0].number} de #{guest.p.cards[0].suit}",type="submit",name="playCard") 
+          input.form-control(value="#{guest.p.cards[1].number} de #{guest.p.cards[1].suit}",type="submit",name="playCard")  
+          input.form-control(value="#{guest.p.cards[2].number} de #{guest.p.cards[2].suit}",type="submit",name="playCard") 
+          br
+          br
+          input.form-control(value="truco",type="submit",name="jugada")
+          input.form-control(value="envido",type="submit",name="jugada")
+          br
+          input.form-control(value="quiero",type="submit",name="jugada")
+          input.form-control(value="no-quiero",type="submit",name="jugada")

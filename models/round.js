@@ -66,11 +66,12 @@ function newTrucoFSM(){
     { name: 'playCard',     from: 'init',                           	to: 'primerCarta' },
     { name: 'envido',       from: ['init', 'primerCarta'],         		to: 'envido' },
     { name: 'truco',        from: ['init', 'playedCard','primerCarta'], to: 'truco'  },
-    { name: 'playCard',		from: ['quiero', 'no_quiero',
-									'primerCarta', 'playedCard'],  		to: 'playedCard' },
-    { name: 'no_quiero', 	from: 'envido',              				to: 'no_quiero' },
+    { name: 'playCard',		from: ['primerCarta', 'playedCard'],  		to: 'playedCard' },
+    { name: 'playCard',     from: 'playingTruco',                       to: 'playingTruco'},
+    { name: 'no_quiero', 	from: 'envido',              				to: 'playedCard' },
 	{ name: 'no_quiero', 	from: 'truco',								to: 'finronda' },
-	{ name: 'quiero', 		from: ['envido', 'truco'],					to: 'quiero' },
+    { name: 'quiero',       from: 'truco',                              to: 'playingTruco'},
+	{ name: 'quiero', 		from: 'envido',					            to: 'playedCard' },
 ],
     callbacks: {
         //Antes de realizar la transcicion de estados cuando juega carta:

@@ -1,6 +1,27 @@
 body {
   padding: 50px;
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+  background-image: url("http://everything.typepad.com/photos/uncategorized/2008/03/28/crosshatch.png");
+
+}
+
+
+#container {
+  width: 1000px;
+  margin: 25px auto;
+}
+.column {
+  float: left;
+  text-align: center;
+}
+#left-column {
+  float: left;
+  width: 300px;
+}
+
+#right-column {
+  float: right;
+  width: 700px;
 }
 
 a {
