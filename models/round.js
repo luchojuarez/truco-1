@@ -12,6 +12,7 @@ var deckModel = require("./deck");
 var Deck = deckModel.deck;
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
+var Card = require("./card").card;
 
 var RoundSchema = new Schema({
 
@@ -42,7 +43,7 @@ var RoundSchema = new Schema({
   nextTurn: { type: String },
 
   /*Registro de cartas jugadas, board[0]: cartas del jugador 1, board[1]: cartas del jugador2 */
-  board: { type: Array , default: [[],[]]},
+  board: { type: Schema.Types.Mixed , default: [[Card],[Card]]},
 
 });
 
@@ -60,7 +61,7 @@ var valueOf = {
 
 function newTrucoFSM(){
   var fsm = StateMachine.create({
-  initial: 'init' ,final: 'finronda',
+  initial: 'init' , final: 'finronda',
   events: [
 
     { name: 'playCard',     from: 'init',                           	to: 'primerCarta' },
@@ -124,12 +125,12 @@ function newTrucoFSM(){
         },
         //Si se canto envido, suma 2 a la pila de puntos
 
-        onbeforequiero: function(event, from, to, carta, tround) {
+        onafterquiero: function(event, from, to, carta, tround) {
             valueOf[from] ? tround.sumarPuntosDeEnvidoCon(true) : tround.puntosTruco++;
         },
         //Si vino de envido le da los puntos al ganador, sino vino de envido suma puntos al truco
 
-        onbeforeno_quiero: function(event, from, to, carta, tround) {
+        onafterno_quiero: function(event, from, to, carta, tround) {
 			if (valueOf[from]) { 
 				tround.sumarPuntosDeEnvidoCon(false);
 			}
@@ -147,7 +148,8 @@ function newTrucoFSM(){
 
 Round.prototype.resetValues = function () {
     this.fsm.current = 'init';
-    this.board = [[],[]];
+    this.board[0] = [];
+    this.board[1] = [];
     this.nextTurn = null;
     this.score = [0,0];
     this.puntosTruco = 1;

@@ -13,7 +13,6 @@ var PlayerSchema = new Schema({
   nickname: {
     type: String,
     required: true,
-    unique: true
   },
   cards : {
     type: Array , default: []

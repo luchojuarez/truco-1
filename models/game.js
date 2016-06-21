@@ -20,13 +20,13 @@ var Schema = mongoose.Schema;
  */
 var GameSchema = new Schema({
   name:         String,
-  player1:      Object,
-  player2:      Object,
+  player1:      { type: Schema.ObjectId, ref: 'Player' },
+  player2:      { type: Schema.ObjectId, ref: 'Player' },
   currentHand:  { type: String },
   currentRound: { type: Schema.Types.ObjectId , ref: 'Round' },
   rounds:       { type : Array , default : [] },
-  maxScore:		{ type : Number , default : 30},
-  score:        { type : Array , default : [0, 0] },
+  maxScore:		  { type : Number , default : 30},
+  score:        [Number],//{ type : Schema.Types.Mixed , default : [0, 0] },
 });
 
 var Game = mongoose.model('Game', GameSchema);
@@ -36,10 +36,11 @@ var Game = mongoose.model('Game', GameSchema);
  */
 Game.prototype.play = function(player, action, value){
   if(this.currentRound.currentTurn !== player)
-    return new Error("[ERROR] INVALID TURN...");
+    throw new Error("[ERROR] INVALID TURN...");
 
   if(this.currentRound.fsm.cannot(action))
-    return new Error("[ERROR] INVALID MOVE...");
+    throw new Error("[ERROR] INVALID MOVE...");
+ 
 
   this.currentRound.play(action, value);
 
@@ -50,15 +51,19 @@ Game.prototype.play = function(player, action, value){
  * Create and return a new Round to this game
  */
 Game.prototype.newRound = function(){
-  console.log("Preparing round number ",this.rounds.length,"...");
+  if (this.currentRound != null) {
+    console.log("Round results: ",this.currentRound.resultados);
+    console.log("Board: ",this.currentRound.board);
+  };
+  console.log("GameScore:",this.score);
+  console.log("Preparing round number ",this.rounds.length+1,"...");
+  this.currentRound = null;
   this.currentHand == undefined? this.currentHand= 'player1' : this.currentHand = switchPlayer(this.currentHand);
   var round = new Round({game :this, currentTurn : this.currentHand});
   round.resetValues();
   round.deal();
   this.currentRound = round;
   this.rounds.push(round);
-
-  return this;
 }
 
 //

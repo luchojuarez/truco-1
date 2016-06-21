@@ -14,7 +14,7 @@ var Player = playerModel.player;
 describe('Game', function(){
 
   beforeEach(function(){
-    game = new Game({name : "nuevoJuego" });
+    game = new Game({name : "nuevoJuego", score : [0,0] });
     game.player1 = new Player({ nickname: 'J' });
     game.player2 = new Player({ nickname: 'X' });
     game.newRound({game : game, currentTurn : game.currentHand });

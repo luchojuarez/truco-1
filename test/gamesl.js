@@ -12,29 +12,41 @@ var Card = gameCard.card;
 var Player = playerModel.player;
 
 //Funciones a testear para guardar/cargar, utilizan callbacks
-    function saveGame(gameObject,cb) {
-		gameObject.currentRound.save(function(err, savedround) {
-			if (err)
-				cb(err);
-			game.save(function(err, savedgame) {
-				if (err) {
-					cb(err);
-				}
-				cb(err,savedgame);
-			});
-		});
-	}
-		
-	function loadGameById(gameId,cb) {
-	Game
-		.findOne({_id : gameId })
-		.populate("currentRound")
-		.exec(function (err,tgame) {
-			if (err)
-				cb(err,undefined);
-			cb(err,tgame);
-	});
-	}
+    function saveGame(gameObject, cb) {
+    gameObject.currentRound.save(function(err, savedround) {
+        if (err)
+            return cb(err);
+        gameObject.player1.save(function(err, p1) {
+            if (err)
+                return cb(err);
+            gameObject.player2.save(function(err, p2) {
+                if (err)
+                    return cb(err);
+                gameObject.save(function(err, savedgame) {
+                    if (err) {
+                        return cb(err);
+                    }
+                    cb(err, savedgame);
+                });
+            })
+        })
+
+    });
+}
+function loadGameById(gameId,cb) {
+    Game
+        .findOne({_id : gameId })
+        .populate("currentRound")
+        .populate("player1")
+        .populate("player2")
+        .exec(function (err,tgame) {
+            if (err){
+                cb(err,undefined);
+                console.error("GAME NOT LOADED: ",err);
+            }
+            cb(err,tgame);
+    });
+}
 
 describe('GameSave&Restore', function(){
 
@@ -109,7 +121,7 @@ describe('GameSave&Restore', function(){
     });
     setTimeout(function() {
         loadGameById(gameId,function (err,loaded) {
-            if (err) done(err);
+            if (err) done(err); 
             expect(true).to.be.ok;
             done()
         })

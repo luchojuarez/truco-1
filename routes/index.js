@@ -43,6 +43,7 @@ router.post('/loginGuest',function (req,res) {
     var p2 = new Player({user:guest , nickname:guest.username});
     var game = new Game({
         name:p1.nickname+ ' VS '+p2.nickname,
+        score : [0,0],
         player1:p1,
         player2:p2,
     });
@@ -110,16 +111,16 @@ router.post('/changePlayer',function (req,res,next) {
         jugada=req.body.jugada;
 
     if (jugada){
-        console.log(currentGame.currentRound.fsm.current,currentGame.currentHand);
-        currentGame.play(currentGame.currentHand,jugada);
-        console.log(currentGame.currentRound.fsm.current,currentGame.currentHand);
+        console.log("Intentando jugar: ",jugada);
+        console.log("FSM CURRENT: ",currentGame.currentRound.fsm.current);
+        currentGame.play(currentGame.currentRound.currentTurn,jugada);
         next();
     }
     if (carta && FSM.can('playCard')) {
-        console.log(currentGame.currentRound.fsm.current,currentGame.currentHand);
         carta=parseCard(carta);
-        currentGame.play(currentGame.currentHand,'playCard',carta);
-        console.log(currentGame.currentRound.fsm.current,currentGame.currentHand);
+        console.log("Intentando jugar: playCard");
+        console.log("FSM CURRENT: ",currentGame.currentRound.fsm.current);
+        currentGame.play(currentGame.currentRound.currentTurn,'playCard',carta);
         next();
     }
 
@@ -127,35 +128,49 @@ router.post('/changePlayer',function (req,res,next) {
     //Aca se tendria que ver si termino el juego?
     //Guardar el juego actualizado
     tablero = currentGame.currentRound.board;
+    if (FSM.current == 'init') {
+        //Comienza una nueva ronda
+    }
     saveGame(currentGame, function(err, lastSaved) {
         if (err) {
             console.error(err);
             return res.render('error', err);
         }
         res.render('changePlayer',{
-            player:currentGame.currentHand,
+            player:lastSaved.currentRound.currentTurn,
             gameID:req.query.gameID
         });
     });
 });
 
 
-function saveGame(gameObject,cb) {
+function saveGame(gameObject, cb) {
     gameObject.currentRound.save(function(err, savedround) {
         if (err)
-            cb(err);
-        gameObject.save(function(err, savedgame) {
-            if (err) {
-                cb(err);
-            }
-            cb(err,savedgame);
-        });
+            return cb(err);
+        gameObject.player1.save(function(err, p1) {
+            if (err)
+                return cb(err);
+            gameObject.player2.save(function(err, p2) {
+                if (err)
+                    return cb(err);
+                gameObject.save(function(err, savedgame) {
+                    if (err) {
+                        return cb(err);
+                    }
+                    cb(err, savedgame);
+                });
+            })
+        })
+
     });
 }
 function loadGameById(gameId,cb) {
     Game
         .findOne({_id : gameId })
         .populate("currentRound")
+        .populate("player1")
+        .populate("player2")
         .exec(function (err,tgame) {
             if (err){
                 cb(err,undefined);
