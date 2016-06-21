@@ -32,8 +32,6 @@ var Player = playerModel.player;
 		.exec(function (err,tgame) {
 			if (err)
 				cb(err,undefined);
-
-            console.log("GAME LOADED: ",tgame._id);
 			cb(err,tgame);
 	});
 	}
@@ -108,12 +106,10 @@ describe('GameSave&Restore', function(){
             done(err);
         }
         gameId = savedgame._id;
-        console.log("saved game id",gameId);
     });
     setTimeout(function() {
         loadGameById(gameId,function (err,loaded) {
             if (err) done(err);
-            console.log("game loaded  ", loaded._id);
             expect(true).to.be.ok;
             done()
         })

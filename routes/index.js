@@ -45,11 +45,12 @@ router.post('/loginGuest',function (req,res) {
         player2:p2,
     });
     game.newRound();
-    game.currentRound.deal();
+    FSM = game.currentRound.fsm;
+    tablero = game.currentRound.board;
     saveGame(game,function (err,savedgame) {
         if (err){
             console.error(err);
-            res.render('error',err);
+            return res.render('error',err);
         }
         res.redirect('/play?gameID='+savedgame._id);
     })
