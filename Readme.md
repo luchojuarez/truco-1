@@ -1,6 +1,6 @@
 # Truco Project
 
-Este es un proyecto para la asignatura "Análisis y Diseño de Sistemas" 
+Este es un proyecto para la asignatura "Análisis y Diseño de Sistemas"
 
 ### Install
 
@@ -9,10 +9,12 @@ Este es un proyecto para la asignatura "Análisis y Diseño de Sistemas"
 
 ### Run
 
- `npm test`
+ `npm start`
+
+ ### play
+  [Play](http://localhost:3000/)
 
 ### Useful Links
 [Mocha](https://mochajs.org)
 [Chai API](http://chaijs.com/api/bdd/)
 [Lodash](https://lodash.com/docs)
-
