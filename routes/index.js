@@ -116,6 +116,7 @@ router.post('/changePlayer',function (req,res,next) {
         next();
     }
     if (carta && FSM.can('playCard')) {
+        console.log(currentGame.currentRound.fsm.current,currentGame.currentHand);
         carta=parseCard(carta);
         currentGame.play(currentGame.currentHand,'playCard',carta);
         console.log(currentGame.currentRound.fsm.current,currentGame.currentHand);

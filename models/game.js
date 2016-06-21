@@ -40,9 +40,10 @@ Game.prototype.play = function(player, action, value){
 
   if(this.currentRound.fsm.cannot(action))
     return new Error("[ERROR] INVALID MOVE...");
- 
 
-  return this.currentRound.play(action, value);
+  this.currentRound.play(action, value);
+
+  return this.currentHand=switchPlayer(this.currentHand);
 };
 
 /*

@@ -3,10 +3,10 @@
 extends layout
 block content
   h1 Gran truco Argentino
-  h3 #{game.name}
+  h2 #{game.name} 
+  h3 board
   if (game.currentRound.board[0][0])
     #left-column.column
-      h3 board
       p cartas en la mesa de #{user.u.username}
       p #{game.currentRound.board[0][0].show()}
       if (game.currentRound.board[0][1])

@@ -1,8 +1,14 @@
 body {
   padding: 50px;
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
-  background-image: url("http://everything.typepad.com/photos/uncategorized/2008/03/28/crosshatch.png");
+  background-image: url('simple.png');
+}
 
+h1 {
+    text-align: center;
+}
+h2 {
+    text-align: center;
 }
 
 
