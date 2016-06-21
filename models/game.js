@@ -49,6 +49,7 @@ Game.prototype.play = function(player, action, value){
  * Create and return a new Round to this game
  */
 Game.prototype.newRound = function(){
+  console.log("Preparing round number ",this.rounds.length,"...");
   this.currentHand == undefined? this.currentHand= 'player1' : this.currentHand = switchPlayer(this.currentHand);
   var round = new Round({game :this, currentTurn : this.currentHand});
   round.resetValues();
@@ -59,18 +60,19 @@ Game.prototype.newRound = function(){
   return this;
 }
 
-//Cuando se actualiza el score del juego, verifica si termina el juego y llama a terminar juego
 //
-Game.prototype.gameScoreUpdated = function() {
-  if (this.score[0] >= this.maxScore ||
-    this.score[1] >= this.maxScore) {
-    //si term
-    console.log("EL JUEGO TERMINO ..");
-    this.endTheGame();
-  }
+
+//borra la ronda corriente y devuelve el jugador ganador
+Game.prototype.endGame = function () {
+  this.currentRound = null;
+  var ganador;
+  this.score[0] >= this.maxScore ? ganador=this.player1 : ganador=this.player2;
+  return ganador;
+};
+
+Game.prototype.hasEnded = function () {
+  return (this.score[0] >= this.maxScore || this.score[1] >= this.maxScore);
 }
-//TODO: sin implementar
-Game.prototype.endTheGame = function () {};
 /*
  * returns the oposite player
  */

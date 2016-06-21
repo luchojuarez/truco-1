@@ -134,7 +134,7 @@ function newTrucoFSM(){
 			}
 			else {
             	tround.currentPlayer === "player1" ? tround.score[0] += tround.puntosTruco : tround.score[1] += tround.puntosTruco;
-				tround.updateGameScore();
+				tround.endRound();
 			}
         },
         //Si vino de envido le da los puntos al contrario del que dijo no quiero
@@ -226,7 +226,8 @@ Round.prototype.hasEnded = function() {
                 return true;
                 break;
             }
-        case (this.resultados[0] === "empate" && this.resultados[1] !== "empate"):
+        case (this.resultados[0] === "empate" 
+              && (this.resultados[1] === "player1" || this.resultados[1] === "player2")) :
             {
                 return true;
                 break;
@@ -236,7 +237,8 @@ Round.prototype.hasEnded = function() {
                 return true;
                 break;
             }
-        case (this.resultados[0] == this.resultados[1] ): 
+        case (this.resultados[0] === this.resultados[1] 
+              && this.resultados[0] !== 'empate'): 
             {
                 return true;
                 break;
@@ -288,14 +290,14 @@ Round.prototype.updateRoundScore = function() {
         default:
     }
     //Actualizar el score del juego
-    this.updateGameScore();
+    this.endRound();
 };
 
 //Actualiza los puntos de la ronda al juego y le avisa que fueron cambiados
-Round.prototype.updateGameScore = function() {
+Round.prototype.endRound = function() {
 	this.game.score[0] += this.score[0];
     this.game.score[1] += this.score[1];
-    this.game.gameScoreUpdated();
+    this.game.newRound();
 };
 
 Round.prototype.pushCardToBoard = function(carta) {
@@ -321,13 +323,10 @@ Round.prototype.sumarPuntosDeEnvidoCon = function(quiero) {
                     this.game.currentHand === "player1" ? this.game.score[0] += puntosConQuiero : this.game.score[1] += puntosConQuiero;
                     break;
             }
-            this.game.gameScoreUpdated();
         } else { //quiero == false
             var puntosNoQuiero = this.calculateEnvidoScore(quiero);
             //Si el que dijo no quiero es el jugador 1 se le dan los puntos al jugador 2
             this.currentTurn === "player1" ? this.game.score[1] += puntosNoQuiero : this.game.score[0] += puntosNoQuiero;
-			//Decirle al juego que se actualizaron los puntos
-            this.game.gameScoreUpdated();
         }
     };
     /* ************************************************************************************************** */
