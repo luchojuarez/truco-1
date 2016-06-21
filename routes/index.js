@@ -4,11 +4,13 @@ var User = require('../models/user');
 var router = express.Router();
 
 var Game = require("../models/game").game;
-var Card = require("../models/card").card;
 var Player = require("../models/player").player;
 var Round = require("../models/round").round;
+var Card = require("../models/card").card;
 var guest;
 var currentGame;
+var FSM;
+var tablero;
 
 /* GET home page. */
 router.get('/', function (req, res) {
@@ -54,7 +56,6 @@ router.post('/loginGuest',function (req,res) {
         }
         res.redirect('/play?gameID='+savedgame._id);
     })
-    currentGame=game;
 })
 
 router.get('/login', function(req, res) {
@@ -77,6 +78,10 @@ router.get('/play',function (req,res) {
         if (err)
             console.error(err);
         else {
+	        currentGame = game;
+            currentGame.currentRound.fsm = FSM;
+            currentGame.currentRound.board = tablero;
+            currentGame.currentRound.game = currentGame;
             res.render('play',{
                 game:game,
                 gameID:game._id,
@@ -88,6 +93,7 @@ router.get('/play',function (req,res) {
     })
 
 })
+
 router.post('/play',function (req,res) {
 })
 
@@ -95,7 +101,7 @@ router.get('/changePlayer',function (req,res) {
 
 })
 
-router.post('/changePlayer',function (req,res) {
+router.post('/changePlayer',function (req,res,next) {
     var carta;
     var jugada;
     if (!(undefined===req.body.playCard))
@@ -107,22 +113,30 @@ router.post('/changePlayer',function (req,res) {
         console.log(currentGame.currentRound.fsm.current,currentGame.currentHand);
         currentGame.play(currentGame.currentHand,jugada);
         console.log(currentGame.currentRound.fsm.current,currentGame.currentHand);
-        res.render('changePlayer',{
-            player:currentGame.currentHand,
-            gameID:req.query.gameID
-        });
+        next();
     }
-    if (carta && currentGame.currentRound.fsm.can('playCard')) {
+    if (carta && FSM.can('playCard')) {
         carta=parseCard(carta);
         currentGame.play(currentGame.currentHand,'playCard',carta);
         console.log(currentGame.currentRound.fsm.current,currentGame.currentHand);
+        next();
+    }
+
+}, function(req, res) {
+    //Aca se tendria que ver si termino el juego?
+    //Guardar el juego actualizado
+    tablero = currentGame.currentRound.board;
+    saveGame(currentGame, function(err, lastSaved) {
+        if (err) {
+            console.error(err);
+            return res.render('error', err);
+        }
         res.render('changePlayer',{
             player:currentGame.currentHand,
             gameID:req.query.gameID
         });
-    }
-
-})
+    });
+});
 
 
 function saveGame(gameObject,cb) {
