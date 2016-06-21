@@ -73,7 +73,8 @@ router.get('/logout', function(req, res) {
 });
 
 
-router.get('/play',function (req,res) {
+router.get('/play'+'*',function (req,res) {
+    console.log("ID DEL JUEGO A CARGAR",req.query.gameID);
     loadGameById(req.query.gameID,function (err,game) {
         if (err)
             console.error(err);
@@ -110,15 +111,12 @@ router.post('/changePlayer',function (req,res,next) {
         jugada=req.body.jugada;
 
     if (jugada){
-        console.log(currentGame.currentRound.fsm.current,currentGame.currentHand);
-        currentGame.play(currentGame.currentHand,jugada);
-        console.log(currentGame.currentRound.fsm.current,currentGame.currentHand);
+        currentGame.play(currentGame.currentRound.currentTurn,jugada);
         next();
     }
     if (carta && FSM.can('playCard')) {
         carta=parseCard(carta);
-        currentGame.play(currentGame.currentHand,'playCard',carta);
-        console.log(currentGame.currentRound.fsm.current,currentGame.currentHand);
+        currentGame.play(currentGame.currentRound.currentTurn,'playCard',carta);
         next();
     }
 
@@ -132,7 +130,7 @@ router.post('/changePlayer',function (req,res,next) {
             return res.render('error', err);
         }
         res.render('changePlayer',{
-            player:currentGame.currentHand,
+            player:lastSaved.currentRound.currentTurn,
             gameID:req.query.gameID
         });
     });
