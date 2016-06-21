@@ -44,7 +44,7 @@ Game.prototype.play = function(player, action, value){
 
   this.currentRound.play(action, value);
 
-  return this.currentHand=switchPlayer(this.currentHand);
+  return this.currentRound.currentTurn;
 };
 
 /*
@@ -58,10 +58,9 @@ Game.prototype.newRound = function(){
   console.log("GameScore:",this.score);
   console.log("Preparing round number ",this.rounds.length+1,"...");
   this.currentRound = null;
-  this.currentHand == undefined? this.currentHand= 'player1' : this.currentHand = switchPlayer(this.currentHand);
-  console.log("Nueva mano: ",this.currentHand);
+  this.currentHand === undefined? this.currentHand= 'player1' : this.currentHand = switchPlayer(this.currentHand);
   var round = new Round({game :this, currentTurn : this.currentHand});
-  console.log("turno de la nueva ronda: ",round.currentTurn);
+
   round.resetValues();
   round.deal();
   this.currentRound = round;

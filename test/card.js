@@ -21,7 +21,7 @@ describe('Card', function() {
   describe("#show", function(){
     it('should returns card', function(){
       var c = new Card(1, 'copa');
-      expect(c.show()).to.be.eq("1: copa");
+      expect(c.show()).to.be.eq("1 de copa");
     });
   });
 
