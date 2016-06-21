@@ -20,8 +20,8 @@ var Schema = mongoose.Schema;
  */
 var GameSchema = new Schema({
   name:         String,
-  player1:      { type: Schema.ObjectId, ref: 'Player' },
-  player2:      { type: Schema.ObjectId, ref: 'Player' },
+  player1:      Object,
+  player2:      Object,
   currentHand:  { type: String },
   currentRound: { type: Schema.Types.ObjectId , ref: 'Round' },
   rounds:       { type : Array , default : [] },
@@ -59,7 +59,9 @@ Game.prototype.newRound = function(){
   console.log("Preparing round number ",this.rounds.length+1,"...");
   this.currentRound = null;
   this.currentHand == undefined? this.currentHand= 'player1' : this.currentHand = switchPlayer(this.currentHand);
+  console.log("Nueva mano: ",this.currentHand);
   var round = new Round({game :this, currentTurn : this.currentHand});
+  console.log("turno de la nueva ronda: ",round.currentTurn);
   round.resetValues();
   round.deal();
   this.currentRound = round;
