@@ -53,9 +53,9 @@ router.post('/loginGuest',function (req,res) {
     actualValues.board = game.currentRound.board;
     actualValues.player1 = p1;
     actualValues.player2 = p2;
-    actualValues.score = game.score;
     console.log('cartas del jugador 1',p1.cards);
     console.log('cartas del jugador 2',p2.cards);
+    actualValues.score = game.score;
     saveGame(game,function (err,savedgame) {
         if (err){
             console.error(err);
@@ -120,12 +120,16 @@ router.post('/changePlayer',function (req,res,next) {
         currentGame.play(currentGame.currentRound.currentTurn,jugada);
         next();
     }
-    if (carta && actualValues.FSM.can('playCard')) {
-        carta=parseCard(carta);
-        console.log("Intentando jugar: playCard");
-        console.log("FSM CURRENT: ",currentGame.currentRound.fsm.current);
-        currentGame.play(currentGame.currentRound.currentTurn,'playCard',carta);
-        next();
+    if (carta) {
+        if (actualValues.FSM.can('playCard')) {
+            carta=parseCard(carta);
+            console.log("Intentando jugar: playCard");
+            console.log("FSM CURRENT: ",currentGame.currentRound.fsm.current);
+            currentGame.play(currentGame.currentRound.currentTurn,'playCard',carta);
+            next();
+        }else {
+            res.render(error,{message:'invalid'})
+        }
     }
 
 }, function(req, res) {

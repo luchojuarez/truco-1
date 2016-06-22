@@ -48,7 +48,7 @@ block content
       form(role='form', action="/changePlayer?gameID="+gameID,method="post", style='max-width: 300px;')
         .form-group
           input.form-control(value="#{guest.p.cards[0].number} de #{guest.p.cards[0].suit}",type="submit",name="playCard") 
-          input.form-control(value="#{guest.p.cards[1].number} de #{guest.p.cards[1].suit}",type="submit",name="playCard")  
+          input.form-control(value="#{guest.p.cards[1].number}  de #{guest.p.cards[1].suit}",type="submit",name="playCard")  
           input.form-control(value="#{guest.p.cards[2].number} de #{guest.p.cards[2].suit}",type="submit",name="playCard") 
           br
           br
