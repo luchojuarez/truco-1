@@ -54,6 +54,8 @@ router.post('/loginGuest',function (req,res) {
     actualValues.player1 = p1;
     actualValues.player2 = p2;
     actualValues.score = game.score;
+    console.log('cartas del jugador 1',p1.cards);
+    console.log('cartas del jugador 2',p2.cards);
     saveGame(game,function (err,savedgame) {
         if (err){
             console.error(err);

@@ -22,9 +22,3 @@ block content
         button.btn.btn-primary(type="button") Login a guest
     if (guest)
       h3 #{guest.username}
-
-  // si ambos estan logueados podemos arrancar
-  if (user && guest)
-    h1 Jugar
-    a(href="/play") 
-      button.btn.btn-primary(type="button") #{user.username} VS. #{guest.username}
