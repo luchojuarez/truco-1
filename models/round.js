@@ -65,6 +65,7 @@ var valueOf = {
     'faltaenvido': -1 //Caso especial, necesita ser calculado
 };
 
+//Auxiliares, no afectan en nada si son modificadas
 var eventoDisparado;
 var estadoAlcanzado;
 
