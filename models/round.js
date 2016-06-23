@@ -14,6 +14,8 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 var Card = require("./card").card;
 
+
+
 var RoundSchema = new Schema({
 
   /*Game*/
@@ -40,7 +42,13 @@ var RoundSchema = new Schema({
   envidoStack: { type: Array , default : [] },
 
   /* Almacena el turno al que se debe cambiar luego de cantar quiero del envido/truco o luego de que termino un duelo */
-  nextTurn: { type: String },
+  nextTurn: { type: String, default: null },
+
+  /* Almacena el evento corriente de la FSM */
+  currentState: { type: String, default: 'init' },
+
+  /* Almacena la ultima jugada */
+  lastPlay: { type:String, default: null },
 
   /*Registro de cartas jugadas, board[0]: cartas del jugador 1, board[1]: cartas del jugador2 */
   board: { type: Schema.Types.Mixed , default: [[Card],[Card]]},
@@ -56,6 +64,9 @@ var valueOf = {
     'realenvido': 3,
     'faltaenvido': -1 //Caso especial, necesita ser calculado
 };
+
+var eventoDisparado;
+var estadoAlcanzado;
 
 
 
@@ -77,8 +88,17 @@ function newTrucoFSM(){
     callbacks: {
         //Antes de realizar la transcicion de estados cuando juega carta:
         //      *Agregar la carta al tablero
+        //      *Sacar la carta de la mano del jugador
         onbeforeplayCard: function(event, from, to, carta, instanciaRonda) {
             instanciaRonda.pushCardToBoard(carta);
+            var player = getCurrentPlayer(instanciaRonda);
+            var cardIndex = _.indexOf(player.cards,carta);
+            _.pullAt(player.cards,cardIndex);
+        },
+
+        onafterevent: function(event,from,to) {
+            eventoDisparado = event;
+            estadoAlcanzado = to;
         },
 
         /*Despues de hacer la transicion:
@@ -161,9 +181,15 @@ Round.prototype.resetValues = function () {
 
 //Funciones
 
-function asignarPuntos(jugador, puntos, instanciaRonda) {
-    jugador === "player1" ? instanciaRonda.score[0] += puntos : instanciaRonda.score[1] += puntos;
+function asignarPuntos(instanciaRonda,puntos) {
+    instanciaRonda.currentTurn === "player1" ? instanciaRonda.score[0] += puntos : instanciaRonda.score[1] += puntos;
     return instanciaRonda.score;
+}
+
+function getCurrentPlayer(instanciaRonda) {
+    var player;
+    instanciaRonda.currentTurn === 'player1' ? player = instanciaRonda.game.player1 : player = instanciaRonda.game.player2;
+    return player;
 }
 
 //pre: un tablero con cartas
@@ -403,6 +429,8 @@ Round.prototype.changeTurn = function(action) {
 Round.prototype.play = function(action, value) {
     // move to the next state
     this.fsm[action](value, this);
+    this.currentState = estadoAlcanzado;
+    this.lastPlay = eventoDisparado;
 
     // Change player's turn
     this.changeTurn(action);

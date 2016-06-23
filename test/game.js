@@ -56,14 +56,21 @@ describe('Game#play', function(){
     expect(game.score[0]).to.equal(1);
   });
 
-    it('plays [truco, quiero] should gives 2 points to winner', function(){
+  it('playing a card removes it from the player hand',function () {
+    var cardscount = game.player1.cards.length;
+    var cardRemoved = game.player1.cards[1];
+    game.play('player1','playCard',cardRemoved);
+    expect(game.player1.cards.length).to.be.eq(cardscount-1);
+    expect(game.player1.cards).to.not.include(cardRemoved);
+  });
 
+    it('plays [truco, quiero] should gives 2 points to winner', function(){
       game.play('player1', 'truco');
       game.play('player2', 'quiero');
       game.play('player1', 'playCard',game.player1.cards[0]); //juega 1 espada
-      game.play('player2', 'playCard',game.player2.cards[1]); //juega 4 basto
-      game.play('player1', 'playCard',game.player1.cards[1]); //juega 3 oro
-      game.play('player2', 'playCard',game.player2.cards[2]); //juega 2 basto
+      game.play('player2', 'playCard',game.player2.cards[1]); //juega 7 basto
+      game.play('player1', 'playCard',game.player1.cards[0]); //juega 3 oro
+      game.play('player2', 'playCard',game.player2.cards[1]); //juega 2 basto
       expect(game.score[0]).to.equal(2);
     });
    it('plays some cards then player2 chants truco and player 1 declines it, increase 1 in the score of player 2 ', function() {
@@ -71,8 +78,8 @@ describe('Game#play', function(){
 	var cardsp2 = game.player2.cards;
 	var oldscore = game.score[1];
 	game.play('player1', 'playCard', cardsp1[0]); //1 espada
-	game.play('player2','playCard', cardsp2[1]); //4 basto
-	game.play('player1','playCard', cardsp1[1]); //3 oro
+	game.play('player2','playCard', cardsp2[1]); //7 basto
+	game.play('player1','playCard', cardsp1[0]); //3 oro
 	game.play('player2','playCard', cardsp2[0]); // 7 oro
 	game.play('player2','truco');
 	game.play('player1','no_quiero');
@@ -95,12 +102,12 @@ describe('Game#play', function(){
 	var cardsp2 = game.player2.cards;
 	game.play('player1','playCard', cardsp1[0]);
 	game.play('player2','playCard', cardsp2[0]);
-	game.play('player1','playCard', cardsp1[1]);
+	game.play('player1','playCard', cardsp1[0]);
 	game.play('player2','truco');
 	game.play('player1','quiero');
-	game.play('player2','playCard', cardsp2[1]);
-	game.play('player1','playCard', cardsp1[2]);
-	game.play('player2','playCard', cardsp2[2]);
+	game.play('player2','playCard', cardsp2[0]);
+	game.play('player1','playCard', cardsp1[0]);
+	game.play('player2','playCard', cardsp2[0]);
 	expect(game.score[0]).to.be.equal(2);
     });
 });
