@@ -92,7 +92,12 @@ function newTrucoFSM(){
         onbeforeplayCard: function(event, from, to, carta, instanciaRonda) {
             instanciaRonda.pushCardToBoard(carta);
             var player = getCurrentPlayer(instanciaRonda);
-            var cardIndex = _.indexOf(player.cards,carta);
+            var cardIndex;
+            for (var i = 0; i < player.cards.length; i++){
+                if (carta.number === player.cards[i].number && carta.suit === player.cards[i].suit) {
+                    cardIndex = i;
+                }
+            }
             _.pullAt(player.cards,cardIndex);
         },
 
@@ -421,6 +426,10 @@ Round.prototype.changeTurn = function(action) {
 
 };
 
+Round.prototype.recreate = function() {
+    this.fsm = newTrucoFSM();
+    this.fsm.current = this.currentState;
+}
 
 
 /*

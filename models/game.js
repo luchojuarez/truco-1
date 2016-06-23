@@ -26,7 +26,7 @@ var GameSchema = new Schema({
   currentRound: { type: Schema.Types.ObjectId , ref: 'Round' },
   rounds:       { type : Array , default : [] },
   maxScore:		  { type : Number , default : 30},
-  score:        [Number],//{ type : Schema.Types.Mixed , default : [0, 0] },
+  score:        [Number],
 });
 
 var Game = mongoose.model('Game', GameSchema);
@@ -76,6 +76,16 @@ Game.prototype.endGame = function () {
   this.score[0] >= this.maxScore ? ganador=this.player1 : ganador=this.player2;
   return ganador;
 };
+
+
+
+//Recrea los atributos del juego con los mismos valores
+Game.prototype.recreate = function () {
+  this.player1.recreate();
+  this.player2.recreate();
+  this.currentRound.recreate();
+
+}
 
 Game.prototype.hasEnded = function () {
   return (this.score[0] >= this.maxScore || this.score[1] >= this.maxScore);
