@@ -112,18 +112,10 @@ router.post('/changePlayer',function (req,res,next) {
     if (!(undefined===req.body.jugada))
         jugada=req.body.jugada;
 
-    if (jugada==='quiero'|| jugada==='no-quiero') {
-        currentGame.play(currentGame.currentRound.currentTurn,jugada);
-    }
     if (jugada){
+        console.log("Estado antes de jugar",currentGame.currentRound.currentState);
+        console.log("Trancisciones posibles;",currentGame.currentRound.fsm.transitions());
         console.log('FSM.can ',jugada, currentGame.currentRound.fsm.can(jugada));
-        if (jugada==='envido' || jugada==='truco'){
-            res.render('envidoOTruco',{
-                jugada:jugada,
-                jugador:currentGame.currentRound.currentTurn,
-                gameID:req.query.gameID
-            });
-        }
         currentGame.play(currentGame.currentRound.currentTurn,jugada);
         next();
     }
@@ -139,26 +131,31 @@ router.post('/changePlayer',function (req,res,next) {
         }
     }
 
-}, function(req, res,next) {
+}, function(req, res) {
     //Aca se tendria que ver si termino el juego?
     //Guardar el juego actualizado
     actualValues.player1 = currentGame.player1;
     actualValues.player2 = currentGame.player2;
     actualValues.board = currentGame.currentRound.board;
     actualValues.score = currentGame.score;
-    if (actualValues.FSM.current == 'init') {
-        //Comienza una nueva ronda
-        next();
-    }
     saveGame(currentGame, function(err, lastSaved) {
         if (err) {
             console.error(err);
             return res.render('error', err);
         }
-        res.render('changePlayer',{
-            player:lastSaved.currentRound.currentTurn,
-            gameID:req.query.gameID
-        });
+        if (currentGame.currentRound.lastPlay ==='envido' || currentGame.currentRound.lastPlay ==='truco'){
+            res.render('envidoOTruco',{
+                jugada:currentGame.currentRound.lastPlay,
+                jugador:currentGame.currentRound.currentTurn,
+                gameID:req.query.gameID
+            });
+        }
+        else {
+            res.render('changePlayer',{
+                player:lastSaved.currentRound.currentTurn,
+                gameID:req.query.gameID
+            });
+        }
     });
 });
 
