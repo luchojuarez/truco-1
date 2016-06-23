@@ -75,16 +75,16 @@ function newTrucoFSM(){
   var fsm = StateMachine.create({
   initial: 'init' , final: 'finronda',
   events: [
-    { name: 'al-mazo',      from:['init','playCard','envido','truco','qiero',
+    { name: 'al_mazo',      from:['init','playCard','envido','truco','quiero',
                              'no-quiero','playingTruco','primerCarta'], to:'finronda'},
     { name: 'playCard',     from: 'init',                           	to: 'primerCarta' },
     { name: 'envido',       from: ['init', 'primerCarta'],         		to: 'envido' },
-    { name: 'truco',        from: ['playedCard','primerCarta'],         to: 'truco'  },
+    { name: 'truco',        from: ['playedCard','primerCarta','init'],         to: 'truco'  },
     { name: 'playCard',		from: ['primerCarta', 'playedCard'],  		to: 'playedCard' },
     { name: 'playCard',     from: 'playingTruco',                       to: 'playingTruco'},
-	{ name: 'no-quiero', 	from: 'truco',								to: 'finronda' },
+	{ name: 'no_quiero', 	from: 'truco',								to: 'finronda' },
     { name: 'quiero',       from: 'truco',                              to: 'playingTruco'},
-    { name: 'no-quiero', 	from: 'envido',              				to: 'playedCard' },
+    { name: 'no_quiero', 	from: 'envido',              				to: 'playedCard' },
 	{ name: 'quiero', 		from: 'envido',					            to: 'playedCard' },
 ],
     callbacks: {
