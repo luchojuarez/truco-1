@@ -54,7 +54,7 @@ describe('GameSave&Restore', function(){
 
 //BFeach
   beforeEach(function(){
-    game = new Game({name : "nuevoJuego" });
+    game = new Game({name : "nuevoJuego",score : [0,0] });
     game.player1 = new Player({ nickname: 'J' });
     game.player2 = new Player({ nickname: 'X' });
     game.newRound({game : game, currentTurn : game.currentHand });
@@ -76,9 +76,11 @@ describe('GameSave&Restore', function(){
     game.play('player1', 'truco');
     game.play('player2', 'quiero');
     game.play('player1', 'playCard',game.player1.cards[0]); //juega 1 espada
-    game.play('player2', 'playCard',game.player2.cards[1]); //juega 4 basto
-    //game.play('player1', 'playCard',game.player1.cards[1]); //juega 3 oro
-    //game.play('player2', 'playCard',game.player2.cards[2]); //juega 2 basto
+    game.play('player2', 'playCard',game.player2.cards[1]); //juega 7 basto
+    game.play('player1', 'playCard',game.player1.cards[0]); //juega 3 oro
+    game.play('player2', 'playCard',game.player2.cards[1]); //juega 2 basto
+    game.play('player2','envido');
+    game.play('player1','quiero');
 
   });
 	
@@ -88,7 +90,7 @@ describe('GameSave&Restore', function(){
     //Keep the old card count in the board
     var pretestCardsCount = game.currentRound.board[0].length + game.currentRound.board[1].length
     //just another move
-    game.play('player1', 'playCard',game.player1.cards[1]); //juega 3 oro
+    game.play('player2', 'playCard',game.player1.cards[0]); 
         player1 = game.player1;
         player2 = game.player2;
 		saveGame(game,function (err,thegame) {
@@ -111,22 +113,25 @@ describe('GameSave&Restore', function(){
 
 
   it('Load a saved game', function(done) {
-
+    //Just another move
+    game.play('player2', 'playCard',game.player1.cards[0]); 
     var gameId;                                                               
     saveGame(game,function (err,savedgame) {
         if (err) {
             done(err);
         }
+        var savedScore = savedgame.score;
+        var savedBoardLength = savedgame.currentRound.board[0].length + savedgame.currentRound.board[1].length;
         gameId = savedgame._id;
-    });
-    setTimeout(function() {
         loadGameById(gameId,function (err,loaded) {
-            if (err) done(err); 
-            expect(true).to.be.ok;
+            if (err) done(err);
+            var loadedBoardLength = loaded.currentRound.board[0].length + loaded.currentRound.board[1].length;
+            expect(savedBoardLength).to.be.eq(loadedBoardLength);
+            expect(savedScore[0]).to.be.eq(loaded.score[0]);
+            expect(savedScore[1]).to.be.eq(loaded.score[1]);
             done()
-        })
-    }, 200);
-
+        });
+    });
   });
 
 });

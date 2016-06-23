@@ -53,8 +53,6 @@ router.post('/loginGuest',function (req,res) {
     actualValues.board = game.currentRound.board;
     actualValues.player1 = p1;
     actualValues.player2 = p2;
-    console.log('cartas del jugador 1',p1.cards);
-    console.log('cartas del jugador 2',p2.cards);
     actualValues.score = game.score;
     saveGame(game,function (err,savedgame) {
         if (err){
