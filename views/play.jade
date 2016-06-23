@@ -36,7 +36,7 @@ block content
             input.form-control(value="#{user.p.cards[0].number} de #{user.p.cards[0].suit}",type="submit",name="playCard") 
           if user.p.cards[1]
             input.form-control(value="#{user.p.cards[1].number} de #{user.p.cards[1].suit}",type="submit",name="playCard")  
-          if user.p.cards[0]
+          if user.p.cards[2]
             input.form-control(value="#{user.p.cards[2].number} de #{user.p.cards[2].suit}",type="submit",name="playCard") 
           br
           br
@@ -52,7 +52,7 @@ block content
             input.form-control(value="#{guest.p.cards[0].number} de #{guest.p.cards[0].suit}",type="submit",name="playCard") 
           if guest.p.cards[1]
             input.form-control(value="#{guest.p.cards[1].number} de #{guest.p.cards[1].suit}",type="submit",name="playCard")  
-          if guest.p.cards[0]
+          if guest.p.cards[2]
             input.form-control(value="#{guest.p.cards[2].number} de #{guest.p.cards[2].suit}",type="submit",name="playCard") 
           br
           br
