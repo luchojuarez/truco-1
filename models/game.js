@@ -38,9 +38,9 @@ Game.prototype.play = function(player, action, value){
   if(this.currentRound.currentTurn !== player)
     throw new Error("[ERROR] INVALID TURN...");
 
-  if(this.currentRound.fsm.cannot(action))
+  if(!(this.currentRound.fsm.can(action)))
     throw new Error("[ERROR] INVALID MOVE...");
- 
+
 
   this.currentRound.play(action, value);
 

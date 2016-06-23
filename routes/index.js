@@ -106,7 +106,8 @@ router.post('/changePlayer',function (req,res,next) {
     var carta;
     var jugada;
     console.log('-----------------------------',req.body);
-    console.log('current:',currentGame.currentRound.fsm.current);
+    console.log('current',currentGame.currentRound.fsm.current);
+    console.log('transitions:',currentGame.currentRound.fsm.transitions());
     if (!(undefined===req.body.playCard))
         carta=req.body.playCard;
     if (!(undefined===req.body.jugada))

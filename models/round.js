@@ -419,7 +419,7 @@ Round.prototype.deal = function() {
  */
 Round.prototype.changeTurn = function(action) {
     if (action === "quiero" ||
-        action === "no_quiero" ||
+        action === "no-quiero" ||
         action === "playCard") {
         return this.currentTurn = this.nextTurn;
     } else {
