@@ -1,6 +1,8 @@
 var _ = require('lodash');
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
+var cardModel = require("../models/card.js");
+var Card = cardModel.card;
 
 /*
  * Player Schema
@@ -47,5 +49,16 @@ Player.prototype.points = function() {
   });
   return _.max(pairValues);
 };
+
+//Recrea las cartas del jugador
+Player.prototype.recreate = function() {
+  var aux;
+
+  for (var i=0; i<= this.cards.length-1; i++){
+    aux = this.cards[i];
+    console.log(aux);
+    this.cards[i] = new Card(aux.number,aux.suit);
+  };
+}
 
 module.exports.player = Player;
