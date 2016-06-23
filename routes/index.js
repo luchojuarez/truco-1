@@ -108,6 +108,7 @@ router.post('/changePlayer',function (req,res,next) {
     var carta;
     var jugada;
     console.log('-----------------------------',req.body);
+    console.log('current:',currentGame.currentRound.fsm.current);
     if (!(undefined===req.body.playCard))
         carta=req.body.playCard;
     if (!(undefined===req.body.jugada))
@@ -117,8 +118,7 @@ router.post('/changePlayer',function (req,res,next) {
         currentGame.play(currentGame.currentRound.currentTurn,jugada);
     }
     if (jugada){
-        console.log("Intentando jugar: ",jugada);
-        console.log("FSM CURRENT: ",currentGame.currentRound.fsm.current);
+        console.log('FSM.can ',jugada, currentGame.currentRound.fsm.can(jugada));
         if (jugada==='envido' || jugada==='truco'){
             res.render('envidoOTruco',{
                 jugada:jugada,
@@ -134,8 +134,6 @@ router.post('/changePlayer',function (req,res,next) {
             carta=parseCard(carta);
             console.log(currentGame.player1.cards);
             console.log(currentGame.player2.cards);
-            console.log("Intentando jugar: playCard");
-            console.log("FSM CURRENT: ",currentGame.currentRound.fsm.current);
             currentGame.play(currentGame.currentRound.currentTurn,'playCard',carta);
             next();
         }else {
