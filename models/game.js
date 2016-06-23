@@ -10,10 +10,13 @@ var _ = require('lodash');
 var playerModel = require("./player");
 var roundModel = require("./round");
 var mongoose = require('mongoose');
-
+var cardModel = require("./card.js");
+var Card = cardModel.card;
 var Player = playerModel.player;
 var Round  = roundModel.round;
 var Schema = mongoose.Schema;
+
+
 
 /*
  * Game Schema
@@ -81,10 +84,18 @@ Game.prototype.endGame = function () {
 
 //Recrea los atributos del juego con los mismos valores
 Game.prototype.recreate = function () {
-  this.player1.recreate();
-  this.player2.recreate();
+  recrearCartas(this.player1);
+  recrearCartas(this.player2);
   this.currentRound.recreate();
 
+}
+
+var recrearCartas = function(player) {
+  var aux;
+  for (var i=0; i<= player.cards.length-1; i++){
+    aux = player.cards[i];
+    player.cards[i] = new Card(aux.number,aux.suit);
+  };
 }
 
 Game.prototype.hasEnded = function () {

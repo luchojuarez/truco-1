@@ -9,7 +9,7 @@ var Round = require("../models/round").round;
 var Card = require("../models/card").card;
 var guest;
 var actualValues = { FSM: null, board: null, player1: null, player2: null , score: null };
-var currentGame;
+//var currentGame;
 
 
 /* GET home page. */
@@ -49,13 +49,11 @@ router.post('/loginGuest',function (req,res) {
         player2:p2,
     });
     game.newRound();
-    actualValues.FSM = game.currentRound.fsm;
+/*    currentGame.currentRound.fsm = game.currentRound.fsm;
     actualValues.board = game.currentRound.board;
     actualValues.player1 = p1;
     actualValues.player2 = p2;
-    console.log('cartas del jugador 1',p1.cards);
-    console.log('cartas del jugador 2',p2.cards);
-    actualValues.score = game.score;
+    actualValues.score = game.score;*/
     saveGame(game,function (err,savedgame) {
         if (err){
             console.error(err);
@@ -85,8 +83,11 @@ router.get('/play',function (req,res) {
         if (err)
             console.error(err);
         else {
-	        currentGame = game;
-            restoreValues(currentGame);
+			game.recreate()
+			console.log(game.player1.cards);
+			console.log(game.player2.cards);
+			console.log(game.currentRound.fsm.current);
+			console.log(game.currentRound.board);	
             res.render('play',{
                 game:game,
                 gameID:game._id,
@@ -107,52 +108,54 @@ router.get('/changePlayer',function (req,res) {
 })
 
 router.post('/changePlayer',function (req,res,next) {
-    var carta;
-    var jugada;
-    if (!(undefined===req.body.playCard))
-        carta=req.body.playCard;
-    if (!(undefined===req.body.jugada))
-        jugada=req.body.jugada;
+	console.log("CARGANDO JUGADA",req.body.jugada);
+	console.log("Id del juego:",req.query.gameID);
 
-    if (jugada){
-        console.log("Intentando jugar: ",jugada);
-        console.log("FSM CURRENT: ",currentGame.currentRound.fsm.current);
-        currentGame.play(currentGame.currentRound.currentTurn,jugada);
-        next();
-    }
-    if (carta) {
-        if (actualValues.FSM.can('playCard')) {
-            carta=parseCard(carta);
-            console.log("Intentando jugar: playCard");
-            console.log("FSM CURRENT: ",currentGame.currentRound.fsm.current);
-            currentGame.play(currentGame.currentRound.currentTurn,'playCard',carta);
-            next();
-        }else {
-            res.render(error,{message:'invalid'})
-        }
-    }
-
-}, function(req, res) {
-    //Aca se tendria que ver si termino el juego?
-    //Guardar el juego actualizado
-    actualValues.player1 = currentGame.player1;
-    actualValues.player2 = currentGame.player2;
-    actualValues.board = currentGame.currentRound.board;
-    actualValues.score = currentGame.score;
-    if (actualValues.FSM.current == 'init') {
-        //Comienza una nueva ronda
-    }
-    saveGame(currentGame, function(err, lastSaved) {
+    loadGameById(req.query.gameID,function (err,game) {
         if (err) {
-            console.error(err);
-            return res.render('error', err);
-        }
-        res.render('changePlayer',{
-            player:lastSaved.currentRound.currentTurn,
-            gameID:req.query.gameID
-        });
-    });
+		}
+        else {
+			game.recreate();
+			console.log("juego recreado");
+			console.log(game.currentRound.fsm.can('playCard'));
+			console.log(game.player1.cards);
+			var carta;
+			var jugada;
+			if (!(undefined===req.body.playCard))
+				carta=req.body.playCard;
+			if (!(undefined===req.body.jugada))
+				jugada=req.body.jugada;
+
+			if (jugada){
+				console.log("Intentando jugar: ",jugada);
+				console.log("FSM CURRENT: ",game.currentRound.fsm.current);
+				game.play(game.currentRound.currentTurn,jugada);
+			}
+			if (carta) {
+				if (game.currentRound.fsm.can('playCard')) {
+					carta=parseCard(carta);
+					console.log("Intentando jugar: playCard");
+					console.log("FSM CURRENT: ",game.currentRound.fsm.current);
+					game.play(game.currentRound.currentTurn,'playCard',carta);
+				}else {
+					res.render(error,{message:'invalid'})
+				}
+			}
+
+			saveGame(game, function(err, lastSaved) {
+				if (err) {
+					console.error(err);
+					return res.render('error', err);
+				}
+				res.render('changePlayer',{
+					player:lastSaved.currentRound.currentTurn,
+					gameID:req.query.gameID
+				});
+			});
+      }
+	});
 });
+
 
 
 function saveGame(gameObject, cb) {
@@ -174,8 +177,8 @@ function loadGameById(gameId,cb) {
         .populate("currentRound")
         .exec(function (err,tgame) {
             if (err){
-                cb(err,undefined);
                 console.error("GAME NOT LOADED: ",err);
+                cb(err,undefined);
             }
             cb(err,tgame);
     });
@@ -206,7 +209,7 @@ function parseCard (carta) {
 }
 
 function restoreValues (game) {
-            game.currentRound.fsm = actualValues.FSM;
+            game.currentRound.fsm = currentGame.currentRound.fsm;
             game.currentRound.board = actualValues.board;
             game.player1 = actualValues.player1;
             game.player2 = actualValues.player2;
