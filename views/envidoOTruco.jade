@@ -1,0 +1,7 @@
+extends layout
+block content
+  p #{jugador} te canto #{jugada}
+  form(role='form', action="/changePlayer?gameID="+gameID,method="post", style='max-width: 300px;')
+    .form-group
+      input.form-control(value="quiero",type="submit",name="jugada")
+      input.form-control(value="no-quiero",type="submit",name="jugada") 

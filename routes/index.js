@@ -93,6 +93,7 @@ router.get('/play',function (req,res) {
                 user:{u:req.user, p:game.player1},
                 guest:{u:guest, p:game.player2},
                 currentTurn:game.currentRound.currentTurn,
+                score:game.score,
             })
         }
     })
@@ -102,27 +103,37 @@ router.get('/play',function (req,res) {
 router.post('/play',function (req,res) {
 })
 
-router.get('/changePlayer',function (req,res) {
-
-})
 
 router.post('/changePlayer',function (req,res,next) {
     var carta;
     var jugada;
+    console.log('-----------------------------',req.body);
     if (!(undefined===req.body.playCard))
         carta=req.body.playCard;
     if (!(undefined===req.body.jugada))
         jugada=req.body.jugada;
 
+    if (jugada==='quiero'|| jugada==='no-quiero') {
+        currentGame.play(currentGame.currentRound.currentTurn,jugada);
+    }
     if (jugada){
         console.log("Intentando jugar: ",jugada);
         console.log("FSM CURRENT: ",currentGame.currentRound.fsm.current);
+        if (jugada==='envido' || jugada==='truco'){
+            res.render('envidoOTruco',{
+                jugada:jugada,
+                jugador:currentGame.currentRound.currentTurn,
+                gameID:req.query.gameID
+            });
+        }
         currentGame.play(currentGame.currentRound.currentTurn,jugada);
         next();
     }
     if (carta) {
         if (actualValues.FSM.can('playCard')) {
             carta=parseCard(carta);
+            console.log(currentGame.player1.cards);
+            console.log(currentGame.player2.cards);
             console.log("Intentando jugar: playCard");
             console.log("FSM CURRENT: ",currentGame.currentRound.fsm.current);
             currentGame.play(currentGame.currentRound.currentTurn,'playCard',carta);
@@ -132,7 +143,7 @@ router.post('/changePlayer',function (req,res,next) {
         }
     }
 
-}, function(req, res) {
+}, function(req, res,next) {
     //Aca se tendria que ver si termino el juego?
     //Guardar el juego actualizado
     actualValues.player1 = currentGame.player1;
@@ -141,6 +152,7 @@ router.post('/changePlayer',function (req,res,next) {
     actualValues.score = currentGame.score;
     if (actualValues.FSM.current == 'init') {
         //Comienza una nueva ronda
+        next();
     }
     saveGame(currentGame, function(err, lastSaved) {
         if (err) {
@@ -153,6 +165,7 @@ router.post('/changePlayer',function (req,res,next) {
         });
     });
 });
+
 
 
 function saveGame(gameObject, cb) {
