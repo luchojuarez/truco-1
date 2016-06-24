@@ -8,6 +8,7 @@ var Player = require("../models/player").player;
 var Round = require("../models/round").round;
 var Card = require("../models/card").card;
 var guest;
+//NO ES CORRECTO USAR ESTO, solucion temporal.
 var actualValues = { FSM: null, board: null, player1: null, player2: null , score: null };
 //var currentGame;
 

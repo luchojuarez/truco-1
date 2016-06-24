@@ -74,6 +74,84 @@ describe('Game#play', function(){
       game.play('player2', 'playCard',game.player2.cards[1]); //juega 2 basto
       expect(game.score[0]).to.equal(2);
     });
+
+    it('plays [truco,quiero,retruco,quiero] should gives 3 points to winner', function(){
+      game.play('player1', 'truco');
+      game.play('player2', 'quiero');
+      game.play('player1', 'playCard',game.player1.cards[0]); //juega 1 espada
+      game.play('player2', 'retruco');
+      game.play('player1', 'quiero');
+      game.play('player2', 'playCard',game.player2.cards[1]); //juega 7 basto
+      game.play('player1', 'playCard',game.player1.cards[0]); //juega 3 oro
+      game.play('player2', 'playCard',game.player2.cards[1]); //juega 2 basto
+      expect(game.score[0]).to.equal(3);
+    });
+
+    it('plays [truco,retruco,quiero] should gives 3 points to winner', function(){
+      game.play('player1', 'truco');
+      game.play('player2', 'retruco');
+      game.play('player1', 'quiero');
+      game.play('player1', 'playCard',game.player1.cards[0]); //juega 1 espada
+      game.play('player2', 'playCard',game.player2.cards[1]); //juega 7 basto
+      game.play('player1', 'playCard',game.player1.cards[0]); //juega 3 oro
+      game.play('player2', 'playCard',game.player2.cards[1]); //juega 2 basto
+      expect(game.score[0]).to.equal(3);
+    });
+
+    it('plays [truco,retruco,valecuatro,quiero] should gives 4 points to winner', function(){
+      game.play('player1', 'truco');
+      game.play('player2', 'retruco');
+      game.play('player1', 'valecuatro');
+      game.play('player2', 'quiero');
+      game.play('player1', 'playCard',game.player1.cards[0]); //juega 1 espada
+      game.play('player2', 'playCard',game.player2.cards[1]); //juega 7 basto
+      game.play('player1', 'playCard',game.player1.cards[0]); //juega 3 oro
+      game.play('player2', 'playCard',game.player2.cards[1]); //juega 2 basto
+      expect(game.score[0]).to.equal(4);
+    });
+
+    it('plays [truco,quiero,retruco,valecuatro,quiero] should gives 4 points to winner', function(){
+      game.play('player1', 'truco');
+      game.play('player2', 'quiero');
+      game.play('player1', 'playCard',game.player1.cards[0]); //juega 1 espada
+      game.play('player2', 'retruco');
+      game.play('player1', 'valecuatro');
+      game.play('player2', 'quiero');
+      game.play('player2', 'playCard',game.player2.cards[1]); //juega 7 basto
+      game.play('player1', 'playCard',game.player1.cards[0]); //juega 3 oro
+      game.play('player2', 'playCard',game.player2.cards[1]); //juega 2 basto
+      expect(game.score[0]).to.equal(4);
+    });
+
+    it('plays [truco,quiero,retruco,quiero,valecuatro,quiero] should gives 4 points to winner', function(){
+      game.play('player1', 'truco');
+      game.play('player2', 'quiero');
+      game.play('player1', 'playCard',game.player1.cards[0]); //juega 1 espada
+      game.play('player2', 'retruco');
+      game.play('player1', 'quiero');
+      game.play('player2', 'playCard',game.player2.cards[1]); //juega 7 basto
+      game.play('player1', 'valecuatro');
+      game.play('player2', 'quiero');
+      game.play('player1', 'playCard',game.player1.cards[0]); //juega 3 oro
+      game.play('player2', 'playCard',game.player2.cards[1]); //juega 2 basto
+      expect(game.score[0]).to.equal(4);
+    });
+
+    it('plays [truco,retruco,noquiero] should gives 2 points to winner', function(){
+      game.play('player1', 'truco');
+      game.play('player2', 'retruco');
+      game.play('player1', 'no_quiero');
+      expect(game.score[1]).to.equal(2);
+    });
+
+    it('plays [truco,retruco,valecuatro,noquiero] should gives 3 points to winner', function(){
+      game.play('player1', 'truco');
+      game.play('player2', 'retruco');
+      game.play('player1', 'valecuatro');
+      game.play('player2', 'no_quiero');
+      expect(game.score[0]).to.equal(3);
+    });
+
    it('plays some cards then player2 chants truco and player 1 declines it, increase 1 in the score of player 2 ', function() {
 	var cardsp1 = game.player1.cards;
 	var cardsp2 = game.player2.cards;

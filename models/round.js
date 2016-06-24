@@ -65,6 +65,14 @@ var valueOf = {
     'faltaenvido': -1 //Caso especial, necesita ser calculado
 };
 
+//Usado para filtrar eventos
+var raise = {
+    'truco' : true,
+    'retruco' : true,
+    'valecuatro' : true
+};
+
+//Auxiliares, no afectan en nada si son modificadas
 var eventoDisparado;
 var estadoAlcanzado;
 
@@ -77,13 +85,21 @@ function newTrucoFSM(){
 
     { name: 'playCard',     from: 'init',                           	to: 'primerCarta' },
     { name: 'envido',       from: ['init', 'primerCarta'],         		to: 'envido' },
-    { name: 'truco',        from: ['init', 'playedCard','primerCarta'], to: 'truco'  },
-    { name: 'playCard',		from: ['primerCarta', 'playedCard'],  		to: 'playedCard' },
+    { name: 'truco',        from: ['init', 'playingCard','primerCarta'],to: 'truco'  },
+    { name: 'playCard',		from: ['primerCarta', 'playingCard'],  		to: 'playingCard' },
     { name: 'playCard',     from: 'playingTruco',                       to: 'playingTruco'},
-    { name: 'no_quiero', 	from: 'envido',              				to: 'playedCard' },
-	{ name: 'no_quiero', 	from: 'truco',								to: 'finronda' },
+    { name: 'playCard',     from: 'playingRetruco',                     to: 'playingRetruco'},
+    { name: 'playCard',     from: 'playingValecuatro',                  to: 'playingValecuatro'},
+    { name: 'no_quiero', 	from: ['envido','envido2','realenvido',
+                                   'faltaenvido'],         				to: 'playingCard' },
+	{ name: 'no_quiero', 	from: ['truco','retruco','valecuatro'],		to: 'finronda' },
+    { name: 'quiero',       from: ['envido','envido2','realenvido',
+                                   'faltaenvido'],                      to: 'playingCard' },
     { name: 'quiero',       from: 'truco',                              to: 'playingTruco'},
-	{ name: 'quiero', 		from: 'envido',					            to: 'playedCard' },
+    { name: 'retruco',      from: ['truco','playingTruco'],             to: 'retruco'},
+    { name: 'quiero',       from: 'retruco',                            to: 'playingRetruco'},
+    { name: 'valecuatro',   from: ['retruco','playingRetruco'],         to: 'valecuatro'},
+    { name: 'quiero',       from: 'valecuatro',                         to: 'playingValecuatro'},
 ],
     callbacks: {
         //Antes de realizar la transcicion de estados cuando juega carta:
@@ -148,12 +164,33 @@ function newTrucoFSM(){
         onentertruco: function(event, from, to, carta, tround) {
             tround.nextTurn = tround.currentTurn;
         },
-        //Si se canto envido, suma 2 a la pila de puntos
 
+        onenterretruco: function(event,from,to,carta,tround) {
+            if (from === 'truco') { //Si vino del truco se suma el punto del truco
+                tround.puntosTruco++;
+            }
+            else {  //Si vino de una jugada normal se almacena el turno del que canto
+                console.log("NOPE");
+                console.log(tround.currentTurn);
+                tround.nextTurn = tround.currentTurn;
+            }
+        },
+
+        onentervalecuatro: function(event,from,to,carta,tround) {
+            if (from === 'retruco') { //Si vino del retruco se suma el punto del truco
+                tround.puntosTruco++;
+            }
+            else {  //Si vino de una jugada normal se almacena el turno del que canto
+                tround.nextTurn = tround.currentTurn;
+            }
+        },
+    
+        //Despues del quiero depende de donde vino
         onafterquiero: function(event, from, to, carta, tround) {
             valueOf[from] ? tround.sumarPuntosDeEnvidoCon(true) : tround.puntosTruco++;
         },
-        //Si vino de envido le da los puntos al ganador, sino vino de envido suma puntos al truco
+        //Si vino de algun envido le da los puntos al ganador, sino vino de envido suma puntos al truco
+        //porque vino de un truco/retruco/valecuatro
 
         onafterno_quiero: function(event, from, to, carta, tround) {
 			if (valueOf[from]) { 
@@ -164,7 +201,7 @@ function newTrucoFSM(){
 				tround.endRound();
 			}
         },
-        //Si vino de envido le da los puntos al contrario del que dijo no quiero
+        //Si vino de algun envido le da los puntos al contrario del que dijo no quiero
         //Si no vino de envido le da los puntos acumulados del truco hasta el momento al jugador que canto truco
     }
 });
