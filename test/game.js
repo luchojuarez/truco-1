@@ -73,17 +73,18 @@ describe('Game#play', function(){
       game.play('player2', 'playCard',game.player2.cards[1]); //juega 2 basto
       expect(game.score[0]).to.equal(2);
     });
-   it('plays some cards then player2 chants truco and player 1 declines it, increase 1 in the score of player 2 ', function() {
-	var cardsp1 = game.player1.cards;
-	var cardsp2 = game.player2.cards;
-	var oldscore = game.score[1];
-	game.play('player1', 'playCard', cardsp1[0]); //1 espada
-	game.play('player2','playCard', cardsp2[1]); //7 basto
-	game.play('player1','playCard', cardsp1[0]); //3 oro
-	game.play('player2','playCard', cardsp2[0]); // 7 oro
-	game.play('player2','truco');
-	game.play('player1','no_quiero');
-	expect(game.score[1]).to.be.equal(oldscore+1);
+  // here is TRUCO - NO QUIERO tested  
+  it('plays some cards then player2 chants truco and player 1 declines it, increase 1 in the score of player 2 ', function() {
+    var cardsp1 = game.player1.cards;
+	  var cardsp2 = game.player2.cards;
+	  var oldscore = game.score[1];
+	  game.play('player1', 'playCard', cardsp1[0]); //1 espada
+	  game.play('player2','playCard', cardsp2[1]); //7 basto
+	  game.play('player1','playCard', cardsp1[0]); //3 oro
+	  game.play('player2','playCard', cardsp2[0]); // 7 oro
+	  game.play('player2','truco');
+	  game.play('player1','no_quiero');
+	  expect(game.score[1]).to.be.equal(oldscore+1);
    });
 
    it('plays a round with all ties, player 1(the hand) wons, also truco is chanted', function() {
