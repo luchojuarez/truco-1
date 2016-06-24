@@ -65,9 +65,9 @@ describe('Game#play', function(){
   });
 
     it('plays [truco, quiero] should gives 2 points to winner', function(){
-      game.play('player1', 'truco');
-      game.play('player2', 'quiero');
       game.play('player1', 'playCard',game.player1.cards[0]); //juega 1 espada
+      game.play('player2', 'truco');
+      game.play('player1', 'quiero');
       game.play('player2', 'playCard',game.player2.cards[1]); //juega 7 basto
       game.play('player1', 'playCard',game.player1.cards[0]); //juega 3 oro
       game.play('player2', 'playCard',game.player2.cards[1]); //juega 2 basto
