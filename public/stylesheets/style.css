@@ -1,7 +1,7 @@
 body {
   padding: 50px;
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
-  background-image: url('simple.png');
+  background-image: url('../images/simple.png');
 }
 
 h1 {
@@ -9,6 +9,10 @@ h1 {
 }
 h2 {
     text-align: center;
+}
+.win {
+    background-image: url('../images/win.jpg');
+    text-decoration-color: white;
 }
 
 

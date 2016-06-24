@@ -79,7 +79,7 @@ function newTrucoFSM(){
                              'no-quiero','playingTruco','primerCarta'], to:'finronda'},
     { name: 'playCard',     from: 'init',                           	to: 'primerCarta' },
     { name: 'envido',       from: ['init', 'primerCarta'],         		to: 'envido' },
-    { name: 'truco',        from: ['playedCard','primerCarta','init'],         to: 'truco'  },
+    { name: 'truco',        from: ['playedCard','primerCarta'],         to: 'truco'  },
     { name: 'playCard',		from: ['primerCarta', 'playedCard'],  		to: 'playedCard' },
     { name: 'playCard',     from: 'playingTruco',                       to: 'playingTruco'},
 	{ name: 'no_quiero', 	from: 'truco',								to: 'finronda' },

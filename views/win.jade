@@ -1,0 +1,8 @@
+extends layout
+block content
+  body.win
+    h1 #{winner} win a round
+    h3 score #{score}
+    a(href="/play?gameID="+gameID)
+      button.btn.btn-primary(type="button") Rematch? 
+  

@@ -86,6 +86,7 @@ router.get('/play',function (req,res) {
 	        currentGame = game;
             restoreValues(currentGame);
             res.render('play',{
+                gameID:req.body.gameID,
                 game:game,
                 gameID:game._id,
                 user:{u:req.user, p:game.player1},
@@ -105,7 +106,7 @@ router.post('/play',function (req,res) {
 router.post('/changePlayer',function (req,res,next) {
     var carta;
     var jugada;
-    console.log('-----------------------------',req.body);
+    console.log('req.body:',req.body);
     console.log('current',currentGame.currentRound.fsm.current);
     console.log('transitions:',currentGame.currentRound.fsm.transitions());
     if (!(undefined===req.body.playCard))
@@ -118,6 +119,7 @@ router.post('/changePlayer',function (req,res,next) {
         console.log("Trancisciones posibles;",currentGame.currentRound.fsm.transitions());
         console.log('FSM.can ',jugada, currentGame.currentRound.fsm.can(jugada));
         currentGame.play(currentGame.currentRound.currentTurn,jugada);
+        console.log("Estado despues de jugar",currentGame.currentRound.currentState);
         next();
     }
     if (carta) {
@@ -135,6 +137,14 @@ router.post('/changePlayer',function (req,res,next) {
 }, function(req, res) {
     //Aca se tendria que ver si termino el juego?
     //Guardar el juego actualizado
+    if (currentGame.currentRound.currentState==='init') {
+        res.render('win',{
+            winner:currentGame.currentRound.currentTurn,
+            score:currentGame.score,
+            gameID:req.query.gameID
+        });
+    }
+
     actualValues.player1 = currentGame.player1;
     actualValues.player2 = currentGame.player2;
     actualValues.board = currentGame.currentRound.board;

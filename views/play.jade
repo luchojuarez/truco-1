@@ -5,7 +5,7 @@ block content
   h1 Gran truco Argentino
   h2 #{game.name} 
   #left-column.column
-    p puntaje #{score}
+    p acrual score round #{score}
     if game.currentRound.board
       h3 board
     if (game.currentRound.board[0][0])
@@ -40,8 +40,10 @@ block content
             input.form-control(value="#{user.p.cards[2].number} de #{user.p.cards[2].suit}",type="submit",name="playCard") 
           br
           br
-          input.form-control(value="truco",type="submit",name="jugada")
-          input.form-control(value="envido",type="submit",name="jugada")
+          - if (game.currentRound.fsm.can('truco')) 
+            input.form-control(value="truco",type="submit",name="jugada")
+          - if (game.currentRound.fsm.can('envido')) 
+            input.form-control(value="envido",type="submit",name="jugada")
   
     //es el turno del player 2
     - if (currentTurn=="player2")
@@ -56,5 +58,7 @@ block content
             input.form-control(value="#{guest.p.cards[2].number} de #{guest.p.cards[2].suit}",type="submit",name="playCard") 
           br
           br
-          input.form-control(value="truco",type="submit",name="jugada")
-          input.form-control(value="envido",type="submit",name="jugada")
+          - if (game.currentRound.fsm.can('truco')) 
+            input.form-control(value="truco",type="submit",name="jugada")
+          - if (game.currentRound.fsm.can('envido')) 
+            input.form-control(value="envido",type="submit",name="jugada")
