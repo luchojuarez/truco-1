@@ -54,7 +54,52 @@ describe('Game#play', function(){
     game.play('player1', 'envido');
     game.play('player2', 'no_quiero');
     expect(game.score[0]).to.equal(1);
+  })
+
+  it('plays [envido, envido, quiero] should gives 4 points to winner', function(){
+    game.play('player1', 'envido');
+    game.play('player2', 'envido');
+    game.play('player1', 'quiero');
+
+    expect(game.score[1]).to.equal(4);
   });
+
+  it('plays [envido, envido, noquiero] should gives 2 points to winner', function(){
+    game.play('player1', 'envido');
+    game.play('player2', 'envido');
+    game.play('player1', 'no_quiero');
+
+    expect(game.score[1]).to.equal(2);
+  });
+
+ it('plays [faltaenvido,quiero] should give 30 points to the winner', function() {
+    game.play('player1', 'faltaenvido');
+    game.play('player2', 'quiero');
+    expect(game.score[1]).to.equal(30);
+  });
+
+  it('plays [envido,faltaenvido,quiero] should give 30 points to the winner', function() {
+    game.play('player1', 'envido');
+    game.play('player2', 'faltaenvido');
+    game.play('player1', 'quiero');
+    expect(game.score[1]).to.equal(30);
+  });
+
+it('plays [envido,faltaenvido,no_quiero] should give 2 points to who ever chanted falta', function() {
+    game.play('player1', 'envido');
+    game.play('player2', 'faltaenvido');
+    game.play('player1', 'no_quiero');
+    expect(game.score[1]).to.equal(2);
+  });
+
+
+  it('plays [envido,realenvido,quiero] should give 5 points to the winner', function() {
+    game.play('player1', 'envido');
+    game.play('player2', 'realenvido');
+    game.play('player1', 'quiero');
+    expect(game.score[1]).to.equal(5);
+  });
+
 
   it('playing a card removes it from the player hand',function () {
     var cardscount = game.player1.cards.length;

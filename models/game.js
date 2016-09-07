@@ -51,12 +51,12 @@ Game.prototype.play = function(player, action, value){
  * Create and return a new Round to this game
  */
 Game.prototype.newRound = function(){
-  if (this.currentRound != null) {
+  /*if (this.currentRound != null) {
     console.log("Round results: ",this.currentRound.resultados);
     console.log("Board: ",this.currentRound.board);
-  };
-  console.log("GameScore:",this.score);
-  console.log("Preparing round number ",this.rounds.length+1,"...");
+  };*/
+  //console.log("GameScore:",this.score);
+  //console.log("Preparing round number ",this.rounds.length+1,"...");
   this.currentRound = null;
   this.currentHand === undefined? this.currentHand= 'player1' : this.currentHand = switchPlayer(this.currentHand);
   var round = new Round({game :this, currentTurn : this.currentHand});
