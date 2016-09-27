@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Plato - models/round.js</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <!--[if lt IE 9]>
+  <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+
+  <link href="../../assets/css/vendor/morris.css" rel="stylesheet">
+  <link href="../../assets/css/vendor/bootstrap.css" rel="stylesheet">
+  <link href="../../assets/css/vendor/font-awesome.css" rel="stylesheet">
+  <link href="../../assets/css/vendor/codemirror.css" rel="stylesheet">
+  <link href="../../assets/css/plato.css" rel="stylesheet">
+  <link href="../../assets/css/plato-file.css" rel="stylesheet">
+
+</head>
+
+<body>
+
+<div class="navbar navbar-fixed-top">
+  <div class="container">
+    <a class="navbar-brand" href="http://github.com/es-analysis/plato">Plato on Github</a>
+    <ul class="nav navbar-nav">
+      <li>
+        <a href="../../index.html">Report Home</a>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<div class="jumbotron">
+  <div class="container">
+    <h1>models/round.js</h1>
+  </div>
+</div>
+
+<div class="container aggregate-stats">
+  <div class="row">
+    <div class="col-md-6">
+      <h2 class="header">Maintainability <a href="http://blogs.msdn.com/b/codeanalysis/archive/2007/11/20/maintainability-index-range-and-meaning.aspx"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="A value between 0 and 100 that represents the relative ease of maintaining the code. A high value means better maintainability." data-original-title="Maintainability Index"  data-container="body"></i></a></h2>
+      <p class="stat">64.01</p>
+    </div>
+    <div class="col-md-6">
+      <h2 class="header">Lines of code <i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="Source Lines of Code / Logical Lines of Code" data-original-title="SLOC/LSLOC" data-container="body"></i></h2>
+      <p class="stat">515</p>
+    </div>
+  </div>
+  <div class="row historical">
+    <div class="col-md-6">
+      <p id="chart_historical_maint" class="chart"></p>
+    </div>
+    <div class="col-md-6">
+      <p id="chart_historical_sloc" class="chart"></p>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-6">
+      <h2 class="header">Difficulty  <a href="http://en.wikipedia.org/wiki/Halstead_complexity_measures"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="The difficulty measure is related to the difficulty of the program to write or understand." data-original-title="Difficulty" data-container="body"></i></a></h2>
+      <p class="stat">83.60</p>
+    </div>
+    <div class="col-md-6">
+      <h2 class="header">Estimated Errors  <a href="http://en.wikipedia.org/wiki/Halstead_complexity_measures"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="Halstead's delivered bugs is an estimate for the number of errors in the implementation." data-original-title="Delivered Bugs" data-container="body"></i></a></h2>
+      <p class="stat">4.43</p>
+    </div>
+  </div>
+</div>
+
+<div class="container charts">
+  <div class="row">
+    <h2 class="header">Function weight</h2>
+  </div>
+  <div class="row">
+    <div class="col-md-6">
+      <h3 class="chart-header">By Complexity <a href="http://en.wikipedia.org/wiki/Cyclomatic_complexity"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="This metric counts the number of distinct paths through a block of code. Lower values are better." data-original-title="Cyclomatic Complexity" data-container="body"></i></a></h3>
+      <div id="fn-by-complexity" class="stat"></div>
+    </div>
+    <div class="col-md-6">
+      <h3 class="chart-header">By SLOC  <i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="Source Lines of Code / Logical Lines of Code" data-original-title="SLOC/LSLOC" data-container="body"></i></h3>
+      <div id="fn-by-sloc" class="stat"></div>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+  <div class="row">
+    <textarea id="file-source" class="col-md-12">/*
+ *
+ * Represents a game&#039;s round
+ *
+ * @param gmae [Object]: game where the round belongs
+ *
+ */
+
+var _ = require(&#039;lodash&#039;);
+var StateMachine = require(&quot;../node_modules/javascript-state-machine/state-machine.js&quot;);
+var deckModel = require(&quot;./deck&quot;);
+var Deck = deckModel.deck;
+var mongoose = require(&#039;mongoose&#039;);
+var Schema = mongoose.Schema;
+var Card = require(&quot;./card&quot;).card;
+
+
+
+var RoundSchema = new Schema({
+
+  /*Game*/
+  game: Object,
+
+  /* next turn*/
+  currentTurn:  String,
+
+  /*here is a FSM to perform user&#039;s actions*/
+  fsm: { type: Object , default : newTrucoFSM() },
+
+  status: { type: String, default : &#039;running&#039; },
+
+  /* Round&#039; score*/
+  score: { type: Array , default : [0, 0] },
+
+  /*Puntos que se estan jugando del truco/retruco/vale4*/
+  puntosTruco: { type: Number, default : 1 },
+
+  /* Resultados de cada duelo: empate/player1/player2 */
+  resultados: { type: Array , default : [] },
+
+  /* Puntos acumulados del envido hasta el momento */
+  envidoStack: { type: Array , default : [] },
+
+  /* Almacena el turno al que se debe cambiar luego de cantar quiero del envido/truco o luego de que termino un duelo */
+  nextTurn: { type: String, default: null },
+
+  /* Almacena el evento corriente de la FSM */
+  currentState: { type: String, default: &#039;init&#039; },
+
+  /* Almacena la ultima jugada */
+  lastPlay: { type:String, default: null },
+
+  /*Registro de cartas jugadas, board[0]: cartas del jugador 1, board[1]: cartas del jugador2 */
+  board: { type: Schema.Types.Mixed , default: [[Card],[Card]]},
+
+});
+
+var Round = mongoose.model(&#039;Round&#039;, RoundSchema);
+
+
+//Puntos que dan el envido/realenvido/faltaenvido
+var valueOf = {
+    &#039;envido&#039;: 2,
+    &#039;envido2&#039; : 2,
+    &#039;realenvido&#039;: 3,
+    &#039;faltaenvido&#039;: -1 //Caso especial, necesita ser calculado
+};
+
+//Usado para filtrar eventos
+var raise = {
+    &#039;truco&#039; : true,
+    &#039;retruco&#039; : true,
+    &#039;valecuatro&#039; : true
+};
+
+//Auxiliares, no afectan en nada si son modificadas
+var eventoDisparado;
+var estadoAlcanzado;
+
+
+
+function newTrucoFSM(){
+  var fsm = StateMachine.create({
+  initial: &#039;init&#039; , final: &#039;finronda&#039;,
+  events: [
+
+    { name: &#039;playCard&#039;,     from: &#039;init&#039;,                           	to: &#039;primerCarta&#039; },
+    { name: &#039;envido&#039;,       from: [&#039;init&#039;, &#039;primerCarta&#039;],         		to: &#039;envido&#039; },
+    { name: &#039;truco&#039;,        from: [&#039;init&#039;, &#039;playingCard&#039;,&#039;primerCarta&#039;],to: &#039;truco&#039;  },
+    { name: &#039;playCard&#039;,		from: [&#039;primerCarta&#039;, &#039;playingCard&#039;],  		to: &#039;playingCard&#039; },
+    { name: &#039;playCard&#039;,     from: &#039;playingTruco&#039;,                       to: &#039;playingTruco&#039;},
+    { name: &#039;playCard&#039;,     from: &#039;playingRetruco&#039;,                     to: &#039;playingRetruco&#039;},
+    { name: &#039;playCard&#039;,     from: &#039;playingValecuatro&#039;,                  to: &#039;playingValecuatro&#039;},
+    { name: &#039;no_quiero&#039;, 	from: [&#039;envido&#039;,&#039;envido2&#039;,&#039;realenvido&#039;,
+                                   &#039;faltaenvido&#039;],         				to: &#039;playingCard&#039; },
+	{ name: &#039;no_quiero&#039;, 	from: [&#039;truco&#039;,&#039;retruco&#039;,&#039;valecuatro&#039;],		to: &#039;finronda&#039; },
+    { name: &#039;quiero&#039;,       from: [&#039;envido&#039;,&#039;envido2&#039;,&#039;realenvido&#039;,
+                                   &#039;faltaenvido&#039;],                      to: &#039;playingCard&#039; },
+    { name: &#039;quiero&#039;,       from: &#039;truco&#039;,                              to: &#039;playingTruco&#039;},
+    { name: &#039;retruco&#039;,      from: [&#039;truco&#039;,&#039;playingTruco&#039;],             to: &#039;retruco&#039;},
+    { name: &#039;quiero&#039;,       from: &#039;retruco&#039;,                            to: &#039;playingRetruco&#039;},
+    { name: &#039;valecuatro&#039;,   from: [&#039;retruco&#039;,&#039;playingRetruco&#039;],         to: &#039;valecuatro&#039;},
+    { name: &#039;quiero&#039;,       from: &#039;valecuatro&#039;,                         to: &#039;playingValecuatro&#039;},
+    { name: &#039;envido&#039;,       from: &#039;envido&#039;,                             to: &#039;envido2&#039;},
+    { name: &#039;realenvido&#039;,   from: [&#039;envido2&#039;,&#039;envido&#039;,&#039;init&#039;,
+                                   &#039;primerCarta&#039;],                      to: &#039;realenvido&#039;},
+    { name: &#039;faltaenvido&#039;,  from: [&#039;envido2&#039;,&#039;envido&#039;,&#039;init&#039;,
+                                   &#039;primerCarta&#039;,&#039;realenvido&#039;],         to: &#039;faltaenvido&#039;},
+],
+    callbacks: {
+        //Antes de realizar la transcicion de estados cuando juega carta:
+        //      *Agregar la carta al tablero
+        //      *Sacar la carta de la mano del jugador
+        onbeforeplayCard: function(event, from, to, carta, instanciaRonda) {
+            instanciaRonda.pushCardToBoard(carta);
+            var player = getCurrentPlayer(instanciaRonda);
+            var cardIndex;
+            for (var i = 0; i &lt; player.cards.length; i++){
+                if (carta.number === player.cards[i].number &amp;&amp; carta.suit === player.cards[i].suit) {
+                    cardIndex = i;
+                }
+            }
+            _.pullAt(player.cards,cardIndex);
+        },
+
+        onafterevent: function(event,from,to) {
+            eventoDisparado = event;
+            estadoAlcanzado = to;
+        },
+
+        /*Despues de hacer la transicion:
+     //     *Verificar si el duelo termino (un duelo termina cuando (this.board[0].length + this.board.length[1]) == 2 || 4 || 6)
+     //         &gt;si termino guardar el resultado del duelo (resultado = &quot;player1&quot; || &quot;player2&quot; || &quot;empate&quot;)
+     //          y establecer el proximo turno al jugador que gano el duelo
+      //        &gt;verificar si la ronda termino
+      //            &gt;si termino, asignar los puntos al ganador en game
+      //    *Si el duelo no termino, el proximo turno es el del jugador contrario
+      */
+
+        onafterplayCard: function(event, from, to, carta, instanciaRonda) {
+            if (duelEnd(instanciaRonda.board)) {
+
+
+                var resultado = instanciaRonda.calcularRonda(instanciaRonda.board);
+                instanciaRonda.resultados.push(resultado);
+                //Si es empate, el proximo turno es el de la mano del juego
+                if (resultado !== &quot;empate&quot;) {
+                    instanciaRonda.nextTurn = resultado;
+                } else {
+                    instanciaRonda.nextTurn = instanciaRonda.game.currentHand;
+                }
+
+                if (instanciaRonda.hasEnded()) {
+                    instanciaRonda.updateRoundScore();
+                }
+            } else { //Se sigue jugando el duelo, el proximo a jugar es el contrario del currentTurn
+                instanciaRonda.nextTurn = switchPlayer(instanciaRonda.currentTurn);
+            }
+        },
+
+        // Cuando se entra al estado envido:
+        //  *apilar 2 puntos a la pila que guarda los diferentes cantos de envido (@envidoStack)
+        //  *guardar la persona que canto el envido en this.nextTurn
+        onenterenvido: function(event, from, to, carta, tround) {
+            tround.pushEnvidoPlay(event);
+            tround.nextTurn = tround.currentTurn;
+        },
+
+        // Cuando entra al estado envido2
+        //  *apilar 2 puntos a la pila que guarda los diferentes cantos de envido (@envidoStack)
+        onenterenvido2: function(event, from, to, carta, tround) {
+            tround.pushEnvidoPlay(event);
+        },
+
+        // Cuando se entra al estado realenvido: 
+        //  *apilar 3 puntos a la pila que guarda los diferentes cantos de envido (@envidoStack)
+        //  *si se canto realenvido sin haberse cantado otro envido antes guardar el turno del que canto
+        onenterrealenvido: function(event, from, to, carta, tround) {
+            if (valueOf[from] === undefined) {//Si no vino de ningun otro envido se guarda el turno
+                tround.nextTurn = tround.currentTurn;
+            }
+            tround.pushEnvidoPlay(event);
+        },
+
+        // Cuando se entra al estado faltaenvido: 
+        //  *calcula los puntos que daria la falta restando los ya acumulados en(@envidoStack) y los apila
+        //  *si se canto faltaenvido sin haberse cantado otro envido antes guardar el turno del que canto
+        onenterfaltaenvido: function(event, from, to, carta, tround) {
+            if (valueOf[from] === undefined) {//Si no vino de ningun otro envido se guarda el turno
+                tround.nextTurn = tround.currentTurn;
+            }
+            tround.pushEnvidoPlay(event);
+        },
+
+		//Cuando se canta truco se guarda el turno del que canto
+        onentertruco: function(event, from, to, carta, tround) {
+            tround.nextTurn = tround.currentTurn;
+        },
+
+        onenterretruco: function(event,from,to,carta,tround) {
+            if (from === &#039;truco&#039;) { //Si vino del truco se suma el punto del truco
+                tround.puntosTruco++;
+            }
+            else {  //Si vino de una jugada normal se almacena el turno del que canto
+                tround.nextTurn = tround.currentTurn;
+            }
+        },
+
+        onentervalecuatro: function(event,from,to,carta,tround) {
+            if (from === &#039;retruco&#039;) { //Si vino del retruco se suma el punto del truco
+                tround.puntosTruco++;
+            }
+            else {  //Si vino de una jugada normal se almacena el turno del que canto
+                tround.nextTurn = tround.currentTurn;
+            }
+        },
+    
+        //Despues del quiero depende de donde vino
+        onafterquiero: function(event, from, to, carta, tround) {
+            valueOf[from] ? tround.sumarPuntosDeEnvidoCon(true) : tround.puntosTruco++;
+        },
+        //Si vino de algun envido le da los puntos al ganador, sino vino de envido suma puntos al truco
+        //porque vino de un truco/retruco/valecuatro
+
+        onafterno_quiero: function(event, from, to, carta, tround) {
+			if (valueOf[from]) {
+				tround.sumarPuntosDeEnvidoCon(false);
+			}
+			else {
+                asignarPuntos(tround,switchPlayer(tround.currentTurn),tround.puntosTruco);
+				tround.endRound();
+			}
+        },
+        //Si vino de algun envido le da los puntos al contrario del que dijo no quiero
+        //Si no vino de envido le da los puntos acumulados del truco hasta el momento al jugador que canto truco
+    }
+});
+  return fsm;
+}
+
+Round.prototype.resetValues = function () {
+    this.fsm.current = &#039;init&#039;;
+    this.board[0] = [];
+    this.board[1] = [];
+    this.nextTurn = null;
+    this.score = [0,0];
+    this.puntosTruco = 1;
+    this.envidoStack = [];
+}
+
+
+
+
+//Funciones
+
+function asignarPuntos(instanciaRonda,player,puntos) {
+    player === &quot;player1&quot; ? instanciaRonda.score[0] += puntos : instanciaRonda.score[1] += puntos;
+    return instanciaRonda.score;
+}
+
+function getCurrentPlayer(instanciaRonda) {
+    var player;
+    instanciaRonda.currentTurn === &#039;player1&#039; ? player = instanciaRonda.game.player1 : player = instanciaRonda.game.player2;
+    return player;
+}
+
+//pre: un tablero con cartas
+//post: true si la cantidad de cartas jugadas es 2 o 4 o 6
+function duelEnd(board) {
+
+    var totalCartas = board[0].length + board[1].length;
+    return (totalCartas == 2 ||
+            totalCartas == 4 ||
+            totalCartas == 6);
+}
+/*
+ * returns the oposite player
+ */
+function switchPlayer(player) {
+    return &quot;player1&quot; === player ? &quot;player2&quot; : &quot;player1&quot;;
+}
+
+
+//Metodos de la ronda
+
+//PRE: Cantidad de cartas del tablero = 2 || 4 || 6
+//dado un tablero, ve las ultimas dos cartas jugadas del tablero y retorna el jugador ganador
+Round.prototype.calcularRonda = function(board, mano) {
+    var quienAgano;
+    var cartasJ1 = board[0];
+    var cartasJ2 = board[1];
+    var ultimaJugadaJ1 = cartasJ1[cartasJ1.length - 1];
+    var ultimaJugadaJ2 = cartasJ2[cartasJ2.length - 1];
+    var confrontResult = ultimaJugadaJ1.confront(ultimaJugadaJ2);
+    switch (true) {
+        case (confrontResult &gt; 0):
+            {
+                quienAgano = &quot;player1&quot;;
+                break;
+            }
+        case (confrontResult &lt; 0):
+            {
+                quienAgano = &quot;player2&quot;;
+                break;
+            }
+        case (confrontResult == 0):
+            {
+                quienAgano = &quot;empate&quot;;
+                break;
+            }
+    };
+    return quienAgano;
+};
+
+/*
+    La ronda termina cuando:
+        -Se jugaron las 6 cartas (this.board[0].length + this.board.length[1] == 6)
+        -Primer duelo = empate, Segundo duelo != empate (gana el del resultado del segundo duelo)
+        -Primer duelo != empate, Segundo duelo = empate (gana el del resultado del primer duelo)
+        -Pirmer duelo y segundo son iguales (gano 2 veces seguidas)
+*/
+Round.prototype.hasEnded = function() {
+    var cartasJugadas = (this.board[0].length + this.board[1].length);
+    switch (true) {
+        case (cartasJugadas == 6):
+            {
+                return true;
+                break;
+            }
+        case (this.resultados[0] === &quot;empate&quot;
+              &amp;&amp; (this.resultados[1] === &quot;player1&quot; || this.resultados[1] === &quot;player2&quot;)) :
+            {
+                return true;
+                break;
+            }
+        case (this.resultados[0] !== &quot;empate&quot; &amp;&amp; this.resultados[1] === &quot;empate&quot;):
+            {
+                return true;
+                break;
+            }
+        case (this.resultados[0] === this.resultados[1]
+              &amp;&amp; this.resultados[0] !== &#039;empate&#039;):
+            {
+                return true;
+                break;
+            }
+        default:
+            return false;
+    }
+}
+
+/*
+ *Mira el ganador de la ronda y actualiza el puntaje al juego
+ */
+Round.prototype.updateRoundScore = function() {
+    //Actualizar el score de la ronda
+    var resultCount = {
+        &quot;player1&quot;: 0,
+        &quot;player2&quot;: 0,
+        &quot;empate&quot;: 0
+    };
+    for (var i = 0; i &lt; this.resultados.length; i++) {
+        resultCount[this.resultados[i]]++;
+    }
+
+    //Vemos los empates para saber quien gano
+    switch (resultCount.empate) {
+        case 3:
+            { //3 empates, gana la mano
+                asignarPuntos(this,this.game.currentHand,this.puntosTruco);
+                break;
+            }
+        case 2:
+            { //2 empates, gana el 3er duelo 
+                asignarPuntos(this,this.resultados[2],this.puntosTruco);
+                break;
+            }
+        case 1:
+            { //1 empate, gana el primero que haya ganado algun duelo
+                var ganador;
+                this.resultados[0] == &quot;empate&quot; ? ganador = this.resultados[1] : ganador = this.resultados[0];
+
+                asignarPuntos(this,ganador,this.puntosTruco);
+                break;
+            }
+        case 0: //Si no hubo empates, gana el que tenga 2 victorias
+            {
+                resultCount.player1 &gt; resultCount.player2 ? this.score[0] += this.puntosTruco : this.score[1] += this.puntosTruco;
+				break;
+            }
+        default:
+    }
+    //Actualizar el score del juego
+    this.endRound();
+};
+
+//Actualiza los puntos de la ronda al juego y le avisa que fueron cambiados
+Round.prototype.endRound = function() {
+	this.game.score[0] += this.score[0];
+    this.game.score[1] += this.score[1];
+    this.game.newRound();
+};
+
+Round.prototype.pushCardToBoard = function(carta) {
+    if (this.currentTurn === &quot;player1&quot;) {
+        this.board[0].push(carta);
+    } else {
+        this.board[1].push(carta);
+    }
+};
+
+Round.prototype.sumarPuntosDeEnvidoCon = function(quiero) {
+        if (quiero === true) {
+            var puntosConQuiero = this.calculateEnvidoScore(quiero);
+            var comparePoints = this.game.player1.envidoPoints - this.game.player2.envidoPoints;
+            switch (true) {
+                case (comparePoints &gt; 0): //Gano player1
+                    this.game.score[0] += puntosConQuiero;
+                    break;
+                case (comparePoints &lt; 0): //Gano player2
+                    this.game.score[1] += puntosConQuiero;
+                    break;
+                case (comparePoints = 0): //Empate, puntos van para la mano
+                    this.game.currentHand === &quot;player1&quot; ? this.game.score[0] += puntosConQuiero : this.game.score[1] += puntosConQuiero;
+                    break;
+            }
+        } else { //quiero == false
+            var puntosNoQuiero = this.calculateEnvidoScore(quiero);
+            //Si el que dijo no quiero es el jugador 1 se le dan los puntos al jugador 2
+            this.currentTurn === &quot;player1&quot; ? this.game.score[1] += puntosNoQuiero : this.game.score[0] += puntosNoQuiero;
+        }
+    };
+    /* ************************************************************************************************** */
+    /* De acuerdo a lo que se canto, suma puntos a la pila de envido/realenvido/faltaenvido */
+Round.prototype.pushEnvidoPlay = function(tipodejugada) {
+    if (valueOf[tipodejugada] &lt; 0) { //Se canto falta envido
+        var puntosQueFaltan = this.game.maxScore - _.max(this.game.score) - _.sum(this.envidoStack);
+        this.envidoStack.push(puntosQueFaltan);
+    } else {
+        this.envidoStack.push(valueOf[tipodejugada]);
+    }
+};
+
+/*****************************************************************************************************
+ * calculateEnvidoScore utiliza el stack de las jugadas de envido cantadas para calcular los puntos
+ * cuando un jugador quiere el envido/realenvido/faltaenvido se hace la sumatoria del arreglo
+ * cuando un jugador no quiere el envido/realenvido/faltaenvido
+   se saca el tope y se hace la sumatoria de la pila
+   |___CASO ESPECIAL: Si al sacar el tope la pila queda vacia entonces se retorna 1 punto
+*/
+Round.prototype.calculateEnvidoScore = function(quiso) {
+    var puntosAcumuladosEnvido = _.sum(this.envidoStack);
+
+    if (quiso) {
+        return puntosAcumuladosEnvido;
+    } else { //no quiso
+        var puntosNegados = this.envidoStack.pop();
+        if (this.envidoStack.length &gt; 0) {
+            return puntosAcumuladosEnvido - puntosNegados;
+        } else {
+            return 1;
+        }
+    }
+};
+
+/******************************************************************************************************/
+
+/*
+ * Generate a new deck mixed and gives to players the correspondent cards
+ */
+Round.prototype.deal = function() {
+    var deck = new Deck().mix();
+
+    this.game.player1.setCards(_.pullAt(deck, 0, 2, 4));
+    this.game.player2.setCards(_.pullAt(deck, 1, 3, 5));
+};
+
+/*
+ * Calculates who is the next player to play.
+ *
+ * + if action is &#039;quiero&#039; or &#039;no_quiero&#039; and it&#039;s playing &#039;envido&#039; the next
+ * player to play is who start to chant
+ * + if action is &#039;playCard&#039; next to play is the duel winner, the hand of the game if duel is tied, or the other player otherwise
+ */
+Round.prototype.changeTurn = function(action) {
+    if (action === &quot;quiero&quot; ||
+        action === &quot;no-quiero&quot; ||
+        action === &quot;playCard&quot;) {
+        return this.currentTurn = this.nextTurn;
+    } else {
+        return this.currentTurn = switchPlayer(this.currentTurn);
+    }
+
+};
+
+Round.prototype.recreate = function() {
+    this.fsm = newTrucoFSM();
+    this.fsm.current = this.currentState;
+}
+
+
+/*
+ * Let&#039;s Play :)
+ */
+Round.prototype.play = function(action, value) {
+    // move to the next state
+    this.fsm[action](value, this);
+    this.currentState = estadoAlcanzado;
+    this.lastPlay = eventoDisparado;
+
+    // Change player&#039;s turn
+    this.changeTurn(action);
+};
+
+module.exports.round = Round;</textarea>
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="container">
+    <p>.</p>
+  </div>
+</footer>
+
+<script type="text/html" id="complexity-popover-template">
+  <div class="complexity-notice">
+    Complexity : {{ cyclomatic }} <br>
+    Length : {{ halstead.length }} <br>
+    Difficulty : {{ halstead.difficulty.toFixed(2) }} <br>
+    Est # bugs : {{ halstead.bugs.toFixed(2) }}<br>
+  </div>
+</script>
+
+<script type="text/javascript" src="../../assets/scripts/bundles/core-bundle.js"></script>
+<script type="text/javascript" src="../../assets/scripts/bundles/codemirror.js"></script>
+<script type="text/javascript" src="../../assets/scripts/codemirror.markpopovertext.js"></script>
+<script type="text/javascript" src="report.js"></script>
+<script type="text/javascript" src="report.history.js"></script>
+<script type="text/javascript" src="../../assets/scripts/plato-file.js"></script>
+</body>
+</html>
