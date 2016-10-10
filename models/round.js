@@ -61,8 +61,16 @@ var Round = mongoose.model('Round', RoundSchema);
 //Puntos que dan el envido/realenvido/faltaenvido
 var valueOf = {
     'envido': 2,
+    'envido2' : 2,
     'realenvido': 3,
     'faltaenvido': -1 //Caso especial, necesita ser calculado
+};
+
+//Usado para filtrar eventos
+var raise = {
+    'truco' : true,
+    'retruco' : true,
+    'valecuatro' : true
 };
 
 //Auxiliares, no afectan en nada si son modificadas
@@ -75,17 +83,29 @@ function newTrucoFSM(){
   var fsm = StateMachine.create({
   initial: 'init' , final: 'finronda',
   events: [
-    { name: 'al_mazo',      from:['init','playCard','envido','truco','quiero',
-                             'no-quiero','playingTruco','primerCarta'], to:'finronda'},
+
     { name: 'playCard',     from: 'init',                           	to: 'primerCarta' },
     { name: 'envido',       from: ['init', 'primerCarta'],         		to: 'envido' },
-    { name: 'truco',        from: ['playedCard','primerCarta'],         to: 'truco'  },
-    { name: 'playCard',		from: ['primerCarta', 'playedCard'],  		to: 'playedCard' },
+    { name: 'truco',        from: ['init', 'playingCard','primerCarta'],to: 'truco'  },
+    { name: 'playCard',		from: ['primerCarta', 'playingCard'],  		to: 'playingCard' },
     { name: 'playCard',     from: 'playingTruco',                       to: 'playingTruco'},
-	{ name: 'no_quiero', 	from: 'truco',								to: 'finronda' },
+    { name: 'playCard',     from: 'playingRetruco',                     to: 'playingRetruco'},
+    { name: 'playCard',     from: 'playingValecuatro',                  to: 'playingValecuatro'},
+    { name: 'no_quiero', 	from: ['envido','envido2','realenvido',
+                                   'faltaenvido'],         				to: 'playingCard' },
+	{ name: 'no_quiero', 	from: ['truco','retruco','valecuatro'],		to: 'finronda' },
+    { name: 'quiero',       from: ['envido','envido2','realenvido',
+                                   'faltaenvido'],                      to: 'playingCard' },
     { name: 'quiero',       from: 'truco',                              to: 'playingTruco'},
-    { name: 'no_quiero', 	from: 'envido',              				to: 'playedCard' },
-	{ name: 'quiero', 		from: 'envido',					            to: 'playedCard' },
+    { name: 'retruco',      from: ['truco','playingTruco'],             to: 'retruco'},
+    { name: 'quiero',       from: 'retruco',                            to: 'playingRetruco'},
+    { name: 'valecuatro',   from: ['retruco','playingRetruco'],         to: 'valecuatro'},
+    { name: 'quiero',       from: 'valecuatro',                         to: 'playingValecuatro'},
+    { name: 'envido',       from: 'envido',                             to: 'envido2'},
+    { name: 'realenvido',   from: ['envido2','envido','init',
+                                   'primerCarta'],                      to: 'realenvido'},
+    { name: 'faltaenvido',  from: ['envido2','envido','init',
+                                   'primerCarta','realenvido'],         to: 'faltaenvido'},
 ],
     callbacks: {
         //Antes de realizar la transcicion de estados cuando juega carta:
@@ -142,31 +162,76 @@ function newTrucoFSM(){
         //  *apilar 2 puntos a la pila que guarda los diferentes cantos de envido (@envidoStack)
         //  *guardar la persona que canto el envido en this.nextTurn
         onenterenvido: function(event, from, to, carta, tround) {
-            tround.pushEnvidoPlay(to);
+            tround.pushEnvidoPlay(event);
             tround.nextTurn = tround.currentTurn;
+        },
+
+        // Cuando entra al estado envido2
+        //  *apilar 2 puntos a la pila que guarda los diferentes cantos de envido (@envidoStack)
+        onenterenvido2: function(event, from, to, carta, tround) {
+            tround.pushEnvidoPlay(event);
+        },
+
+        // Cuando se entra al estado realenvido: 
+        //  *apilar 3 puntos a la pila que guarda los diferentes cantos de envido (@envidoStack)
+        //  *si se canto realenvido sin haberse cantado otro envido antes guardar el turno del que canto
+        onenterrealenvido: function(event, from, to, carta, tround) {
+            if (valueOf[from] === undefined) {//Si no vino de ningun otro envido se guarda el turno
+                tround.nextTurn = tround.currentTurn;
+            }
+            tround.pushEnvidoPlay(event);
+        },
+
+        // Cuando se entra al estado faltaenvido: 
+        //  *calcula los puntos que daria la falta restando los ya acumulados en(@envidoStack) y los apila
+        //  *si se canto faltaenvido sin haberse cantado otro envido antes guardar el turno del que canto
+        onenterfaltaenvido: function(event, from, to, carta, tround) {
+            if (valueOf[from] === undefined) {//Si no vino de ningun otro envido se guarda el turno
+                tround.nextTurn = tround.currentTurn;
+            }
+            tround.pushEnvidoPlay(event);
         },
 
 		//Cuando se canta truco se guarda el turno del que canto
         onentertruco: function(event, from, to, carta, tround) {
             tround.nextTurn = tround.currentTurn;
         },
-        //Si se canto envido, suma 2 a la pila de puntos
 
+        onenterretruco: function(event,from,to,carta,tround) {
+            if (from === 'truco') { //Si vino del truco se suma el punto del truco
+                tround.puntosTruco++;
+            }
+            else {  //Si vino de una jugada normal se almacena el turno del que canto
+                tround.nextTurn = tround.currentTurn;
+            }
+        },
+
+        onentervalecuatro: function(event,from,to,carta,tround) {
+            if (from === 'retruco') { //Si vino del retruco se suma el punto del truco
+                tround.puntosTruco++;
+            }
+            else {  //Si vino de una jugada normal se almacena el turno del que canto
+                tround.nextTurn = tround.currentTurn;
+            }
+        },
+    
+        //Despues del quiero depende de donde vino
         onafterquiero: function(event, from, to, carta, tround) {
             valueOf[from] ? tround.sumarPuntosDeEnvidoCon(true) : tround.puntosTruco++;
         },
-        //Si vino de envido le da los puntos al ganador, sino vino de envido suma puntos al truco
+        //Si vino de algun envido le da los puntos al ganador, sino vino de envido suma puntos al truco
+        //porque vino de un truco/retruco/valecuatro
 
         onafterno_quiero: function(event, from, to, carta, tround) {
 			if (valueOf[from]) {
 				tround.sumarPuntosDeEnvidoCon(false);
 			}
 			else {
-            	tround.currentTurn === "player1" ? tround.score[1] += tround.puntosTruco : tround.score[0] += tround.puntosTruco;
+                asignarPuntos(tround,switchPlayer(tround.currentTurn),tround.puntosTruco);
 				tround.endRound();
 			}
         },
-        //Si vino de envido le da los puntos al contrario del que dijo no quiero
+        //Si vino de algun envido le da los puntos al contrario del que dijo no quiero
         //Si no vino de envido le da los puntos acumulados del truco hasta el momento al jugador que canto truco
     }
 });
@@ -188,8 +253,8 @@ Round.prototype.resetValues = function () {
 
 //Funciones
 
-function asignarPuntos(instanciaRonda,puntos) {
-    instanciaRonda.currentTurn === "player1" ? instanciaRonda.score[0] += puntos : instanciaRonda.score[1] += puntos;
+function asignarPuntos(instanciaRonda,player,puntos) {
+    player === "player1" ? instanciaRonda.score[0] += puntos : instanciaRonda.score[1] += puntos;
     return instanciaRonda.score;
 }
 
@@ -302,12 +367,12 @@ Round.prototype.updateRoundScore = function() {
     switch (resultCount.empate) {
         case 3:
             { //3 empates, gana la mano
-                this.game.currentHand == "player1" ? this.score[0] += this.puntosTruco : this.score[1] += this.puntosTruco;
+                asignarPuntos(this,this.game.currentHand,this.puntosTruco);
                 break;
             }
         case 2:
-            { //2 empates, gana el 3er duelo
-                this.resultados[2] == "player1" ? this.score[0] += this.puntosTruco : this.score[1] += this.puntosTruco;
+            { //2 empates, gana el 3er duelo 
+                asignarPuntos(this,this.resultados[2],this.puntosTruco);
                 break;
             }
         case 1:
@@ -315,7 +380,7 @@ Round.prototype.updateRoundScore = function() {
                 var ganador;
                 this.resultados[0] == "empate" ? ganador = this.resultados[1] : ganador = this.resultados[0];
 
-                ganador == "player1" ? this.score[0] += this.puntosTruco : this.score[1] += this.puntosTruco;
+                asignarPuntos(this,ganador,this.puntosTruco);
                 break;
             }
         case 0: //Si no hubo empates, gana el que tenga 2 victorias
