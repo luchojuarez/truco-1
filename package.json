@@ -4,7 +4,7 @@
   "description": "Quiero re truco",
   "main": "engine.js",
   "scripts": {
-    "test": "fuser -k 3000/tcp;NODE_ENV=test mocha --reporter spec",
+    "test": "fuser -k 3000/tcp;NODE_ENV=test mocha --reporter spec; plato -r -d report models;x-www-browser ./report/index.html",
     "start": "fuser -k 3000/tcp;NODE_ENV=development node ./bin/www"
   },
   "author": "me",
