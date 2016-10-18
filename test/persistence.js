@@ -33,6 +33,7 @@ var Player = playerModel.player;
 
     });
 }
+
 function loadGameById(gameId,cb) {
     Game
         .findOne({_id : gameId })
@@ -44,11 +45,12 @@ function loadGameById(gameId,cb) {
                 cb(err,undefined);
                 console.error("GAME NOT LOADED: ",err);
             }
+			tgame.recreate();
             cb(err,tgame);
     });
 }
 
-describe('GameSave&Restore', function(){
+describe('Persistence in the database', function(){
 
 
 
@@ -72,7 +74,15 @@ describe('GameSave&Restore', function(){
         new Card(2, 'basto')
     ]);
 
-	//Do some moves
+
+  });
+	
+//Begin
+  describe('Saving and loading data',function () {
+
+   it('should save a game', function(done) {
+
+    //Do some moves
     game.play('player1', 'playCard',game.player1.cards[0]); //juega 1 espada
     game.play('player2', 'truco');
     game.play('player1', 'quiero');
@@ -81,16 +91,12 @@ describe('GameSave&Restore', function(){
     game.play('player2', 'playCard',game.player2.cards[1]); //juega 2 basto
     game.play('player2','envido');
     game.play('player1','quiero');
+    game.play('player2','playCard',game.player2.cards[0]);
 
-  });
-	
-//Begin
-
-   it('should save a game', function(done) {
     //Keep the old card count in the board
     var pretestCardsCount = game.currentRound.board[0].length + game.currentRound.board[1].length
     //just another move
-    game.play('player2', 'playCard',game.player1.cards[0]); 
+    game.play('player1', 'playCard',game.player1.cards[0]); 
         player1 = game.player1;
         player2 = game.player2;
 		saveGame(game,function (err,thegame) {
@@ -113,9 +119,19 @@ describe('GameSave&Restore', function(){
 
 
   it('Load a saved game', function(done) {
-    //Just another move
-    game.play('player2', 'playCard',game.player1.cards[0]); 
-    var gameId;                                                               
+    var gameId;
+
+    //Do some moves
+    game.play('player1', 'playCard',game.player1.cards[0]); //juega 1 espada
+    game.play('player2', 'truco');
+    game.play('player1', 'quiero');
+    game.play('player2', 'playCard',game.player2.cards[1]); //juega 7 basto
+    game.play('player1', 'playCard',game.player1.cards[0]); //juega 3 oro
+    game.play('player2', 'playCard',game.player2.cards[1]); //juega 2 basto
+    game.play('player2','envido');
+    game.play('player1','quiero');
+    game.play('player2','playCard',game.player2.cards[0]);             
+
     saveGame(game,function (err,savedgame) {
         if (err) {
             done(err);
@@ -133,6 +149,70 @@ describe('GameSave&Restore', function(){
         });
     });
   });
+
+  it('Loading a game does not lose the play method', function(done) {
+    var gameId;
+
+    game.play('player1', 'playCard',game.player1.cards[0]); //1 Espada
+    saveGame(game,function(err,savedgame) {
+        if (err) {
+            done(err);
+        }
+        gameId = savedgame._id;
+        loadGameById(gameId,function (err,loaded) {
+            if (err) done(err);
+            loaded.play('player2', 'playCard', game.player2.cards[1]); //7 Basto
+            expect(loaded.currentRound.board[1].length).to.be.eq(1);
+            done();
+        })
+    })
+  })
+
+    it('Loading a game does not lose the truco and quiero plays', function(done) {
+    var gameId;
+
+    game.play('player1', 'playCard',game.player1.cards[0]); //1 Espada
+    saveGame(game,function(err,savedgame) {
+        if (err) {
+            done(err);
+        }
+        gameId = savedgame._id;
+        loadGameById(gameId,function (err,loaded) {
+            if (err) done(err);
+            loaded.play('player2', 'truco');
+            expect(loaded.currentRound.currentTurn).to.be.eq('player1');
+            expect(loaded.currentRound.currentState).to.be.eq('truco');
+            loaded.play('player1', 'quiero');
+            expect(loaded.currentRound.currentTurn).to.be.eq('player2');
+            expect(loaded.currentRound.currentState).to.be.eq('playingTruco');
+            done();
+        })
+    })
+  })
+
+
+    it('Loading a game does not lose the envido and no quiero plays', function(done) {
+    var gameId;
+
+    game.play('player1', 'playCard',game.player1.cards[0]); //1 Espada
+    saveGame(game,function(err,savedgame) {
+        if (err) {
+            done(err);
+        }
+        gameId = savedgame._id;
+        loadGameById(gameId,function (err,loaded) {
+            if (err) done(err);
+            loaded.play('player2', 'envido');
+            expect(loaded.currentRound.currentTurn).to.be.eq('player1');
+            expect(loaded.currentRound.currentState).to.be.eq('envido');
+            loaded.play('player1', 'no_quiero');
+            expect(loaded.currentRound.currentTurn).to.be.eq('player2');
+            expect(loaded.currentRound.currentState).to.be.eq('playingCard');
+            done();
+        })
+    })
+  })
+});
 
 });
 
