@@ -1,0 +1,10 @@
+extends layout
+
+block content
+  h1(class="header") Choise a player
+  for player in list
+    br
+    a(href="")
+      button.btn.btn-primary(type="submit" value="#{player}") #{player.user.username}
+  else
+    h2 Sorry, no players founds!

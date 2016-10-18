@@ -7,15 +7,11 @@ var Game = require("../models/game").game;
 var Player = require("../models/player").player;
 var Round = require("../models/round").round;
 var Card = require("../models/card").card;
-var guest;
-//NO ES CORRECTO USAR ESTO, solucion temporal.
-var actualValues = { FSM: null, board: null, player1: null, player2: null , score: null };
-var currentGame;
 
 
 /* GET home page. */
 router.get('/', function (req, res) {
-  res.render('index', { user : req.user , guest : guest});
+  res.render('index', { user : req.user});
 });
 
 router.get('/register', function(req, res) {
@@ -34,35 +30,7 @@ router.post('/register', function(req, res) {
     });
 });
 
-router.get('/loginGuest',function (req,res) {
-    res.render('loginGuest')
-})
 
-router.post('/loginGuest',function (req,res) {
-    guest= new User( {username : req.body.username , password : 'spiderman'});
-    var p1 = new Player({user:req.user,nickname:req.user.username});
-    var p2 = new Player({user:guest , nickname:guest.username});
-    var game = new Game({
-        currentHand : 'player1',
-        name:p1.nickname+ ' VS '+p2.nickname,
-        score : [0,0],
-        player1:p1,
-        player2:p2,
-    });
-    game.newRound();
-    actualValues.FSM = game.currentRound.fsm;
-    actualValues.board = game.currentRound.board;
-    actualValues.player1 = p1;
-    actualValues.player2 = p2;
-    actualValues.score = game.score;
-    saveGame(game,function (err,savedgame) {
-        if (err){
-            console.error(err);
-            return res.render('error',err);
-        }
-        res.redirect('/play?gameID='+savedgame._id);
-    })
-})
 
 router.get('/login', function(req, res) {
     res.render('login', { user : req.user});
@@ -103,6 +71,25 @@ router.get('/play',function (req,res) {
 router.post('/play',function (req,res) {
 })
 
+
+
+router.get('/newgame', function(req, res) {
+    getAllPlayers(function (err,players) {
+        if(err) console.error(err);
+        else {
+            //console.log(players);
+            res.render('newgame', {
+                list:players
+                //list:["Lucho","Tecla","Wasi"]
+            });
+        }
+    })
+});
+
+router.post('/newgame', function(req, res) {
+    console.log("hello",req.body);
+
+});
 
 router.post('/changePlayer',function (req,res,next) {
     var carta;
@@ -198,6 +185,19 @@ function loadGameById(gameId,cb) {
             cb(err,tgame);
     });
 }
+
+function getAllPlayers(callback) {
+    Player.find()
+    .exec(function (err, players) {
+        if (err){
+            callback(err,undefined);
+            console.error(err);
+        }
+        callback(err,players)
+    })
+}
+
+
 function parseCard (carta) {
     var number = parseInt(carta.split("",2)[0]+carta.split("",2)[1]);
 	var suit = carta.split("",7);

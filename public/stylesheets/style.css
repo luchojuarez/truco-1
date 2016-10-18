@@ -16,6 +16,7 @@ h2 {
 }
 
 
+
 #container {
   width: 1000px;
   margin: 25px auto;
@@ -36,4 +37,24 @@ h2 {
 
 a {
   color: #00B7FF;
+}
+
+.header {
+    position: absolute;
+    width: 100%; /* hacemos que la cabecera ocupe el ancho completo de la página */
+    left: 0; /* Posicionamos la cabecera al lado izquierdo */
+    top: 0; /* Posicionamos la cabecera pegada arriba */
+    position: fixed; /* Hacemos que la cabecera tenga una posición fija */
+}
+
+.footer {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  padding: 1rem;
+  background-color: #efefef;
+  text-align: center;
+  position: fixed; /* Hacemos que la cabecera tenga una posición fija */
+
 }
