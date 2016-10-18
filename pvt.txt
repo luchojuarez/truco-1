@@ -1,2 +1,4 @@
-ifed
+modifed
 asd
+
+Esta rama añade test para jugadas nuevas ?
