@@ -12,7 +12,7 @@ var Card = gameCard.card;
 var Player = playerModel.player;
 
 //Funciones a testear para guardar/cargar, utilizan callbacks
-    function saveGame(gameObject, cb) {
+function saveGame(gameObject, cb) {
     gameObject.currentRound.save(function(err, savedround) {
         if (err)
             return cb(err);
@@ -33,6 +33,7 @@ var Player = playerModel.player;
 
     });
 }
+
 
 function loadGameById(gameId,cb) {
     Game
