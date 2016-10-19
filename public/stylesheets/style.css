@@ -58,3 +58,6 @@ a {
   position: fixed; /* Hacemos que la cabecera tenga una posición fija */
 
 }
+#notifications{
+    text-align: right;
+}

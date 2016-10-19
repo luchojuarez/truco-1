@@ -79,8 +79,8 @@ router.get('/newgame', function(req, res) {
         else {
             //console.log(players);
             res.render('newgame', {
-                list:players
-                //list:["Lucho","Tecla","Wasi"]
+                //list:players
+                list:["Lucho","Tecla","Wasi"]
             });
         }
     })

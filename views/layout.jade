@@ -1,5 +1,5 @@
 doctype html
-html
+html(lang="en")
   head
     title Truco
     meta(name='viewport', content='width=device-width, initial-scale=1.0')
@@ -11,5 +11,9 @@ html
   script(src='http://code.jquery.com/jquery.js')
   script(src='http://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js')
 
-footer(class="footer")
-  p hola
+  if (user)
+    footer(class="footer")
+      if (gameWait)
+        a(href="") Lets play!
+      else
+        p Hi #{user.username}, no games waiting for you! 
