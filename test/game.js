@@ -31,6 +31,7 @@ describe('Game', function(){
         new Card(7, 'basto'),
         new Card(2, 'basto')
     ]);
+   
   });
 
 
@@ -39,6 +40,24 @@ describe('Game', function(){
     expect(game).to.have.property('player2');
   });
 
+describe('Game#recreate', function() {
+  it('Recreates cards from a parsed hand of cards', function() {
+    game.player1.cards = JSON.parse(JSON.stringify(game.player1.cards));
+    game.recreate();
+    var recreatedCard = game.player1.cards[0];
+    expect(recreatedCard).to.have.property('isBlackCard');
+    expect(recreatedCard).to.have.property('envido');
+  });
+
+  it('Recreates cards from a parsed board', function() {
+    parsedBoard =  [[{ number: 5, suit: 'espada', weight: 2 } ], [ { number: 4, suit: 'basto', weight: 1 }]];
+    game.currentRound.board = parsedBoard;
+    game.recreate();
+    p1Board = game.currentRound.board[0];
+    expect(p1Board[0]).to.have.property('envido');
+    expect(p1Board[0]).to.have.property('isBlackCard');
+  })
+});
 
 describe('Game#play', function(){
 
@@ -105,7 +124,10 @@ it('plays [envido,faltaenvido,no_quiero] should give 2 points to who ever chante
     var cardscount = game.player1.cards.length;
     var cardRemoved = game.player1.cards[1];
     game.play('player1','playCard',cardRemoved);
-    expect(game.player1.cards.length).to.be.eq(cardscount-1);
+    game.play('player2','playCard',game.player2.cards[2]);
+    game.play('player1','playCard',game.player1.cards[0]);
+    expect(game.player1.cards.length).to.be.eq(cardscount-2);
+    expect(game.player2.cards.length).to.be.eq(2);
     expect(game.player1.cards).to.not.include(cardRemoved);
   });
 
