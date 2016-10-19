@@ -21,8 +21,8 @@ var Schema = mongoose.Schema;
  */
 var GameSchema = new Schema({
   name:         String,
-  player1:      Object,
-  player2:      Object,
+  player1:      { type: Schema.Types.ObjectId, ref: 'Player' },
+  player2:      { type: Schema.Types.ObjectId, ref: 'Player' },
   currentHand:  { type: String },
   currentRound: { type: Schema.Types.ObjectId , ref: 'Round' },
   rounds:       { type : Array , default : [] },

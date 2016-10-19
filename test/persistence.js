@@ -12,23 +12,35 @@ var Card = gameCard.card;
 var Player = playerModel.player;
 
 //Funciones a testear para guardar/cargar, utilizan callbacks
-function saveGame(gameObject, cb) {
+    function saveGame(gameObject, cb) {
     gameObject.currentRound.save(function(err, savedround) {
         if (err)
             return cb(err);
-        gameObject.save(function(err, savedgame) {
-            if (err) {
+        gameObject.player1.save(function(err, p1) {
+            if (err)
                 return cb(err);
-            }
-            cb(err, savedgame);
-        });
-    })
+            gameObject.player2.save(function(err, p2) {
+                if (err)
+                    return cb(err);
+                gameObject.save(function(err, savedgame) {
+                    if (err) {
+                        return cb(err);
+                    }
+                    cb(err, savedgame);
+                });
+            })
+        })
+
+    });
+
 }
 
 function loadGameById(gameId,cb) {
     Game
         .findOne({_id : gameId })
         .populate("currentRound")
+        .populate("player1")
+        .populate("player2")
         .exec(function (err,tgame) {
             if (err){
                 cb(err,undefined);
