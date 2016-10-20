@@ -30,6 +30,38 @@ var GameSchema = new Schema({
   score:        [Number],
 });
 
+GameSchema.pre('save', function (next) {
+  var game = this;
+   game.currentRound.save(function(err, savedround) {
+        if (err) 
+            next(err);
+        game.player1.save(function(err, p1) {
+            if (err)
+                next(err);
+            game.player2.save(function(err, p2) {
+                if (err)
+                    next(err);
+                next();
+            })
+        })
+    })
+})
+
+GameSchema.statics.load = function (gameId,cb) {
+  return this.findOne({_id : gameId })
+        .populate("currentRound")
+        .populate("player1")
+        .populate("player2")
+        .exec(function (err,tgame) {
+            if (err){
+                cb(err);
+                console.error("GAME NOT LOADED: ",err);
+            }
+            tgame.recreate();
+            cb(err,tgame);
+    });
+};
+
 var Game = mongoose.model('Game', GameSchema);
 
 /*

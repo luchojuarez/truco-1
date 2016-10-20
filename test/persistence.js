@@ -100,7 +100,7 @@ describe('Persistence in the database', function(){
     game.play('player1', 'playCard',game.player1.cards[0]); 
         player1 = game.player1;
         player2 = game.player2;
-		saveGame(game,function (err,thegame) {
+		game.save(function (err,thegame) {
         	if (err)
 				done(err);
 
@@ -133,14 +133,14 @@ describe('Persistence in the database', function(){
     game.play('player1','quiero');
     game.play('player2','playCard',game.player2.cards[0]);             
 
-    saveGame(game,function (err,savedgame) {
+    game.save(function (err,savedgame) {
         if (err) {
             done(err);
         }
         var savedScore = savedgame.score;
         var savedBoardLength = savedgame.currentRound.board[0].length + savedgame.currentRound.board[1].length;
         gameId = savedgame._id;
-        loadGameById(gameId,function (err,loaded) {
+        Game.load(gameId,function (err,loaded) {
             if (err) done(err);
             var loadedBoardLength = loaded.currentRound.board[0].length + loaded.currentRound.board[1].length;
             expect(savedBoardLength).to.be.eq(loadedBoardLength);
@@ -155,12 +155,12 @@ describe('Persistence in the database', function(){
     var gameId;
 
     game.play('player1', 'playCard',game.player1.cards[0]); //1 Espada
-    saveGame(game,function(err,savedgame) {
+    game.save(function(err,savedgame) {
         if (err) {
             done(err);
         }
         gameId = savedgame._id;
-        loadGameById(gameId,function (err,loaded) {
+        Game.load(gameId,function (err,loaded) {
             if (err) done(err);
             loaded.play('player2', 'playCard', game.player2.cards[1]); //7 Basto
             expect(loaded.currentRound.board[1].length).to.be.eq(1);
@@ -173,12 +173,12 @@ describe('Persistence in the database', function(){
     var gameId;
 
     game.play('player1', 'playCard',game.player1.cards[0]); //1 Espada
-    saveGame(game,function(err,savedgame) {
+    game.save(function(err,savedgame) {
         if (err) {
             done(err);
         }
         gameId = savedgame._id;
-        loadGameById(gameId,function (err,loaded) {
+        Game.load(gameId,function (err,loaded) {
             if (err) done(err);
             loaded.play('player2', 'truco');
             expect(loaded.currentRound.currentTurn).to.be.eq('player1');
@@ -196,12 +196,12 @@ describe('Persistence in the database', function(){
     var gameId;
 
     game.play('player1', 'playCard',game.player1.cards[0]); //1 Espada
-    saveGame(game,function(err,savedgame) {
+    game.save(function(err,savedgame) {
         if (err) {
             done(err);
         }
         gameId = savedgame._id;
-        loadGameById(gameId,function (err,loaded) {
+        Game.load(gameId,function (err,loaded) {
             if (err) done(err);
             loaded.play('player2', 'envido');
             expect(loaded.currentRound.currentTurn).to.be.eq('player1');
