@@ -1,24 +1,20 @@
 extends layout
 
 block content
-  h1 Truco
+  h1(class="header") Truco
   // Interface jugador 1
   if (!user)
-    h3 Player 1
     a(href="/login")
       button.btn.btn-primary(type="button") Login 
     a(href="/register")
       button.btn.btn-primary(type="button") Register 
   if (user)
     h3 #{user.username}
-    a(href="/logout") 
-      button.btn.btn-primary(type="button") Logout
-  
-  //interface jugador 2
-  if (user)
-    if (!guest)
-      h3 Player 2
-      a(href="/loginGuest")
-        button.btn.btn-primary(type="button") Login a guest
-    if (guest)
-      h3 #{guest.username}
+      br
+      div(class="group-vertical")
+        br
+        a(href="/logout")
+          button.btn.btn-primary(type="submit" href="/logout") Logout
+        br
+        a(href="newgame")
+          button.btn.btn-primary(type="button") Create a new game

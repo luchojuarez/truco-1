@@ -43,11 +43,19 @@ Player.prototype.points = function() {
     [this.cards[1], this.cards[2]],
   ];
 
-  var pairValues = _.map(pairs, function(pair) { 
+  var pairValues = _.map(pairs, function(pair) {
     return pair[0].envido(pair[1]);
   });
   return _.max(pairValues);
 };
+
+
+Player.prototype.getAll =function() {
+    Player.find()
+    .exec(function() {
+        return
+    })
+}
 
 
 module.exports.player = Player;
