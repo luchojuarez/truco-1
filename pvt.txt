@@ -1,2 +1,4 @@
 ifed
 asd
+
+Branch para añadir jugadas del truco
