@@ -48,7 +48,7 @@ router.get('/logout', function(req, res) {
 
 
 router.get('/play',function (req,res) {
-    loadGameById(req.query.gameID,function (err,game) {
+    Game.load(req.query.gameID,function (err,game) {
         if (err)
             console.error(err);
         else {
@@ -79,8 +79,8 @@ router.get('/newgame', function(req, res) {
         else {
             //console.log(players);
             res.render('newgame', {
-                //list:players
-                list:["Lucho","Tecla","Wasi"]
+                list:players
+                //list:["Lucho","Tecla","Wasi"]
             });
         }
     })
@@ -137,7 +137,7 @@ router.post('/changePlayer',function (req,res,next) {
     actualValues.player2 = currentGame.player2;
     actualValues.board = currentGame.currentRound.board;
     actualValues.score = currentGame.score;
-    saveGame(currentGame, function(err, lastSaved) {
+    currentGame.save(function(err, lastSaved) {
         if (err) {
             console.error(err);
             return res.render('error', err);
@@ -160,31 +160,7 @@ router.post('/changePlayer',function (req,res,next) {
 
 
 
-function saveGame(gameObject, cb) {
-    gameObject.currentRound.save(function(err, savedround) {
-        if (err)
-            return cb(err);
-        gameObject.save(function(err, savedgame) {
-            if (err) {
-                return cb(err);
-            }
-            cb(err, savedgame);
-        });
 
-    });
-}
-function loadGameById(gameId,cb) {
-    Game
-        .findOne({_id : gameId })
-        .populate("currentRound")
-        .exec(function (err,tgame) {
-            if (err){
-                cb(err,undefined);
-                console.error("GAME NOT LOADED: ",err);
-            }
-            cb(err,tgame);
-    });
-}
 
 function getAllPlayers(callback) {
     Player.find()
