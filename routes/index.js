@@ -77,10 +77,8 @@ router.get('/newgame', function(req, res) {
     getAllPlayers(function (err,players) {
         if(err) console.error(err);
         else {
-            //console.log(players);
             res.render('newgame', {
-                //list:players
-                list:["Lucho","Tecla","Wasi"]
+                list:players
             });
         }
     })
@@ -88,7 +86,11 @@ router.get('/newgame', function(req, res) {
 
 router.post('/newgame', function(req, res) {
     console.log("hello",req.body);
+    res.render("/play",{
+        user:{u:req.user},
+        guest:{u:req.oponente},
 
+    })
 });
 
 router.post('/changePlayer',function (req,res,next) {
@@ -199,7 +201,7 @@ function loadGameById(gameId,cb) {
 }
 
 function getAllPlayers(callback) {
-    Player.find()
+    User.find()
     .exec(function (err, players) {
         if (err){
             callback(err,undefined);

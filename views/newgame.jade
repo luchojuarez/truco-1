@@ -3,8 +3,8 @@ extends layout
 block content
   h1(class="header") Choose a player
   for player in list
-    br
-    a(href="#")
-      button.btn.btn-primary(type="submit" value="#{player}") #{player}
+    form(role='form', action="/play?playerId"+"#{player._id}",method="post", style='max-width: 300px;')
+      .form-group
+        button.btn.btn-primary(id="oponente" value="#{player._id}") #{player.username}
   else
     h2 Sorry, no players founds!
