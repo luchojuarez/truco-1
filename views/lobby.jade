@@ -1,0 +1,12 @@
+extends layout
+
+block content
+  h3 #{user.username}
+    br
+    div(class="group-vertical")
+      br
+      a(href="/lobby/newgame")
+        button.btn.btn-primary(type="submit") NewGame
+      br
+      a(href="/")
+        button.btn.btn-primary(type="button") Return
