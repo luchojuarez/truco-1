@@ -9,159 +9,20 @@ var Round = require("../models/round").round;
 var Card = require("../models/card").card;
 
 
+
+
 /* GET home page. */
 router.get('/', function (req, res) {
   res.render('index', { user : req.user});
 });
 
-router.get('/register', function(req, res) {
-    res.render('register', { });
-});
 
-router.post('/register', function(req, res) {
-    User.register(new User({ username : req.body.username }), req.body.password, function(err, user) {
-        if (err) {
-            return res.render('register', { user : user });
-        }
-
-        passport.authenticate('local')(req, res, function () {
-            res.redirect('/');
-        });
-    });
-});
-
-
-
-router.get('/login', function(req, res) {
-    res.render('login', { user : req.user});
-});
-
-router.post('/login', passport.authenticate('local'), function(req, res) {
-    res.redirect('/');
-});
 
 
 router.get('/logout', function(req, res) {
     req.logout();
     res.redirect('/');
 });
-
-
-router.get('/play',function (req,res) {
-    Game.load(req.query.gameID,function (err,game) {
-        if (err)
-            console.error(err);
-        else {
-	        currentGame = game;
-            restoreValues(currentGame);
-            res.render('play',{
-                gameID:req.body.gameID,
-                game:game,
-                gameID:game._id,
-                user:{u:req.user, p:game.player1},
-                guest:{u:guest, p:game.player2},
-                currentTurn:game.currentRound.currentTurn,
-                score:game.score,
-            })
-        }
-    })
-
-})
-
-router.post('/play',function (req,res) {
-})
-
-
-
-router.get('/newgame', function(req, res) {
-    getAllPlayers(function (err,players) {
-        if(err) console.error(err);
-        else {
-            res.render('newgame', {
-                list:players
-            });
-        }
-    })
-});
-
-router.post('/newgame', function(req, res) {
-    console.log("hello",req.body);
-    res.render("/play",{
-        user:{u:req.user},
-        guest:{u:req.oponente},
-
-    })
-});
-
-router.post('/changePlayer',function (req,res,next) {
-    var carta;
-    var jugada;
-    console.log('req.body:',req.body);
-    console.log('current',currentGame.currentRound.fsm.current);
-    console.log('transitions:',currentGame.currentRound.fsm.transitions());
-    if (!(undefined===req.body.playCard))
-        carta=req.body.playCard;
-    if (!(undefined===req.body.jugada))
-        jugada=req.body.jugada;
-
-    if (jugada){
-        console.log("Estado antes de jugar",currentGame.currentRound.currentState);
-        console.log("Trancisciones posibles;",currentGame.currentRound.fsm.transitions());
-        console.log('FSM.can ',jugada, currentGame.currentRound.fsm.can(jugada));
-        currentGame.play(currentGame.currentRound.currentTurn,jugada);
-        console.log("Estado despues de jugar",currentGame.currentRound.currentState);
-        next();
-    }
-    if (carta) {
-        if (actualValues.FSM.can('playCard')) {
-            carta=parseCard(carta);
-            console.log(currentGame.player1.cards);
-            console.log(currentGame.player2.cards);
-            currentGame.play(currentGame.currentRound.currentTurn,'playCard',carta);
-            next();
-        }else {
-            res.render(error,{message:'invalid'})
-        }
-    }
-
-}, function(req, res) {
-    //Aca se tendria que ver si termino el juego?
-    //Guardar el juego actualizado
-    if (currentGame.currentRound.currentState==='init') {
-        res.render('win',{
-            winner:currentGame.currentRound.currentTurn,
-            score:currentGame.score,
-            gameID:req.query.gameID
-        });
-    }
-
-    actualValues.player1 = currentGame.player1;
-    actualValues.player2 = currentGame.player2;
-    actualValues.board = currentGame.currentRound.board;
-    actualValues.score = currentGame.score;
-    currentGame.save(function(err, lastSaved) {
-        if (err) {
-            console.error(err);
-            return res.render('error', err);
-        }
-        if (currentGame.currentRound.lastPlay ==='envido' || currentGame.currentRound.lastPlay ==='truco'){
-            res.render('envidoOTruco',{
-                jugada:currentGame.currentRound.lastPlay,
-                jugador:currentGame.currentRound.currentTurn,
-                gameID:req.query.gameID
-            });
-        }
-        else {
-            res.render('changePlayer',{
-                player:lastSaved.currentRound.currentTurn,
-                gameID:req.query.gameID
-            });
-        }
-    });
-});
-
-
-
 function getAllPlayers(callback) {
     User.find()
     .exec(function (err, players) {

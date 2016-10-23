@@ -1,0 +1,22 @@
+extends layout
+
+block content
+  h1(class="header") Lobby
+  
+  #left-column.column
+    h3 #{user.username}
+      br
+      div(class="group-vertical")
+        br
+        a(href="/lobby/newgame")
+          button.btn.btn-primary(type="submit") NewGame
+        br
+        a(href="/")
+          button.btn.btn-primary(type="button") Return
+  
+  if gameList
+    #right-column.column
+      for game in gameList
+        form(role='form', action="/lobby/join?gameId=#{game.gameId}",method="post")
+          .form-group
+            button.btn.btn-primary #{game.name}
