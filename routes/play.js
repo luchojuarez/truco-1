@@ -18,16 +18,40 @@ function mustBeLogged(req,res,next) {
     next();
 }
 
-router.use(mustBeLogged);
-
-router.get('/', function(req,res,next) {
+function parseGame(req,res,next){
     gameId = req.query.gameId;
     Game.load(gameId,function (err,game) {
-        console.log(req.user._id.toString() === game.player2.user.toString());
-        console.log(req.user._id);
-        console.log(game.player1.user);
-        console.log(game.player2.user);
+        if (err) next(err);
+        var player;
+        var board;
+        if (req.user._id.toString() === game.player2.user.toString()) {
+            player = game.player2
+            board = [game.currentRound.board[1],game.currentRound.board[0]]
+        }
+        else {
+            player = game.player1
+            board = game.currentRound.board
+        }
+        console.log(player,board);
+        var objectGame = {
+            game:game,
+            board:board,
+            cartas:player.cards,
+            nickname:player.nickname,
+            user:req.user,
+            score:game.score,
+            plays:game.currentRound.fsm.transitions()
+        }
+
+        req.game = objectGame;
+        next();
     })
+}
+
+router.use(mustBeLogged);
+
+router.get('/',parseGame, function(req,res,next) {
+    res.render('play',req.game)
 })
 
 module.exports = router;

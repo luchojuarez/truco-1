@@ -56,12 +56,26 @@ function addPlayer(req,res,next) {
     })
 }
 
+function wait(req,res,next) {
+    Game.load(req.query.gameId,function (err,game) {
+        if (err) next(err)
+        if (!game.player2.user) {
+            res.render('waitroom',{})
+        }
+        next();
+    })
+}
+
 router.use(mustBeLogged);
 
 router.get('/', prepareGameList ,function(req, res, next) {
         res.render('lobby',{ user : req.user,
                              gameList : req.gameList});
 });
+
+router.get('/room',wait,function (req,res,next) {
+    res.redirect("/play?gameId="+req.query.gameId)
+})
 
 router.get('/newgame',function (req,res,next){
     var username = req.user.username;
@@ -75,8 +89,8 @@ router.get('/newgame',function (req,res,next){
             console.log("Error saving in routes/lobby",err)
             return res.redirect('/lobby');
         }
-        console.log("Game created succefully");
-        return res.redirect('/play?game='+savedgame._id);
+        console.log("Game created succefully ",savedgame._id);
+        res.redirect('/lobby/room?gameId='+savedgame._id);
     })
 });
 

@@ -2,49 +2,20 @@
 // y de la misma fotma con guest
 extends layout
 block content
-  h1 Gran truco Argentino
-<<<<<<< HEAD
-  #{playerId}
-=======
-  h2 #{game.name} 
-  #left-column.column
-    p acrual score round #{score}
-    if game.currentRound.board
-      h3 board
-    if (game.currentRound.board[0][0])
-      p cartas en la mesa de #{user.u.username}
-      p #{game.currentRound.board[0][0].show()}
-      if (game.currentRound.board[0][1])
-        p #{game.currentRound.board[0][1].show()}
-        if (game.currentRound.board[0][2])
-          p #{game.currentRound.board[0][2].show()}
-
-    if (game.currentRound.board[1][0])
-      p cartas en la mesa de #{guest.u.username}
-      p #{game.currentRound.board[1][0].show()}
-      if (game.currentRound.board[1][1])
-        p #{game.currentRound.board[1][1].show()}
-        if (game.currentRound.board[1][2])
-          p #{game.currentRound.board[1][2].show()}
-    
-  // es el turno del player 1
-  #right-column.column
-    - if (currentTurn=="player1")
-      p es el turno de #{user.u.username} puntos del envido #{user.p.envidoPoints}
-      
-      
-      form(role='form', action="/changePlayer?gameID="+gameID,method="post", style='max-width: 300px;')
-        .form-group
-          if user.p.cards[0]
-            input.form-control(value="#{user.p.cards[0].number} de #{user.p.cards[0].suit}",type="submit",name="playCard") 
-          if user.p.cards[1]
-            input.form-control(value="#{user.p.cards[1].number} de #{user.p.cards[1].suit}",type="submit",name="playCard")  
-          if user.p.cards[2]
-            input.form-control(value="#{user.p.cards[2].number} de #{user.p.cards[2].suit}",type="submit",name="playCard") 
-          br
-          br
-          - if (game.currentRound.fsm.can('truco')) 
-            input.form-control(value="truco",type="submit",name="jugada")
-          - if (game.currentRound.fsm.can('envido')) 
-            input.form-control(value="envido",type="submit",name="jugada")
->>>>>>> f7c2f902c4b3846a14795a735d4537e66de05c63
+  h1(class="header") Gran truco Argentino #{game.name}
+  p acrual score round #{score}
+  p #{game.player1.nickname} = #{score[0]}
+  p Cards
+  for card in cartas
+    form(role='form', action="#{card.show()afeshwemgo8vtrb8wham}",method="post")
+      .form-group
+        button.btn.btn-primary(value=card) #{card.show()}
+  
+  p Board
+  for card in board[0]
+    p #{card}
+  p lets's play
+  for play in plays
+    form(role="form", action="#",method="post")
+      .form-group
+        button.btn.btn-primary(value=play) #{play}
