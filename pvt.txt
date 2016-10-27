@@ -2,4 +2,4 @@ modifed
 asd
 
 Esta rama añade test para jugadas nuevas ?
-Branch para añadir jugadas del truco
+Nuevos cambios para jugadas de envido
