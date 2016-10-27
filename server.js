@@ -6,10 +6,13 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var mongoose = require('mongoose');
 var passport = require('passport');
+var flash = require('connect-flash');
 var LocalStrategy = require('passport-local').Strategy;
 
-var routes = require('./routes/index');
-var users = require('./routes/users');
+var index = require('./routes/index');
+    login = require('./routes/login');
+    register = require('./routes/register');
+    play = require('./routes/play');
 
 var app = express();
 
@@ -31,9 +34,13 @@ app.use(require('express-session')({
 }));
 app.use(passport.initialize());
 app.use(passport.session());
+app.use(flash());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', routes);
+app.use('/', index);
+app.use('/login',login);
+app.use('/register',register);
+app.use('/play',play);
 
 // passport config
 var User = require('./models/user');
