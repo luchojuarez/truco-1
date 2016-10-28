@@ -28,12 +28,13 @@ var GameSchema = new Schema({
   rounds:       { type : Array , default : [] },
   maxScore:		  { type : Number , default : 30},
   score:        [Number],
+  status:       String,
 });
 
 GameSchema.pre('save', function (next) {
   var game = this;
    game.currentRound.save(function(err, savedround) {
-        if (err) 
+        if (err)
             next(err);
         game.player1.save(function(err, p1) {
             if (err)
@@ -73,7 +74,7 @@ Game.prototype.play = function(player, action, value){
 
   if(this.currentRound.fsm.cannot(action))
     throw new Error("[ERROR] INVALID MOVE...");
- 
+
 
   this.currentRound.play(action, value);
 
@@ -92,7 +93,7 @@ Game.prototype.newRound = function(){
   //console.log("Preparing round number ",this.rounds.length+1,"...");
   this.currentRound = null;
   this.currentHand === undefined? this.currentHand= 'player1' : this.currentHand = switchPlayer(this.currentHand);
-  var round = new Round({game :this, currentTurn : this.currentHand});
+  var round = new Round({game :this, currentTurn : this.currentHand, status:"playing"});
 
   round.resetValues();
   round.deal();
@@ -106,6 +107,7 @@ Game.prototype.newRound = function(){
 Game.prototype.endGame = function () {
   this.currentRound = null;
   var ganador;
+  this.status = "finalized";
   this.score[0] >= this.maxScore ? ganador=this.player1 : ganador=this.player2;
   return ganador;
 };

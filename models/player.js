@@ -53,6 +53,16 @@ Player.prototype.getAll =function() {
         return
     })
 }
+PlayerSchema.loadByUsername= function(name){
+//Player.prototype.loadByUsername= function(){
+    return this.findOne({nickname : name })
+        .exec(function (err,tgame) {
+        if (err){
+            cb(err);
+            console.error("GAME NOT LOADED: ",err);
+        }
+    });
+}
 
 
 module.exports.player = Player;

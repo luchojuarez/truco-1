@@ -27,12 +27,19 @@ function prepareGameList(req,res,next) {
     Game.find({},function (err,gameArray) {
         if (err) return next(err);
         for (i in gameArray) {
-            gameList.push({
+            var gameShouldBeLoaded = {
                 gameId : gameArray[i]._id,
                 name : gameArray[i].name,
                 player1 : gameArray[i].player1,
                 player2 : gameArray[i].player2
-            })
+            };
+            console.log("<<<<<<<<<<<<<<<<<",req.user,"<<<<<<<<<<<<<<<<<<<<<<<<",gameShouldBeLoaded);
+            if (req.user===gameShouldBeLoaded.player1)
+                console.log("hola");
+                //console.log("<<<<<<<<<<<<<<<<<",req.user);
+            else{
+                gameList.push(gameShouldBeLoaded);
+            }
         }
         req.gameList = gameList;
         next();

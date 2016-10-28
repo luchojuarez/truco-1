@@ -31,9 +31,12 @@ describe('Game', function(){
         new Card(7, 'basto'),
         new Card(2, 'basto')
     ]);
-   
+
   });
 
+  it('Should have a "Status" property',function () {
+      expect(game).to.have.property("status")
+  })
 
   it('Should have two players', function(){
     expect(game).to.have.property('player1');
@@ -140,7 +143,7 @@ it('plays [envido,faltaenvido,no_quiero] should give 2 points to who ever chante
       game.play('player2', 'playCard',game.player2.cards[1]); //juega 2 basto
       expect(game.score[0]).to.equal(2);
     });
-  // here is TRUCO - NO QUIERO tested  
+  // here is TRUCO - NO QUIERO tested
   it('plays some cards then player2 chants truco and player 1 declines it, increase 1 in the score of player 2 ', function() {
     var cardsp1 = game.player1.cards;
 	  var cardsp2 = game.player2.cards;
