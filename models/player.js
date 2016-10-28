@@ -12,11 +12,7 @@ var PlayerSchema = new Schema({
     type: Schema.ObjectId,
     ref: 'User'
   },
-  nickname: {
-    type: String,
-    required: true,
-    unique: true,
-  },
+  nickname: String,
   cards : {
     type: Array , default: []
   },

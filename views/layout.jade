@@ -10,10 +10,3 @@ html(lang="en")
     block content
   script(src='http://code.jquery.com/jquery.js')
   script(src='http://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js')
-
-  if (user)
-    footer(class="footer")
-      if (gameWait)
-        a(href="") Lets play!
-      else
-        p Hi #{user.username}, no games waiting for you! 
