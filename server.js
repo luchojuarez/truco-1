@@ -17,6 +17,8 @@ var index = require('./routes/index');
     lobby = require('./routes/lobby');
 
 var app = express();
+var server = require('http').Server(app);
+var io = require('socket.io')(server);
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -38,12 +40,16 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use(flash());
 app.use(express.static(path.join(__dirname, 'public')));
-
+app.use(function(req, res, next){
+  res.io = io;
+  next();
+});
 app.use('/', index);
 app.use('/login',login);
 app.use('/register',register);
 app.use('/lobby',lobby);
 app.use('/play',play);
+
 
 // passport config
 var User = require('./models/user');
@@ -86,4 +92,4 @@ app.use(function(err, req, res, next) {
   });
 });
 
-module.exports = app;
+module.exports = {app: app, server: server};
