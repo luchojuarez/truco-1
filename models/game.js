@@ -30,37 +30,56 @@ var GameSchema = new Schema({
   score:        [Number],
 });
 
-GameSchema.pre('save', function (next) {
-  var game = this;
-   game.currentRound.save(function(err, savedround) {
-        if (err) 
-            next(err);
-        game.player1.save(function(err, p1) {
-            if (err)
-                next(err);
-            game.player2.save(function(err, p2) {
-                if (err)
-                    next(err);
-                next();
-            })
-        })
-    })
-})
+//Given an object instance and a sub doc name string that is a subschema of the object
+//it will try to save that subdocument if it exists
 
+function saveSubdoc(instance, subDocName) {
+  return new Promise(function(resolve, reject) {
+      if (instance[subDocName]) {
+        instance[subDocName].save(function(err, object) {
+          if (err) { return reject(err); }
+          return resolve(object);
+        });
+      } else {
+        return resolve(null);
+      }
+  })
+}
+
+
+
+GameSchema.pre('save', function (next) {
+   var game = this;
+   Promise.all([saveSubdoc(game,"currentRound"),saveSubdoc(game,"player1"),saveSubdoc(game,"player2")])
+    .then(function(values) {
+      //Maybe do something with the data if necesary
+      next();
+    },error => {
+      next(error);
+    })
+});
+
+
+//Populate non null fields
 GameSchema.statics.load = function (gameId,cb) {
-  return this.findOne({_id : gameId })
-        .populate("currentRound")
-        .populate("player1")
-        .populate("player2")
-        .exec(function (err,tgame) {
-            if (err){
-                cb(err);
-                console.error("GAME NOT LOADED: ",err);
-            }
-            tgame.recreate();
-            cb(err,tgame);
+  var gameId = arguments[0],fields,cb;
+  return this.findById(gameId, function(err, tgame) {
+    if (err) {
+      cb(err);
+      console.error("GAME NOT LOADED: ", err);
+    }
+    var fields = ["currentRound","player1","player2"];
+    _.remove(fields,function (prop) {
+      return (tgame[prop] == null);
     });
+    Game.populate(tgame,fields.join(" "),function(err,populatedGame) {
+      if (err) cb(err);
+      populatedGame.recreate();
+      cb(err,populatedGame);
+    })
+  })
 };
+
 
 var Game = mongoose.model('Game', GameSchema);
 
@@ -114,11 +133,17 @@ Game.prototype.endGame = function () {
 
 //Recrea los atributos del juego con los mismos valores
 Game.prototype.recreate = function () {
-  this.player1.cards = recreateCards(this.player1.cards);
-  this.player2.cards = recreateCards(this.player2.cards);
-  this.currentRound.board = _.map(this.currentRound.board,recreateCards);
-  this.currentRound.recreate();
-  this.currentRound.game = this;
+  if (this.player1) {
+    this.player1.cards = recreateCards(this.player1.cards);
+  }
+  if (this.player2) {
+    this.player2.cards = recreateCards(this.player2.cards);
+  }
+  if (this.currentRound) {
+    this.currentRound.board = _.map(this.currentRound.board,recreateCards);
+    this.currentRound.recreate();
+    this.currentRound.game = this;
+  }
 
 }
 
