@@ -4,7 +4,7 @@
  * Module dependencies.
  */
 
-var app = require('../server').app;
+var app = require('../server');
 var debug = require('debug')('truco:server');
 var http = require('http');
 
@@ -19,8 +19,14 @@ app.set('port', port);
  * Create HTTP server.
  */
 
-var server = require('../server').server;
+var server = http.createServer(app);
 
+/**
+ * Socket.io
+ */
+
+var io = app.io;
+io.attach( server );
 
 /**
  * Listen on provided port, on all network interfaces.
