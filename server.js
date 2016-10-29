@@ -44,6 +44,7 @@ app.use(function(req, res, next){
   res.io = io;
   next();
 });
+
 app.use('/', index);
 app.use('/login',login);
 app.use('/register',register);
