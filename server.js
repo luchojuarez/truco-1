@@ -8,17 +8,28 @@ var mongoose = require('mongoose');
 var passport = require('passport');
 var flash = require('connect-flash');
 var LocalStrategy = require('passport-local').Strategy;
+var socket_io    = require( "socket.io");
 
-var index = require('./routes/index');
+// Express
+var app = express();
+
+//Socket io
+var io  = socket_io();
+app.io           = io;
+
+// socket.io events
+io.on( "connection", function( socket )
+{
+    console.log( "A user connected" );
+});
+
+//Routes
+var index = require('./routes/index') (io);
     login = require('./routes/login');
     register = require('./routes/register');
     users = require('./routes/users');
     play = require('./routes/play');
     lobby = require('./routes/lobby');
-
-var app = express();
-var server = require('http').Server(app);
-var io = require('socket.io')(server);
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -40,11 +51,6 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use(flash());
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(function(req, res, next){
-  res.io = io;
-  next();
-});
-
 app.use('/', index);
 app.use('/login',login);
 app.use('/register',register);
@@ -88,9 +94,9 @@ if (app.get('env') === 'development') {
 app.use(function(err, req, res, next) {
   res.status(err.status || 500);
   res.render('error', {
-    message: err.message,
+    message: err.message, 
     error: {}
   });
 });
 
-module.exports = {app: app, server: server};
+module.exports = app;
