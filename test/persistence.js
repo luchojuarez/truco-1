@@ -20,9 +20,10 @@ describe('Persistence in the database', function(){
 //BFeach
   beforeEach(function(){
     game = new Game({name : "nuevoJuego",score : [0,0] });
-    game.player1 = new Player({ nickname: 'J' });
-    game.player2 = new Player({ nickname: 'X' });
-    game.newRound({game : game, currentTurn : game.currentHand });
+    player1 = new Player({ nickname: 'J' });
+    player2 = new Player({ nickname: 'X' });
+    game.setup({ player1 : player1, player2 : player2});
+    game.start();
 
     // Force to have the following cards and envidoPoints
     game.player1.setCards([
