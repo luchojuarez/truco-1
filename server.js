@@ -20,16 +20,17 @@ app.io           = io;
 // socket.io events
 io.on( "connection", function( socket )
 {
-    console.log( "A user connected" );
+  //Handle events from the user with the socket
+    //console.log( "A user connected" );
 });
 
 //Routes
 var index = require('./routes/index') (io);
-    login = require('./routes/login');
+    login = require('./routes/login') (io);
     register = require('./routes/register');
     users = require('./routes/users');
-    play = require('./routes/play');
-    lobby = require('./routes/lobby');
+    play = require('./routes/play') (io);
+    lobby = require('./routes/lobby') (io);
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -51,6 +52,8 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use(flash());
 app.use(express.static(path.join(__dirname, 'public')));
+
+// add routers
 app.use('/', index);
 app.use('/login',login);
 app.use('/register',register);

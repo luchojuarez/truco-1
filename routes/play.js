@@ -5,6 +5,7 @@
     + Parse the needed data to render the view (current player cards, current turn, board, points, etc)
     + Render the view
 */
+module.exports = function (io){
 var express = require('express');
 var passport = require('passport');
 var User = require('../models/user');
@@ -54,4 +55,6 @@ router.get('/',parseGame, function(req,res,next) {
     res.render('play',req.game)
 })
 
-module.exports = router;
+    return router;
+};
+
