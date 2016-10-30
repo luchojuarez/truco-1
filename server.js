@@ -18,18 +18,23 @@ var io  = socket_io();
 app.io           = io;
 
 // socket.io events
-io.on( "connection", function( socket )
-{
+io.on( "connection", function( socket ){
+    socket.on("usuario logeado",function (usuario) {
+        console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>< callback",usuario.username);
+    })
     console.log( "A user connected" );
 });
+//io.on("usuario logeado",function(socket) {
+//    console.log("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<asspdynofs7byogf8<<<<<<<<<<<<<");
+//})
 
 //Routes
 var index = require('./routes/index') (io);
-    login = require('./routes/login');
+    login = require('./routes/login')(io);
     register = require('./routes/register');
     users = require('./routes/users');
     play = require('./routes/play');
-    lobby = require('./routes/lobby');
+    lobby = require('./routes/lobby')(io);
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -94,7 +99,7 @@ if (app.get('env') === 'development') {
 app.use(function(err, req, res, next) {
   res.status(err.status || 500);
   res.render('error', {
-    message: err.message, 
+    message: err.message,
     error: {}
   });
 });

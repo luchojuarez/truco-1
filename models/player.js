@@ -19,6 +19,18 @@ var PlayerSchema = new Schema({
   envidoPoints : Number,
 });
 
+
+PlayerSchema.statics.loadByUsername= function(name,cb){
+//Player.prototype.loadByUsername= function(name){
+    return this.findOne({nickname : name })
+        .exec(function (err,tgame) {
+        if (err){
+            cb(err);
+            console.error("GAME NOT LOADED: ",err);
+        }
+    });
+}
+
 var Player = mongoose.model('Player', PlayerSchema);
 
 
@@ -52,16 +64,6 @@ Player.prototype.getAll =function() {
     .exec(function() {
         return
     })
-}
-PlayerSchema.loadByUsername= function(name){
-//Player.prototype.loadByUsername= function(){
-    return this.findOne({nickname : name })
-        .exec(function (err,tgame) {
-        if (err){
-            cb(err);
-            console.error("GAME NOT LOADED: ",err);
-        }
-    });
 }
 
 

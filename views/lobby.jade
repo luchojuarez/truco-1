@@ -14,9 +14,17 @@ block content
         a(href="/")
           button.btn.btn-primary(type="button") Return
   
-  if gameList
-    #right-column.column
-      for game in gameList
-        form(role='form', action="/lobby/join?gameId=#{game.gameId}",method="post")
-          .form-group
-            button.btn.btn-primary #{game.name}
+
+
+  script(src="/socket.io/socket.io.js")
+  
+  script.
+    var socket = io();
+    socket.on("juego nuevo",function (juego) {
+        console.log("sfmighevheybueymsiuyif");
+        $("li").append($("<li>").text(juego.name));
+    })
+
+  ul(id="gamelist") game list
+    li
+  
