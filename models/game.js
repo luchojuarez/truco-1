@@ -16,6 +16,13 @@ var Player = playerModel.player;
 var Round  = roundModel.round;
 var Schema = mongoose.Schema;
 
+var state = {
+  UNSTARTED : "unstarted",
+  STARTED : "started" ,
+  ENDED : "ended",
+  ABORTED : "abort"
+};
+
 /*
  * Game Schema
  */
@@ -28,6 +35,8 @@ var GameSchema = new Schema({
   rounds:       { type : Array , default : [] },
   maxScore:		  { type : Number , default : 30},
   score:        [Number],
+  status:       { type :String , default : state.UNSTARTED },
+  const:        { type: Object, default : state }
 });
 
 //Given an object instance and a sub doc name string that is a subschema of the object
@@ -43,7 +52,7 @@ function saveSubdoc(instance, subDocName) {
       } else {
         return resolve(null);
       }
-  })
+  });
 }
 
 
@@ -56,16 +65,16 @@ GameSchema.pre('save', function (next) {
       next();
     },error => {
       next(error);
-    })
+    });
 });
 
 
 //Populate non null fields
 GameSchema.statics.load = function (gameId,cb) {
-  var gameId = arguments[0],fields,cb;
-  return this.findById(gameId, function(err, tgame) {
+  var gameId = arguments[0], fields, cb;
+  this.findById(gameId, function(err, tgame) {
     if (err) {
-      cb(err);
+      cb(err,false);
       console.error("GAME NOT LOADED: ", err);
     }
     var fields = ["currentRound","player1","player2"];
@@ -76,17 +85,43 @@ GameSchema.statics.load = function (gameId,cb) {
       if (err) cb(err);
       populatedGame.recreate();
       cb(err,populatedGame);
-    })
-  })
+    });
+  });
 };
 
 
+
 var Game = mongoose.model('Game', GameSchema);
+
+Game.prototype.setup = function (opts) {
+  this.name = opts.name || this.name ||"Partida de truco";
+  this.player1 = opts.player1 || this.player1;
+  this.player2 = opts.player2 || this.player2;
+  this.score = opts.score || this.score || [0,0];
+  this.maxScore = opts.maxScore || this.maxScore;
+  this.status = opts.status || this.status || state.UNSTARTED;
+};
+
+
+Game.prototype.start = function () {
+  if (gameIsRunable && this.status == state.UNSTARTED) {
+    this.newRound();
+    this.status = state.STARTED;
+    return true;
+  } else {return false;}
+};
+
+Game.prototype.abort = function () {
+  this.status = state.ABORTED;
+}
 
 /*
  * Check if it's valid move and play in the current round
  */
 Game.prototype.play = function(player, action, value){
+  if(this.state == state.ABORTED)
+    throw new Error("[ERROR] GAME ABORTED...");
+
   if(this.currentRound.currentTurn !== player)
     throw new Error("[ERROR] INVALID TURN...");
 
@@ -103,18 +138,12 @@ Game.prototype.play = function(player, action, value){
  * Create and return a new Round to this game
  */
 Game.prototype.newRound = function(){
-  /*if (this.currentRound != null) {
-    console.log("Round results: ",this.currentRound.resultados);
-    console.log("Board: ",this.currentRound.board);
-  };*/
-  //console.log("GameScore:",this.score);
-  //console.log("Preparing round number ",this.rounds.length+1,"...");
   this.currentRound = null;
   this.currentHand === undefined? this.currentHand= 'player1' : this.currentHand = switchPlayer(this.currentHand);
   var round = new Round({game :this, currentTurn : this.currentHand});
 
   round.resetValues();
-  round.deal();
+  if (this.status == state.STARTED) {round.deal();}
   this.currentRound = round;
   this.rounds.push(round);
 }
@@ -126,6 +155,7 @@ Game.prototype.endGame = function () {
   this.currentRound = null;
   var ganador;
   this.score[0] >= this.maxScore ? ganador=this.player1 : ganador=this.player2;
+  this.status = state.ENDED;
   return ganador;
 };
 
@@ -145,21 +175,25 @@ Game.prototype.recreate = function () {
     this.currentRound.game = this;
   }
 
-}
+};
 
 Game.prototype.hasEnded = function () {
   return (this.score[0] >= this.maxScore || this.score[1] >= this.maxScore);
-}
+};
 /*
  * returns the oposite player
  */
 function switchPlayer(player) {
   return "player1" === player ? "player2" : "player1";
-};
+}
 
 function recreateCards (cardarray) {
   return _.map(cardarray, function (card) {
     return new Card(card.number,card.suit);
   });
-};
+}
+
+function gameIsRunable () {  
+  return (this.payer1 !== null && this.player2 !== null);
+}
 module.exports.game = Game;
