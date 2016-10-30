@@ -8,15 +8,29 @@ var mongoose = require('mongoose');
 var passport = require('passport');
 var flash = require('connect-flash');
 var LocalStrategy = require('passport-local').Strategy;
+var socket_io    = require( "socket.io");
 
-var index = require('./routes/index');
-    login = require('./routes/login');
+// Express
+var app = express();
+
+//Socket io
+var io  = socket_io();
+app.io           = io;
+
+// socket.io events
+io.on( "connection", function( socket )
+{
+  //Handle events from the user with the socket
+    //console.log( "A user connected" );
+});
+
+//Routes
+var index = require('./routes/index') (io);
+    login = require('./routes/login') (io);
     register = require('./routes/register');
     users = require('./routes/users');
-    play = require('./routes/play');
-    lobby = require('./routes/lobby');
-
-var app = express();
+    play = require('./routes/play') (io);
+    lobby = require('./routes/lobby') (io);
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -39,11 +53,13 @@ app.use(passport.session());
 app.use(flash());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// add routers
 app.use('/', index);
 app.use('/login',login);
 app.use('/register',register);
 app.use('/lobby',lobby);
 app.use('/play',play);
+
 
 // passport config
 var User = require('./models/user');
@@ -81,7 +97,7 @@ if (app.get('env') === 'development') {
 app.use(function(err, req, res, next) {
   res.status(err.status || 500);
   res.render('error', {
-    message: err.message,
+    message: err.message, 
     error: {}
   });
 });
