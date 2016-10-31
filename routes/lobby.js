@@ -29,8 +29,8 @@ module.exports = function (io){
 
     function mustBeLogged(req,res,next) {
         if(!req.user) {
-            return res.redirect('/login');
             io.emit('user logged');
+            return res.redirect('/login');
         }
         next();
     }
@@ -105,8 +105,7 @@ module.exports = function (io){
                 name:savedgame.name,
             }
             gameList.push(game);
-            io.emit("load games successful",{game:game,list:gameList,id:io.id})
-            console.log(gameList);
+            io.emit("load games successful",{game:game,list:gameList})
             res.redirect('/lobby/room?gameId='+savedgame._id);
         })
     });

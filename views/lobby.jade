@@ -28,15 +28,15 @@ block content
         var g = document.getElementById("game");
         gameList.forEach(load);
         function load(item,index) {
-            g.innerHTML = g.innerHTML+'<button type="button" class="btn btn-primary" value="'+gameList[index].id.toString()+'">'+gameList[index].name+'</button></a><br />'
+            g.innerHTML = g.innerHTML+'<button onclick="chooseGame('+index+')" type="button" class="btn btn-primary">'+games[index].name+'</button><br>'
         }
     }
     
+    function chooseGame(index) {
+        window.alert(games[index].id);
+    }
+    
     $( document ).ready(function() {
-        $( ".btn btn-primary" ).click(function() {
-            window.alert("hole")
-            console.log("hola");
-        });
         socket.emit('load games', {id: socket.id });
     });
     
@@ -47,10 +47,10 @@ block content
     
     
     socket.on("new game",function (data) {
+        window.alert("asfdag")
+        console.log(data.list);
         updateGames(data.list)
     })
     
   #right-column.column
-    form(role='form',method="post", style='max-width: 300px;')
-      .form-group
-        a(id = "game")
+    a(id = "game")
