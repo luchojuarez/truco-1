@@ -1,4 +1,5 @@
 var express = require('express');
+var session = require('express-session');
 var path = require('path');
 var favicon = require('serve-favicon');
 var logger = require('morgan');
@@ -9,23 +10,43 @@ var passport = require('passport');
 var flash = require('connect-flash');
 var LocalStrategy = require('passport-local').Strategy;
 var socket_io    = require( "socket.io");
+var passportSocketIo = require("passport.socketio");
 
 // Express
 var app = express();
+var sessionStore = new session.MemoryStore();
 
 //Socket io
 var io  = socket_io();
-app.io           = io;
+app.io  = io;
+io.use(passportSocketIo.authorize({
+  cookieParser: cookieParser,
+  store: sessionStore,
+  key:          'connect.sid',      
+  secret:       'keyboard cat',
+  success:      onAuthorizeSuccess,  // *optional* callback on success - read more below
+  fail:         onAuthorizeFail,     // *optional* callback on fail/error - read more below
+}));
 
-// socket.io events
-io.on( "connection", function( socket )
-{
-  //Handle events from the user with the socket
-    //console.log( "A user connected" );
-});
+
+function onAuthorizeSuccess(data, accept){
+  console.log('successful connection to socket.io');
+  accept();
+}
+
+function onAuthorizeFail(data, message, error, accept){
+  if(error)
+    accept(new Error(message));
+  console.log('failed connection to socket.io:', message);
+  accept();
+  // this error will be sent to the user as a special error-package
+  // see: http://socket.io/docs/client-api/#socket > error-object
+}
+
+
 
 //Routes
-var index = require('./routes/index') (io);
+var index = require('./routes/index') (io,passportSocketIo);
     login = require('./routes/login') (io);
     register = require('./routes/register');
     users = require('./routes/users');
@@ -43,15 +64,18 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(passport.initialize());
-app.use(require('express-session')({
+app.use(session({
     secret: 'keyboard cat',
     resave: false,
+    store: sessionStore,
     saveUninitialized: false
 }));
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(flash());
 app.use(express.static(path.join(__dirname, 'public')));
+
+
 
 // add routers
 app.use('/', index);
