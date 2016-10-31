@@ -14,9 +14,10 @@ module.exports = function (io) {
         res.render('login', { user : req.user });
     });
 
-    router.post('/',passport.authenticate('local'), function (req,res) {
+    router.post('/',passport.authenticate('local'), function (req,res,next) {
             io.emit("usuario logeado",req.user)
             res.redirect("/lobby");
+            //next();
         });
 
 return router

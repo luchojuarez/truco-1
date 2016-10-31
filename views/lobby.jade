@@ -17,14 +17,40 @@ block content
 
 
   script(src="/socket.io/socket.io.js")
+  script(src="https://code.jquery.com/jquery-1.10.2.js")
   
   script.
     var socket = io();
-    socket.on("juego nuevo",function (juego) {
-        console.log("sfmighevheybueymsiuyif");
-        $("li").append($("<li>").text(juego.name));
+    var games=[];
+    
+    function updateGames(gameList) {
+        games=gameList;
+        var g = document.getElementById("game");
+        gameList.forEach(load);
+        function load(item,index) {
+            g.innerHTML = g.innerHTML+'<button type="button" class="btn btn-primary" value="'+gameList[index].id.toString()+'">'+gameList[index].name+'</button></a><br />'
+        }
+    }
+    
+    $( document ).ready(function() {
+        $( ".btn btn-primary" ).click(function() {
+            window.alert("hole")
+            console.log("hola");
+        });
+        socket.emit('load games', {id: socket.id });
+    });
+    
+    
+    socket.on('load games successful',function (data) {
+        updateGames(data.list)
     })
-
-  ul(id="gamelist") game list
-    li
-  
+    
+    
+    socket.on("new game",function (data) {
+        updateGames(data.list)
+    })
+    
+  #right-column.column
+    form(role='form',method="post", style='max-width: 300px;')
+      .form-group
+        a(id = "game")

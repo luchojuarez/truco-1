@@ -16,37 +16,25 @@ module.exports = function (io){
     var Player = require("../models/player").player;
 
     var usersList=[];
+    var gameList=[];
 
-    
+    io.on('connection', function(socket) {
+        // Use socket to communicate with this particular client only, sending it it's own id
+        socket.emit('load games successful',{list:gameList,id:socket.id});
+    });
 
+    io.on('load games',function (socket) {
+        socket.emit('load games successful',{list:gameList,id:socket.id});
+    })
 
     function mustBeLogged(req,res,next) {
-        if(!req.user) return res.redirect('/login');
+        if(!req.user) {
+            return res.redirect('/login');
+            io.emit('user logged');
+        }
         next();
     }
 
-    function prepareGameList(req,res,next) {
-        gameList = [];
-        Game.find({},function (err,gameArray) {
-            if (err) return next(err);
-            for (i in gameArray) {
-                var gameShouldBeLoaded = {
-                    gameId : gameArray[i]._id,
-                    name : gameArray[i].name,
-                    player1 : gameArray[i].player1,
-                    player2 : gameArray[i].player2
-                };
-                if (req.user===gameShouldBeLoaded.player1)
-                console.log("hola");
-                //console.log("<<<<<<<<<<<<<<<<<",req.user);
-                else{
-                    gameList.push(gameShouldBeLoaded);
-                }
-            }
-            req.gameList = gameList;
-            next();
-        })
-    }
 
     function addPlayer(req,res,next) {
         var gameId = req.query.gameId;
@@ -65,6 +53,19 @@ module.exports = function (io){
         })
     }
 
+
+    router.use(mustBeLogged);
+
+
+
+    router.get('/' ,function(req, res, next) {
+        res.render('lobby',{
+            user : req.user
+        });
+        //next();
+    });
+
+
     function wait(req,res,next) {
         Game.load(req.query.gameId,function (err,game) {
             if (err) next(err)
@@ -74,33 +75,23 @@ module.exports = function (io){
             next();
         })
     }
-
-    function countUser(req,res,next) {
-        io.sockets.on("usuario logeado",function (user) {
-            usersList.push(user);
-            console.log("<<<<<<<<<<<<<<<<callback",usersList);
+    router.get('/room',function (req,res,next) {
+        Game.load(req.query.gameId,function (err,game) {
+            if (err) next(err)
+            if (!game.player2.user) {
+                res.render('waitroom',{})
+            }else {
+                res.redirect("/play?gameId="+req.query.gameId)
+            }
+            //next();
         })
-        io.emit("usuario logeado")
-        next();
-    }
-    router.use(mustBeLogged);
-
-
-
-    router.get('/' ,function(req, res, next) {
-        res.render('lobby',{
-            user : req.user
-        });
-    });
-
-    router.get('/room',wait,function (req,res,next) {
-        res.redirect("/play?gameId="+req.query.gameId)
     })
+
 
     router.get('/newgame',function (req,res,next){
         var username = req.user.username;
         var user = req.user;
-        game = new Game({name : "Nuevo juego de " + username, score : [0,0] });
+        game = new Game({name : "new game by " + username, score : [0,0] });
         game.player1 = new Player({ nickname: username, user: user});
         game.player2 = new Player({ nickname: "insertUser", user: null });
         game.newRound({game : game, currentTurn : game.currentHand });
@@ -109,17 +100,19 @@ module.exports = function (io){
                 console.log("Error saving in routes/lobby",err)
                 return res.redirect('/lobby');
             }
-            console.log("Game created succefully ",savedgame._id);
             var game = {
                 id: savedgame._id,
                 name:savedgame.name,
             }
-            io.emit("juego nuevo",game)
+            gameList.push(game);
+            io.emit("load games successful",{game:game,list:gameList,id:io.id})
+            console.log(gameList);
             res.redirect('/lobby/room?gameId='+savedgame._id);
         })
     });
 
     router.post('/join',addPlayer,function (req,res,next) {
+        io.emit("let's play",{gameId:req.query.gameId})
         res.redirect("/play?gameId="+req.query.gameId)
     })
     return router;

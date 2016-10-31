@@ -1,3 +1,10 @@
 extends layout
 block content
   h1(class="header") Waiting for opponent
+
+  script(src="/socket.io/socket.io.js")
+  script.
+    var socket = io();
+    socket.on("let's play",function (gameId) {
+        res.redirect("/play?gameId="+gameId)
+    })
