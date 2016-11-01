@@ -1,10 +1,10 @@
 var utils = require('./utils');
 var mongoose = require('mongoose');
 var expect = require("chai").expect;
-var playerModel = require("../models/player");
-var gameModel   = require("../models/game");
-var roundModel  = require("../models/round");
-var gameCard    = require("../models/card");
+var playerModel = require("../app/game/models/player");
+var gameModel   = require("../app/game/models/game");
+var roundModel  = require("../app/game/models/round");
+var gameCard    = require("../app/game/models/card");
 
 var Round = roundModel.round;
 var Game = gameModel.game;
@@ -31,7 +31,7 @@ describe('Game', function(){
         new Card(7, 'basto'),
         new Card(2, 'basto')
     ]);
-   
+
   });
 
 
@@ -140,7 +140,7 @@ it('plays [envido,faltaenvido,no_quiero] should give 2 points to who ever chante
       game.play('player2', 'playCard',game.player2.cards[1]); //juega 2 basto
       expect(game.score[0]).to.equal(2);
     });
-  // here is TRUCO - NO QUIERO tested  
+  // here is TRUCO - NO QUIERO tested
   it('plays some cards then player2 chants truco and player 1 declines it, increase 1 in the score of player 2 ', function() {
     var cardsp1 = game.player1.cards;
 	  var cardsp2 = game.player2.cards;

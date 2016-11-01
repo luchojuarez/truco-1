@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <!-- Use the 'title property to render a page title' -->
+  <title><%= title%> </title>
+</head>
+<body>
+    <!-- Use the 'title' property to render a title element -->
+  <h1> <%= title %></h1>
+  <% if (userFullName) { %>
+      <h2> Hello <%=userFullName%> </h2>
+      <a href="/signout">Sign out</a>
+      <a href="">New Game</a>
+      <!-- IF the user has a game to continue
+      <a href="#">continue</a>
+      --> 
+  <% } else { %>
+  <a href="/signup">Signup</a>
+  <a href="/signin">Signin</a>
+<% } %>
+</body>
+</html>

@@ -1,0 +1,20 @@
+extends layout
+
+block content
+  h1(class="header") Truco
+  // Interface jugador 1
+  if (!user)
+    a(href="/login")
+      button.btn.btn-primary(type="button") Login 
+    a(href="/register")
+      button.btn.btn-primary(type="button") Register 
+  if (user)
+    h3 #{user.username}
+      br
+      div(class="group-vertical")
+        br
+        a(href="/logout")
+          button.btn.btn-primary(type="submit" href="/logout") Logout
+        br
+        a(href="/lobby")
+          button.btn.btn-primary(type="button") Lobby

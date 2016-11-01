@@ -1,5 +1,5 @@
 var expect = require("chai").expect;
-var cardModel = require("../models/card.js");
+var cardModel = require("../app/game/models/card.js");
 
 var Card = cardModel.card;
 
@@ -29,7 +29,7 @@ describe('Card', function() {
     var c = new Card(1, 'espada');
     var x = new Card(4, 'basto');
     var y = new Card(4, 'oro');
-         
+
     describe("when this is better than argument", function(){
       it("should returns 1", function(){
         expect(c.confront(x)).to.be.eq(1);
@@ -49,4 +49,3 @@ describe('Card', function() {
     });
   });
 });
-

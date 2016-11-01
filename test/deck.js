@@ -1,5 +1,5 @@
 var expect = require("chai").expect;
-var deckModel = require("../models/deck");
+var deckModel = require("../app/game/models/deck");
 
 var Deck = deckModel.deck;
 
@@ -10,4 +10,3 @@ describe('Deck', function() {
   });
 
 });
-

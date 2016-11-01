@@ -1,38 +1,88 @@
-// Set the 'NODE_ENV' variable
-process.env.NODE_ENV = process.env.NODE_ENV || 'development'
-
-// Load the module dependecies
-var mongoose = require('./config/mongoose'),
-    express = require('./config/express');
-   passport = require('./config/passport');
-
-
-// Create a new Mongoose connection instance
-var db = mongoose();
-
-
-// Create a new Express application instance
-var app = express();
+// Load the module dependencies
+var config = require('./config'),
+		http = require('http'),
+		socketio = require('socket.io');
+	  express = require('express'),
+	  morgan = require('morgan'),
+	  compress = require('compression'),
+	  bodyParser = require('body-parser'),
+	  methodOverride = require('method-override'),
+	  session = require('express-session'),
+		MongoStore = require('connect-mongo')(session),
+  	flash = require('connect-flash'),
+    passport = require('passport');
 
 
-// configure the passport middleware
-var passport = passport();
+// Define the Express configuration method
+module.exports = function(){
+  //  Create a new Express application instance
+	var app = express();
+
+	// Create a new HTTP server
+	var server = http.createServer(app);
+
+	// Create a new Socket.io server
+	var io = socketio.listen(server); // ESTO ES LO QUE PREGUNTO
 
 
-//  Use the 'Express' application instance to listen to the '3000' port
-app.listen(3000);
+
+// Use the 'NODE_ENV' variable to activate the 'morgan' logger or 'compress' middleware
+  if(process.env.NODE_ENV === 'development') {
+    app.use(morgan('dev'));
+  }
+  else if ( process.env.NODE_ENV === 'production') {
+    app.use(compress());
+  }
+
+  //  Use the 'body-parser' and 'method-override' middleware functions
+  app.use(bodyParser.urlencoded({
+            extended: true
+  }));
+  app.use(bodyParser.json());
+  app.use(methodOverride());
+
+	// Configure the MongoDB session storage
+var mongoStore = new MongoStore({
+			db: db.connection.db
+	});
 
 
-// Log the server status to the console
-console.log('Server running at http://localhost:3000/');
+	// Configure the 'session' middleware
+	app.use(session({
+		saveUninitialized: true,
+		resave: true,
+		secret: config.sessionSecret,
+		store: mongoStore
+	}));
 
-//console.log(process.env.NODE_ENV);
+  //  Set the application view engine and 'views' folder
+  app.set('views', './app/views');
+	app.set('view engine', 'ejs');
 
-// Use the module.exports property to expose our Express application instance for external usage
-module.exports = app;
+
+  //  Configure the flash messages middleware
+   app.use(flash());
+
+  //  Configure the passport middleware
+  app.use(passport.initialize());
+  app.use(passport.session());
+
+  //  Load the routing files
+  require('../app/routes/index.server.routes.js')(app);
+  require('../app/routes/users.server.routes.js')(app);
+	require('../app/routes/newgame.server.routes.js')(app);
+
+  //  Configure static file serving
+  app.use(express.static('./public'));
+
+  //  Return the Express application instance
+  return app;
+}
+
+
+
 
 /*
-
 var express = require('express');
 var path = require('path');
 var favicon = require('serve-favicon');

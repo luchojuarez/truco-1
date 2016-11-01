@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <!-- Use the 'title property to render a page title' -->
+  <title> NOW PLAYING TRUCO</title>
+</head>
+<body>
+    <!-- Use the 'title' property to render a title element -->
+  <h1> PLAY TRUCO</h1>
+  <% if (userFullName) { %>
+      <h2> Hello <%=userFullName%> </h2>
+      <a href="#">Abandonar</a>
+  <% } else { %>
+  <a href="/signup">Signup</a>
+  <a href="/signin">Signin</a>
+<% } %>
+</body>
+</html>

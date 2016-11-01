@@ -1,0 +1,21 @@
+// en user.p tengo el objeto Player y en user.u el objeto User
+// y de la misma fotma con guest
+extends layout
+block content
+  h1(class="header") Gran truco Argentino #{game.name}
+  p acrual score round #{score}
+  p #{game.player1.nickname} = #{score[0]}
+  p Cards
+  for card in cartas
+    form(role='form', action="#{card.show()afeshwemgo8vtrb8wham}",method="post")
+      .form-group
+        button.btn.btn-primary(value=card) #{card.show()}
+  
+  p Board
+  for card in board[0]
+    p #{card}
+  p lets's play
+  for play in plays
+    form(role="form", action="#",method="post")
+      .form-group
+        button.btn.btn-primary(value=play) #{play}

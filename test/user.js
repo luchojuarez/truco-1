@@ -1,6 +1,6 @@
 var utils = require('./utils');
 var expect = require("chai").expect;
-var User = require("../models/user.js");
+var User = require("../app/game/models/user.js");
 
 describe('Users: models', function () {
   describe('#create()', function () {

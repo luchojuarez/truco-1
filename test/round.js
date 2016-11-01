@@ -1,9 +1,9 @@
 var utils = require('./utils');
 var expect = require("chai").expect;
-var card_model   = require("../models/card");
-var player_model = require("../models/player");
-var game_model   = require("../models/game");
-var round_model   = require("../models/round");
+var card_model   = require("../app/game/models/card");
+var player_model = require("../app/game/models/player");
+var game_model   = require("../app/game/models/game");
+var round_model   = require("../app/game/models/round");
 
 var Game  = game_model.game;
 var Round = round_model.round;
@@ -34,5 +34,5 @@ describe('Round', function(){
       expect(game.player2.cards.length).to.be.equal(3);
     });
   });
- 
+
 });
