@@ -5,7 +5,7 @@
   "main": "engine.js",
   "scripts": {
     "test": "fuser -k 3000/tcp;NODE_ENV=test mocha --reporter spec; plato -r -d report models",
-    "start": "fuser -k 3000/tcp;NODE_ENV=development node ./bin/www ; x-www-browser http://localhost:3000"
+    "start": "fuser -k 3000/tcp;NODE_ENV=development node ./bin/www"
   },
   "author": "me",
   "license": "MIT",
@@ -31,6 +31,7 @@
     "passport-local-mongoose": "^4.0.0",
     "passport.socketio": "^3.7.0",
     "serve-favicon": "~2.3.0",
-    "socket.io": "^1.5.1"
+    "socket.io": "^1.5.1",
+    "pubsub-js":"1.5.4"
   }
 }
