@@ -115,3 +115,4 @@ module.exports = function (io){
         res.redirect("/play?gameId="+req.query.gameId)
     })
     return router;
+}
