@@ -14,9 +14,43 @@ block content
         a(href="/")
           button.btn.btn-primary(type="button") Return
   
-  if gameList
-    #right-column.column
-      for game in gameList
-        form(role='form', action="/lobby/join?gameId=#{game.gameId}",method="post")
-          .form-group
-            button.btn.btn-primary #{game.name}
+
+
+  script(src="/socket.io/socket.io.js")
+  script(src="https://code.jquery.com/jquery-1.10.2.js")
+  
+  script.
+    var socket = io();
+    var games=[];
+    
+    function updateGames(gameList) {
+        games=gameList;
+        var g = document.getElementById("game");
+        gameList.forEach(load);
+        function load(item,index) {
+            g.innerHTML = g.innerHTML+'<button onclick="chooseGame('+index+')" type="button" class="btn btn-primary">'+games[index].name+'</button><br>'
+        }
+    }
+    
+    function chooseGame(index) {
+        window.alert(games[index].id);
+    }
+    
+    $( document ).ready(function() {
+        socket.emit('load games', {id: socket.id });
+    });
+    
+    
+    socket.on('load games successful',function (data) {
+        updateGames(data.list)
+    })
+    
+    
+    socket.on("new game",function (data) {
+        window.alert("asfdag")
+        console.log(data.list);
+        updateGames(data.list)
+    })
+    
+  #right-column.column
+    a(id = "game")

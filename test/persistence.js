@@ -60,7 +60,7 @@ describe('Persistence in the database', function(){
     //Keep the old card count in the board
     var pretestCardsCount = game.currentRound.board[0].length + game.currentRound.board[1].length
     //just another move
-    game.play('player1', 'playCard',game.player1.cards[0]); 
+    game.play('player1', 'playCard',game.player1.cards[0]);
         player1 = game.player1;
         player2 = game.player2;
 		game.save(function (err,thegame) {
@@ -94,7 +94,7 @@ describe('Persistence in the database', function(){
     game.play('player2', 'playCard',game.player2.cards[1]); //juega 2 basto
     game.play('player2','envido');
     game.play('player1','quiero');
-    game.play('player2','playCard',game.player2.cards[0]);             
+    game.play('player2','playCard',game.player2.cards[0]);
 
     game.save(function (err,savedgame) {
         if (err) {
@@ -179,5 +179,3 @@ describe('Persistence in the database', function(){
 });
 
 });
-
-
