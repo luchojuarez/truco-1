@@ -18,17 +18,22 @@ block content
   
   script.
     var games=[];
-    
     function updateGames(gameList) {
         games=gameList;
         var g = document.getElementById("game");
-        gameList.forEach(load);
+        g.innerHTML = "<br>";
+        games.forEach(load);
         function load(item,index) {
             g.innerHTML = g.innerHTML+'<button onclick="chooseGame('+index+')" type="button" class="btn btn-primary">'+games[index].name+'</button><br>'
         }
     }
     
     function chooseGame(index) {
+        var usuario = #{user}._id;
+        socket.emit("let's play",{
+            gameId:games[index].id,
+            user:#{user},
+        })
         window.alert(games[index].id);
     }
     
@@ -42,11 +47,5 @@ block content
     })
     
     
-    socket.on("new game",function (data) {
-        window.alert("asfdag")
-        console.log(data.list);
-        updateGames(data.list)
-    })
-    
   #right-column.column
-    a(id = "game")
+    h1(id="game") hola

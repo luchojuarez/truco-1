@@ -8,6 +8,7 @@ RESTRICTIONS:
 
 module.exports = function (io){
     var express = require('express');
+    var PubSub = require('pubsub-js');
     var passport = require('passport');
     var User = require('../models/user');
     var router = express.Router();
@@ -24,7 +25,7 @@ module.exports = function (io){
     });
 
     io.on('load games',function (socket) {
-        socket.emit('load games successful',{list:gameList,id:socket.id});
+        io.emit('load games successful',{list:gameList,id:socket.id});
     })
 
     function mustBeLogged(req,res,next) {
@@ -35,23 +36,24 @@ module.exports = function (io){
         next();
     }
 
-
-    function addPlayer(req,res,next) {
-        var gameId = req.query.gameId;
-        var usuario = req.user;
+    io.on("let's play",function (socket,data) {
+        var gameId = data.gameId;
+        var usuario = data.user;
         Game.load(gameId,function (err,game) {
             if (err) {
                 res.render('error',err);
             }
-            game.player2.user = req.user;
-            game.player2.nickname = req.user.username;
+            game.player2.user = usuario.user;
+            game.player2.nickname = usuario.user.username;
             game.save(function (err,game){
                 if (err) next(err);
+                PubSub.subscribe(gameId);
                 console.log("Jugador ",game.player2.nickname,"agregado");
-                next();
             })
         })
-    }
+        res.redirect("/play?gameId="+req.query.gameId)
+    })
+
 
 
     router.use(mustBeLogged);
@@ -100,9 +102,15 @@ module.exports = function (io){
                 console.log("Error saving in routes/lobby",err)
                 return res.redirect('/lobby');
             }
+            // creo un evento
+            var nuevoCanal = function( msg, data ){
+                console.log( msg, data );
+            };
+            var token = PubSub.subscribe( savedgame._id, nuevoCanal);
             var game = {
                 id: savedgame._id,
                 name:savedgame.name,
+                token:token,
             }
             gameList.push(game);
             io.emit("load games successful",{game:game,list:gameList})
@@ -110,7 +118,7 @@ module.exports = function (io){
         })
     });
 
-    router.post('/join',addPlayer,function (req,res,next) {
+    router.post('/join',function (req,res,next) {
         io.emit("let's play",{gameId:req.query.gameId})
         res.redirect("/play?gameId="+req.query.gameId)
     })
