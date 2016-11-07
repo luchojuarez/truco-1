@@ -23,15 +23,6 @@ module.exports = function (io){
         // Use socket to communicate with this particular client only, sending it it's own id
         socket.emit('load games successful',{list:gameList,id:socket.id});
 
-        socket.on("let's play",function (data) {
-        console.log("Se conecto un guacho al juego");
-        var gameId = data.gameId;
-        var usuario = data.user;
-
-        //io.emit("gameId="+gameId,{id:socket.id});
-
-        //res.redirect("/play?gameId="+req.query.gameId)
-        })
     });
 
     io.on('load games',function (socket) {
@@ -49,8 +40,8 @@ module.exports = function (io){
     function addPlayer(req,res,next) {
         var gameId = req.query.gameId;
         var usuario = req.user;
-        console.log("fefefafdsdd>>");
         Game.load(gameId,function (err,game) {
+
             if (err) {
                 res.render('error',err);
             }
@@ -130,8 +121,6 @@ module.exports = function (io){
     });
 
     router.get('/join',addPlayer,function (req,res,next) {
-        console.log("Entro al get");
-
         io.emit("gameId="+req.query.gameId);
         res.redirect("/play?gameId="+req.query.gameId)
     })

@@ -26,18 +26,18 @@ block content
         var home = url.split('/') [2];
         games.forEach(load);
         function load(item,index) {
-            g.innerHTML = g.innerHTML+'<a href="http://'+home+'/lobby/join?'+games[index].id+'">'+games[index].name+'</a><br>'
+            g.innerHTML = g.innerHTML+'<a href="http://'+home+'/lobby/join?gameId='+games[index].id+'">'+games[index].name+'</a><br>'
         }
     }
     
-    function chooseGame(index) {
+    /*function chooseGame(index) {
         var usuario = !{JSON.stringify(user)};
         socket.emit("let's play",{
             gameId:games[index].id,
             user:usuario,
         })
         window.alert(games[index].id);
-    }
+    }*/
     
     $( document ).ready(function() {
         socket.emit('load games', {id: socket.id });
