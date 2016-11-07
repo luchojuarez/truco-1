@@ -33,7 +33,6 @@ function parseGame(req,res,next){
             player = game.player1
             board = game.currentRound.board
         }
-        console.log(player,board);
         var objectGame = {
             game:game,
             board:board,
@@ -43,6 +42,8 @@ function parseGame(req,res,next){
             score:game.score,
             plays:game.currentRound.fsm.transitions()
         }
+        console.log('<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>><<<<<<<>>>>>><<<<<>>>><<<<>>>>');
+        console.log(objectGame.cartas);
 
         req.game = objectGame;
         next();
@@ -52,9 +53,9 @@ function parseGame(req,res,next){
 router.use(mustBeLogged);
 
 router.get('/',parseGame, function(req,res,next) {
-    res.render('play',req.game)
+    //console.log(req.game.cartas,">>>>>>>>>>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<<");
+    res.render('play',{game:req.game})
 })
 
     return router;
 };
-
