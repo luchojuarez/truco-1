@@ -3,37 +3,37 @@
 extends layout
 block content
   script.
-    var socket = io('/play');
-    function foo(number,suit,weight) {
-        var carta = new Card(number,suit);
-        console.log(carta.show());
+    function foo(el) {
+        var carta = $(el).attr('value');
+        window.alert(carta);
     }
   h1(class="header") #{game.game.name}
-  p acrual score round #{game.score}
   p #{game.nickname}
-  p Cards
-  div
-    for card in game.cartas
-      img(onclick="foo('#{card.number}','#{card.suit}','#{card.weight}')",width="67", height="85",src="/images/cartas/#{card.number}-#{card.suit}.png")
   if(game.board)
-    p Board
-    for card in game.board[0]
-      p #{card.show()}
-    for card in game.board[1]
-      p #{card.show()}
-  p lets's play
-  div(class='btn-group btn-group-lg')
-    if(game.plays.indexOf('envido')>0)
-      a(href="#" onclick="foo()" type="button" class="btn btn-primary") envido
-    if(game.plays.indexOf('truco')>0)
-      a(href="#" type="button" class="btn btn-primary") truco
-    if(game.plays.indexOf('realenvido')>0)
-      a(href="#" type="button" class="btn btn-primary") realenvido
-    if(game.plays.indexOf('faltaenvido')>0)
-      a(href="#" type="button" class="btn btn-primary") faltaenvido
-    if(game.plays.indexOf('retruco')>0)
-      a(href="#" type="button" class="btn btn-primary") retruco
-    if(game.plays.indexOf('valecuatro')>0)
-      a(href="#" type="button" class="btn btn-primary") valecuatro
+    div(class="mesa")
+      p acrual score round #{game.score}
+      for card in game.board[0]
+        p #{card.show()}
+      for card in game.board[1]
+        p #{card.show()}
+  
+  div(class="center")
+    for card in game.cartas
+      img(class="card", width="90", height="120", OnClick="foo(this);",value="#{card.number} de #{card.suit}",src="/images/cartas/#{card.number}-#{card.suit}.png")
+  
+  div
+    div(class='btn-group btn-group-lg')
+      if(game.plays.indexOf('envido')>0)
+        a(href="#" onclick="foo()" type="button" class="btn btn-primary") envido
+      if(game.plays.indexOf('truco')>0)
+        a(href="#" type="button" class="btn btn-primary") truco
+      if(game.plays.indexOf('realenvido')>0)
+        a(href="#" type="button" class="btn btn-primary") realenvido
+      if(game.plays.indexOf('faltaenvido')>0)
+        a(href="#" type="button" class="btn btn-primary") faltaenvido
+      if(game.plays.indexOf('retruco')>0)
+        a(href="#" type="button" class="btn btn-primary") retruco
+       if(game.plays.indexOf('valecuatro')>0)
+        a(href="#" type="button" class="btn btn-primary") valecuatro
     
   

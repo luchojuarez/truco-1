@@ -1,7 +1,8 @@
 body {
+  margin: auto;
   padding: 50px;
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
-  background-image: url('../images/simple.png');
+  background-image: url('../images/background.jpg');
 }
 
 h1 {
@@ -37,6 +38,31 @@ h2 {
 
 a {
   color: #00B7FF;
+}
+
+.center {
+    margin: auto;
+    height: 150px;
+    width: 300px;
+    padding: 10px;
+}
+
+.carta{
+    margin: auto;
+    width="65";
+    height="90";
+}
+
+.mesa{
+    margin: auto;
+    height: 250px;
+    width: 500px;
+    background-image: url("/images/wood.jpg");
+    border: 3px solid black;
+}
+
+.cartas{
+    margin: auto;
 }
 
 .header {
