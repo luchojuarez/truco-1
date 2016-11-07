@@ -8,6 +8,7 @@
 module.exports = function (io){
 var express = require('express');
 var passport = require('passport');
+var playSpace = io.of('/play');
 var User = require('../models/user');
 var router = express.Router();
 
@@ -51,6 +52,24 @@ function parseGame(req,res,next){
 }
 
 router.use(mustBeLogged);
+
+//Manejar los sockets conectados al namespace /play
+playSpace.on('connection',function(socket) {
+
+    //TODO: obtener el id del juego
+    
+    //Meter usuario en la room del juego
+    //  socket.join('play-gameId');
+
+    socket.on('disconenct', function(){
+        //abandonar la sala, creo que se hace solo.
+        //  socket.leave('play-gameId');
+    });
+})
+
+//Enviar mensajes a una room especifica
+// playSpace.to('play-gameId').emit('Algun evento');
+    
 
 router.get('/',parseGame, function(req,res,next) {
     //console.log(req.game.cartas,">>>>>>>>>>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<<");

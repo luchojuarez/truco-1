@@ -2,6 +2,8 @@
 // y de la misma fotma con guest
 extends layout
 block content
+  script.
+    var socket = io('/play');
   h1(class="header") #{game.game.name}
   p acrual score round #{game.score}
   p #{game.nickname}
