@@ -1,18 +1,16 @@
 extends layout
 block content
   h1(class="header") Waiting for opponent
-
-  script(src="/socket.io/socket.io.js")
   script.
-    var socket = io();
-    socket.on("let's play",function (gameId) {
-        //res.redirect("/play?gameId="+gameId)
-        console.log("lets play emitido");
-        var g = document.getElementById("boton");
-        g.innerHTML = "<button type='submit' class='btn btn-primary>let s play</button>";
-        games.forEach(load);
-        function load(item,index) {
-            g.innerHTML = g.innerHTML+'<button onclick="chooseGame('+index+')" type="button" class="btn btn-primary">'+games[index].name+'</button><br>'
-        }
+    var url = window.location.href;
+    var getQuery = url.split('?')[1];
+    var params = getQuery.split('&');
+    gameId = params[0];
+    socket.on(gameId,function (data) {
+        var url = window.location.href;
+        var home = url.split('/') [2];
+        var playRef = "http://"+ home + "/play?" + gameId;
+        console.log(playRef);
+        window.location.href = playRef;
     })
   a(id="boton")

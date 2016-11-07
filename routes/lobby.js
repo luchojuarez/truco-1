@@ -22,6 +22,16 @@ module.exports = function (io){
     io.on('connection', function(socket) {
         // Use socket to communicate with this particular client only, sending it it's own id
         socket.emit('load games successful',{list:gameList,id:socket.id});
+
+        socket.on("let's play",function (data) {
+        console.log("Se conecto un guacho al juego");
+        var gameId = data.gameId;
+        var usuario = data.user;
+
+        //io.emit("gameId="+gameId,{id:socket.id});
+
+        //res.redirect("/play?gameId="+req.query.gameId)
+        })
     });
 
     io.on('load games',function (socket) {
@@ -36,24 +46,23 @@ module.exports = function (io){
         next();
     }
 
-    io.on("let's play",function (socket,data) {
-        var gameId = data.gameId;
-        var usuario = data.user;
+    function addPlayer(req,res,next) {
+        var gameId = req.query.gameId;
+        var usuario = req.user;
+        console.log("fefefafdsdd>>");
         Game.load(gameId,function (err,game) {
             if (err) {
                 res.render('error',err);
             }
-            game.player2.user = usuario.user;
-            game.player2.nickname = usuario.user.username;
+            game.player2.user = req.user;
+            game.player2.nickname = req.user.username;
             game.save(function (err,game){
                 if (err) next(err);
-                PubSub.subscribe(gameId);
                 console.log("Jugador ",game.player2.nickname,"agregado");
+                next();
             })
         })
-        res.redirect("/play?gameId="+req.query.gameId)
-    })
-
+    }
 
 
     router.use(mustBeLogged);
@@ -61,8 +70,10 @@ module.exports = function (io){
 
 
     router.get('/' ,function(req, res, next) {
+        var str = "que";
         res.render('lobby',{
-            user : req.user
+            user : req.user,
+            pepe : str,
         });
         //next();
     });
@@ -118,8 +129,10 @@ module.exports = function (io){
         })
     });
 
-    router.post('/join',function (req,res,next) {
-        io.emit("let's play",{gameId:req.query.gameId})
+    router.get('/join',addPlayer,function (req,res,next) {
+        console.log("Entro al get");
+
+        io.emit("gameId="+req.query.gameId);
         res.redirect("/play?gameId="+req.query.gameId)
     })
     return router;
