@@ -4,18 +4,23 @@ extends layout
 block content
   script.
     var socket = io('/play');
+    function foo(number,suit,weight) {
+        var carta = new Card(number,suit);
+        console.log(carta.show());
+    }
   h1(class="header") #{game.game.name}
   p acrual score round #{game.score}
   p #{game.nickname}
   p Cards
-  for card in game.cartas
-    form(role='form', action="#{card.show()afeshwemgo8vtrb8wham}",method="post")
-      .form-group
-        button.btn.btn-primary(value=card) #{card.show()}
-  
-  p Board
-  for card in game.cartas
-    p #{card.show()}
+  div
+    for card in game.cartas
+      img(onclick="foo('#{card.number}','#{card.suit}','#{card.weight}')",width="67", height="85",src="/images/cartas/#{card.number}-#{card.suit}.png")
+  if(game.board)
+    p Board
+    for card in game.board[0]
+      p #{card.show()}
+    for card in game.board[1]
+      p #{card.show()}
   p lets's play
   div(class='btn-group btn-group-lg')
     if(game.plays.indexOf('envido')>0)
@@ -31,3 +36,4 @@ block content
     if(game.plays.indexOf('valecuatro')>0)
       a(href="#" type="button" class="btn btn-primary") valecuatro
     
+  
