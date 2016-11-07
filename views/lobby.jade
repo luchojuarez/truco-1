@@ -22,17 +22,19 @@ block content
         games=gameList;
         var g = document.getElementById("game");
         g.innerHTML = "<br>";
+        var url = window.location.href;
+        var home = url.split('/') [2];
         games.forEach(load);
         function load(item,index) {
-            g.innerHTML = g.innerHTML+'<button onclick="chooseGame('+index+')" type="button" class="btn btn-primary">'+games[index].name+'</button><br>'
+            g.innerHTML = g.innerHTML+'<a href="http://'+home+'/lobby/join?'+games[index].id+'">'+games[index].name+'</a><br>'
         }
     }
     
     function chooseGame(index) {
-        var usuario = #{user}._id;
+        var usuario = !{JSON.stringify(user)};
         socket.emit("let's play",{
             gameId:games[index].id,
-            user:#{user},
+            user:usuario,
         })
         window.alert(games[index].id);
     }
@@ -48,4 +50,4 @@ block content
     
     
   #right-column.column
-    h1(id="game") hola
+    a(id="game") hola
