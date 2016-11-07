@@ -76,15 +76,14 @@ module.exports = function (io){
             next();
         })
     }
-    router.get('/room',function (req,res,next) {
+    router.get('/room',function (req,res) {
         Game.load(req.query.gameId,function (err,game) {
             if (err) next(err)
-            if (!game.player2.user) {
+            if (game.status == game.const.UNSTARTED) {
                 res.render('waitroom',{})
             }else {
                 res.redirect("/play?gameId="+req.query.gameId)
             }
-            //next();
         })
     })
 
