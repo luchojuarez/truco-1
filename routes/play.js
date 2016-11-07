@@ -5,7 +5,6 @@
     + Parse the needed data to render the view (current player cards, current turn, board, points, etc)
     + Render the view
 */
-
 module.exports = function (io){
 var express = require('express');
 var passport = require('passport');
@@ -44,7 +43,7 @@ function parseGame(req,res,next){
             plays:game.currentRound.fsm.transitions()
         }
         console.log('<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>><<<<<<<>>>>>><<<<<>>>><<<<>>>>');
-        //console.log(objectGame.cartas);
+        console.log(objectGame.cartas,objectGame.plays);
 
         req.game = objectGame;
         next();

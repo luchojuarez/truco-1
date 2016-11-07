@@ -21,12 +21,13 @@ block content
     function updateGames(gameList) {
         games=gameList;
         var g = document.getElementById("game");
-        g.innerHTML = "<br>";
         var url = window.location.href;
         var home = url.split('/') [2];
+        g.innerHTML = '<div class="btn-group-vertical">';
         games.forEach(load);
+        g.innerHTML = g.innerHTML+'</div>'
         function load(item,index) {
-            g.innerHTML = g.innerHTML+'<a href="http://'+home+'/lobby/join?gameId='+games[index].id+'">'+games[index].name+'</a><br>'
+            g.innerHTML = g.innerHTML+'<a type="button" class="btn btn-primary" href="http://'+home+'/lobby/join?gameId='+games[index].id+'">'+games[index].name+'</a><br>'
         }
     }
     
