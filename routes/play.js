@@ -43,7 +43,7 @@ function parseGame(req,res,next){
             plays:game.currentRound.fsm.transitions()
         }
         console.log('<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>><<<<<<<>>>>>><<<<<>>>><<<<>>>>');
-        console.log(objectGame.cartas);
+        console.log(objectGame.cartas,objectGame.plays);
 
         req.game = objectGame;
         next();

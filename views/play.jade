@@ -15,7 +15,17 @@ block content
   for card in game.cartas
     p #{card.show()}
   p lets's play
-  for play in game.plays
-    form(role="form", action="#",method="post")
-      .form-group
-        button.btn.btn-primary(value=play) #{play}
+  div(class='btn-group btn-group-lg')
+    if(game.plays.indexOf('envido')>0)
+      a(href="#" onclick="foo()" type="button" class="btn btn-primary") envido
+    if(game.plays.indexOf('truco')>0)
+      a(href="#" type="button" class="btn btn-primary") truco
+    if(game.plays.indexOf('realenvido')>0)
+      a(href="#" type="button" class="btn btn-primary") realenvido
+    if(game.plays.indexOf('faltaenvido')>0)
+      a(href="#" type="button" class="btn btn-primary") faltaenvido
+    if(game.plays.indexOf('retruco')>0)
+      a(href="#" type="button" class="btn btn-primary") retruco
+    if(game.plays.indexOf('valecuatro')>0)
+      a(href="#" type="button" class="btn btn-primary") valecuatro
+    
