@@ -29,10 +29,10 @@ block content
     }
     
     function chooseGame(index) {
-        var usuario = #{user}._id;
+        //var usuario = #{user}._id;
         socket.emit("let's play",{
             gameId:games[index].id,
-            user:#{user},
+            //user:#{user},
         })
         window.alert(games[index].id);
     }
