@@ -8,10 +8,12 @@ block content
     var url = window.location.href;
     var gameId = url.split('?')[1];
     socket = io('/play',{ query: gameId});
-    function foo(player,index) {
+    function foo(index,player) {
         console.log(player,index);
+        
         socket.emit('playCard',{player:player,index:index});
     }
+    
 
 
   h1(class="header") #{game.game.name}

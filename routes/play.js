@@ -22,27 +22,27 @@ function mustBeLogged(req,res,next) {
 
 
 
-function playAndSave (id,player,move,card,cb) {
+function playAndSave (id,player,move,cardIndex,cb) {
 
-    var card,cb;
+    var id=arguments[0],player=arguments[1],move=arguments[2],cardIndex,cb;
     if (arguments.length == 5) {
-        card = arguments[3];
+        cardIndex = arguments[3];
         cb = arguments[4];
     }
     else {
         cb = arguments[3];
     };
-
     Game.load(id,function (err,game){
         if (err) {
             return cb(err,null);
         }
         try {
-            game.play(player,move,card);
+            game.play(player,move,game[player].cards[cardIndex]);
             game.save(function (err,game) {
                 if (err) {
                     return cb(err,null);
                 }
+                console.log("intenta guardar");
                 return cb(err,game);
             })
         }
@@ -94,12 +94,13 @@ playSpace.on('connection',function(socket) {
     var playroom = 'play-'+gameId;
     socket.join(playroom);
     socket.on('cardClicked',function (data) {
-        console.log("se clickeo la carta ",data);
+        //console.log("se clickeo la carta ",data);
     })
 
-    socket.on('playCard',function (data) {      
+    socket.on('playCard',function (data) {
         playAndSave(gameId,data.player,'playCard',data.index, function(err,game) {
             if (err) {
+                console.log("Error en play ",err)
                 switch (err.name) {
                     case 'gameAborted':
                         //Handler para decirle que el juego esta cancelado
@@ -112,16 +113,16 @@ playSpace.on('connection',function(socket) {
                         playSpace.to(socket.id).emit('invalidTurn');
                         break;
                     default:
-                        console.log(err);                 
+                        console.log(err);
                 }
             } else {
-                playSpace.to(playroom).emit('updateBoard',game);
+                console.log("OK");
+                console.log(game.player1.cards);
+                //playSpace.to(playroom).emit('updateBoard',game);
             }
         })
     })
 
-    //Comunicarse con todos los miembros de la room conectada
-    playSpace.to(playroom).emit('Holis',playroom);
 
     socket.on('disconenct', function(){
         //abandonar la sala, y abortar el juego
