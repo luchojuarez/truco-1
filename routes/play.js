@@ -53,20 +53,25 @@ router.use(mustBeLogged);
 //Manejar los sockets conectados al namespace /play
 playSpace.on('connection',function(socket) {
 
-    //TODO: obtener el id del juego
-    
     //Meter usuario en la room del juego
-    //  socket.join('play-gameId');
+    var playroom = 'play-'+socket.handshake.query.gameId;
+    socket.join(playroom);
+    socket.on('cardClicked',function (data) {
+        console.log("se clickeo la carta ",data);
+    })
+
+    //Comunicarse con todos los miembros de la room conectada
+    playSpace.to(playroom).emit('Holis',playroom);
+    //evento prueba, no deberia ser captado por el cliente
+    playSpace.to("Pepedef").emit('Holis',"Estas en cualquiera");
 
     socket.on('disconenct', function(){
         //abandonar la sala, creo que se hace solo.
-        //  socket.leave('play-gameId');
+        socket.leave(playroom);
     });
 })
 
-//Enviar mensajes a una room especifica
-// playSpace.to('play-gameId').emit('Algun evento');
-    
+
 
 router.get('/',parseGame, function(req,res,next) {
     //console.log(req.game.cartas,">>>>>>>>>>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<<");

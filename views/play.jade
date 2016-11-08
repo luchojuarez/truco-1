@@ -3,10 +3,21 @@
 extends layout
 block content
   script.
+    //Sacar el gameId del query
+    var url = window.location.href;
+    var gameId = url.split('?')[1];
+    socket = io('/play',{ query: gameId});
     function foo(el) {
         var carta = $(el).attr('value');
+        socket.emit('cardClicked',carta);
         window.alert(carta);
     }
+
+    socket.on('Holis',function(data) {
+      console.log("Estoy en la room",data);
+    });
+
+
   h1(class="header") #{game.game.name}
   p #{game.nickname}
   if(game.board)
