@@ -42,18 +42,23 @@ a {
 
 .center {
     margin: auto;
-    height: 150px;
-    width: 300px;
-    padding: 10px;
+    border-radius: 25px;
+    background: #73AD21;
+    padding: 20px;
+    width: 330px;
+    height: 50%;
+    border: 3px solid black;
 }
 
-.carta{
+#carta{
     margin: auto;
     width="65";
     height="90";
 }
 
 .mesa{
+    /*padding: 20px;*/
+    border-radius: 25px;
     margin: auto;
     height: 250px;
     width: 500px;
