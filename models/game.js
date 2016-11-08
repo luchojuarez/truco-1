@@ -105,8 +105,8 @@ Game.prototype.setup = function (opts) {
 
 Game.prototype.start = function () {
   if (gameIsRunable && this.status == state.UNSTARTED) {
-    this.newRound();
     this.status = state.STARTED;
+    this.newRound();
     return true;
   } else {return false;}
 };

@@ -2,13 +2,15 @@ module.exports = function(io,passportSocketIo) {
     var express = require('express');
     var router = express.Router();
     /* GET home page. */
+    var onlinePlayers=[];
 
     // socket.io events
     io.on("connection", function(socket) {
-        //En socket.request.user esta el usuario conectado al socket
         console.log("Connected ", socket.request.user, socket.request.user.logged_in)
-            //Handle events from the user with the socket
-            //console.log( "A user connected" );
+        if(onlinePlayers.indexOf(socket.request.user.username)<0){
+            onlinePlayers.push(socket.request.user.username);
+        }
+        io.emit("update player logged",{onlinePlayers:onlinePlayers});
     });
 
     //Esta funcion filtra los sockets por alguna propiedad del usuario
@@ -19,7 +21,6 @@ module.exports = function(io,passportSocketIo) {
     });*/
 
     router.get('/', function(req, res) {
-
         res.render('index', {
             user: req.user
         });
@@ -28,6 +29,10 @@ module.exports = function(io,passportSocketIo) {
 
 
     router.get('/logout', function(req, res) {
+        var index = onlinePlayers.indexOf(req.user.username);
+        if (index > -1) onlinePlayers.splice(index, 1);
+        io.emit("update player logged",{onlinePlayers:onlinePlayers});
+
         req.logout();
         res.redirect('/');
     });

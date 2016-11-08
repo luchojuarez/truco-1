@@ -8,6 +8,7 @@
 module.exports = function (io){
 var express = require('express');
 var passport = require('passport');
+var playSpace = io.of('/play');
 var User = require('../models/user');
 var router = express.Router();
 
@@ -33,7 +34,6 @@ function parseGame(req,res,next){
             player = game.player1
             board = game.currentRound.board
         }
-        console.log(player,board);
         var objectGame = {
             game:game,
             board:board,
@@ -43,7 +43,6 @@ function parseGame(req,res,next){
             score:game.score,
             plays:game.currentRound.fsm.transitions()
         }
-
         req.game = objectGame;
         next();
     })
@@ -51,10 +50,33 @@ function parseGame(req,res,next){
 
 router.use(mustBeLogged);
 
+//Manejar los sockets conectados al namespace /play
+playSpace.on('connection',function(socket) {
+
+    //Meter usuario en la room del juego
+    var playroom = 'play-'+socket.handshake.query.gameId;
+    socket.join(playroom);
+    socket.on('cardClicked',function (data) {
+        console.log("se clickeo la carta ",data);
+    })
+
+    //Comunicarse con todos los miembros de la room conectada
+    playSpace.to(playroom).emit('Holis',playroom);
+    //evento prueba, no deberia ser captado por el cliente
+    playSpace.to("Pepedef").emit('Holis',"Estas en cualquiera");
+
+    socket.on('disconenct', function(){
+        //abandonar la sala, creo que se hace solo.
+        socket.leave(playroom);
+    });
+})
+
+
+
 router.get('/',parseGame, function(req,res,next) {
-    res.render('play',req.game)
+    //console.log(req.game.cartas,">>>>>>>>>>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<<");
+    res.render('play',{game:req.game})
 })
 
     return router;
 };
-

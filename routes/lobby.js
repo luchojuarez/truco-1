@@ -8,6 +8,7 @@ RESTRICTIONS:
 
 module.exports = function (io){
     var express = require('express');
+    var PubSub = require('pubsub-js');
     var passport = require('passport');
     var User = require('../models/user');
     var router = express.Router();
@@ -21,10 +22,11 @@ module.exports = function (io){
     io.on('connection', function(socket) {
         // Use socket to communicate with this particular client only, sending it it's own id
         socket.emit('load games successful',{list:gameList,id:socket.id});
+
     });
 
     io.on('load games',function (socket) {
-        socket.emit('load games successful',{list:gameList,id:socket.id});
+        io.emit('load games successful',{list:gameList,id:socket.id});
     })
 
     function mustBeLogged(req,res,next) {
@@ -35,16 +37,16 @@ module.exports = function (io){
         next();
     }
 
-
     function addPlayer(req,res,next) {
         var gameId = req.query.gameId;
         var usuario = req.user;
         Game.load(gameId,function (err,game) {
+
             if (err) {
                 res.render('error',err);
             }
-            game.player2.user = req.user;
-            game.player2.nickname = req.user.username;
+            game.setup({player2: new Player({ nickname: req.user.username, user: req.user})})
+            game.start();
             game.save(function (err,game){
                 if (err) next(err);
                 console.log("Jugador ",game.player2.nickname,"agregado");
@@ -57,10 +59,9 @@ module.exports = function (io){
     router.use(mustBeLogged);
 
 
-
     router.get('/' ,function(req, res, next) {
         res.render('lobby',{
-            user : req.user
+            user : req.user,
         });
         //next();
     });
@@ -75,15 +76,14 @@ module.exports = function (io){
             next();
         })
     }
-    router.get('/room',function (req,res,next) {
+    router.get('/room',function (req,res) {
         Game.load(req.query.gameId,function (err,game) {
             if (err) next(err)
-            if (!game.player2.user) {
+            if (game.status == game.const.UNSTARTED) {
                 res.render('waitroom',{})
             }else {
                 res.redirect("/play?gameId="+req.query.gameId)
             }
-            //next();
         })
     })
 
@@ -91,18 +91,28 @@ module.exports = function (io){
     router.get('/newgame',function (req,res,next){
         var username = req.user.username;
         var user = req.user;
-        game = new Game({name : "new game by " + username, score : [0,0] });
-        game.player1 = new Player({ nickname: username, user: user});
-        game.player2 = new Player({ nickname: "insertUser", user: null });
-        game.newRound({game : game, currentTurn : game.currentHand });
+        p1 = new Player({ nickname: username, user: user});
+        var opts = {
+            name : "New game by " + username,
+            player1 : p1,
+            maxScore : 30
+        };
+        game = new Game();
+        game.setup(opts);
         game.save(function (err, savedgame){
             if (err) {
                 console.log("Error saving in routes/lobby",err)
                 return res.redirect('/lobby');
             }
+            // creo un evento
+            var nuevoCanal = function( msg, data ){
+                console.log( msg, data );
+            };
+            var token = PubSub.subscribe( savedgame._id, nuevoCanal);
             var game = {
                 id: savedgame._id,
                 name:savedgame.name,
+                token:token,
             }
             gameList.push(game);
             io.emit("load games successful",{game:game,list:gameList})
@@ -110,8 +120,8 @@ module.exports = function (io){
         })
     });
 
-    router.post('/join',addPlayer,function (req,res,next) {
-        io.emit("let's play",{gameId:req.query.gameId})
+    router.get('/join',addPlayer,function (req,res,next) {
+        io.emit("gameId="+req.query.gameId);
         res.redirect("/play?gameId="+req.query.gameId)
     })
     return router;
