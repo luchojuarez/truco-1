@@ -3,10 +3,9 @@
 extends layout
 block content
   script.
-    function foo(el) {
-        console.log(el);
-        
-        socket.emit('playcard', carta);
+    function foo(index,player) {
+        console.log(index,player);
+        socket.emit('playCard',{player:player,index:index});
     }
   h1(class="header") #{game.game.name}
   p #{game.nickname}
@@ -20,7 +19,7 @@ block content
   
   div(class="center")
     each card,index in game.cartas
-      img(class="card", width="90", height="120", OnClick="foo(#{index});",value='{"number": "#{card.number}"}',src="/images/cartas/#{card.number}-#{card.suit}.png")
+      img(class="card", width="90", height="120", OnClick="foo(#{index},'#{game.player}');",src="/images/cartas/#{card.number}-#{card.suit}.png")
   
   div
     div(class='btn-group btn-group-lg')
