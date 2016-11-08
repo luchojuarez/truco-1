@@ -20,6 +20,8 @@ function mustBeLogged(req,res,next) {
     next();
 }
 
+
+
 function playAndSave (id,player,move,card,cb) {
 
     var card,cb;
@@ -56,21 +58,23 @@ function parseGame(req,res,next){
     gameId = req.query.gameId;
     Game.load(gameId,function (err,game) {
         if (err) next(err);
-        var player;
-        var board;
+        var p,board,player;
         if (req.user._id.toString() === game.player2.user.toString()) {
-            player = game.player2
-            board = [game.currentRound.board[1],game.currentRound.board[0]]
+            p = game.player2;
+            player = "player2";
+            board = [game.currentRound.board[1],game.currentRound.board[0]];
         }
         else {
-            player = game.player1
-            board = game.currentRound.board
+            player = "player1";
+            p = game.player1;
+            board = game.currentRound.board;
         }
         var objectGame = {
             game:game,
             board:board,
-            cartas:player.cards,
-            nickname:player.nickname,
+            cartas:p.cards,
+            nickname:p.nickname,
+            player: player,
             user:req.user,
             score:game.score,
             plays:game.currentRound.fsm.transitions()
@@ -86,14 +90,15 @@ router.use(mustBeLogged);
 playSpace.on('connection',function(socket) {
 
     //Meter usuario en la room del juego
-    var playroom = 'play-'+socket.handshake.query.gameId;
+    var gameId = socket.handshake.query.gameId;
+    var playroom = 'play-'+gameId;
     socket.join(playroom);
     socket.on('cardClicked',function (data) {
         console.log("se clickeo la carta ",data);
     })
 
-    socket.on('jugar',function (data) {      
-        playAndSave(data.gameId,data.player,data.move,data.card, function(err,game) {
+    socket.on('playCard',function (data) {      
+        playAndSave(gameId,data.player,data.move,data.card, function(err,game) {
             if (err) {
                 switch (err.name) {
                     case 'gameAborted':
@@ -110,18 +115,17 @@ playSpace.on('connection',function(socket) {
                         console.log(err);                 
                 }
             } else {
-                playSpace.to(playroom).emit('UpdateGame',game);
+                playSpace.to(playroom).emit('updateBoard',game);
             }
         })
     })
 
     //Comunicarse con todos los miembros de la room conectada
     playSpace.to(playroom).emit('Holis',playroom);
-    //evento prueba, no deberia ser captado por el cliente
-    playSpace.to("Pepedef").emit('Holis',"Estas en cualquiera");
 
     socket.on('disconenct', function(){
-        //abandonar la sala, creo que se hace solo.
+        //abandonar la sala, y abortar el juego
+        Game.lo
         socket.leave(playroom);
     });
 })
