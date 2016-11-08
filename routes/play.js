@@ -20,25 +20,61 @@ function mustBeLogged(req,res,next) {
     next();
 }
 
+
+
+function playAndSave (id,player,move,card,cb) {
+
+    var card,cb;
+    if (arguments.length == 5) {
+        card = arguments[3];
+        cb = arguments[4];
+    }
+    else {
+        cb = arguments[3];
+    };
+
+    Game.load(id,function (err,game){
+        if (err) {
+            return cb(err,null);
+        }
+        try {
+            game.play(player,move,card);
+            game.save(function (err,game) {
+                if (err) {
+                    return cb(err,null);
+                }
+                return cb(err,game);
+            })
+        }
+        catch(e) {
+            return cb(e,null);
+        }
+
+    })
+
+}
+
 function parseGame(req,res,next){
     gameId = req.query.gameId;
     Game.load(gameId,function (err,game) {
         if (err) next(err);
-        var player;
-        var board;
+        var p,board,player;
         if (req.user._id.toString() === game.player2.user.toString()) {
-            player = game.player2
-            board = [game.currentRound.board[1],game.currentRound.board[0]]
+            p = game.player2;
+            player = "player2";
+            board = [game.currentRound.board[1],game.currentRound.board[0]];
         }
         else {
-            player = game.player1
-            board = game.currentRound.board
+            player = "player1";
+            p = game.player1;
+            board = game.currentRound.board;
         }
         var objectGame = {
             game:game,
             board:board,
-            cartas:player.cards,
-            nickname:player.nickname,
+            cartas:p.cards,
+            nickname:p.nickname,
+            player: player,
             user:req.user,
             score:game.score,
             plays:game.currentRound.fsm.transitions()
@@ -53,20 +89,48 @@ router.use(mustBeLogged);
 //Manejar los sockets conectados al namespace /play
 playSpace.on('connection',function(socket) {
 
-    //TODO: obtener el id del juego
-    
     //Meter usuario en la room del juego
-    //  socket.join('play-gameId');
+    var gameId = socket.handshake.query.gameId;
+    var playroom = 'play-'+gameId;
+    socket.join(playroom);
+    socket.on('cardClicked',function (data) {
+        console.log("se clickeo la carta ",data);
+    })
+
+    socket.on('playCard',function (data) {      
+        playAndSave(gameId,data.player,'playCard',data.index, function(err,game) {
+            if (err) {
+                switch (err.name) {
+                    case 'gameAborted':
+                        //Handler para decirle que el juego esta cancelado
+                        break;
+                    case 'invalidMove':
+                        //Handler para decirle que al cliente que realizo una movida invalida
+                        playSpace.to(socket.id).emit('invalidMove'); //Del lado del cliente podria tirar un alert
+                        break;
+                    case 'invalidTurn':
+                        playSpace.to(socket.id).emit('invalidTurn');
+                        break;
+                    default:
+                        console.log(err);                 
+                }
+            } else {
+                playSpace.to(playroom).emit('updateBoard',game);
+            }
+        })
+    })
+
+    //Comunicarse con todos los miembros de la room conectada
+    playSpace.to(playroom).emit('Holis',playroom);
 
     socket.on('disconenct', function(){
-        //abandonar la sala, creo que se hace solo.
-        //  socket.leave('play-gameId');
+        //abandonar la sala, y abortar el juego
+        Game.lo
+        socket.leave(playroom);
     });
 })
 
-//Enviar mensajes a una room especifica
-// playSpace.to('play-gameId').emit('Algun evento');
-    
+
 
 router.get('/',parseGame, function(req,res,next) {
     //console.log(req.game.cartas,">>>>>>>>>>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<<");

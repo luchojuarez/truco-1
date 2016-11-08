@@ -1,12 +1,19 @@
+
 // en user.p tengo el objeto Player y en user.u el objeto User
 // y de la misma fotma con guest
 extends layout
 block content
   script.
-    function foo(index,player) {
-        console.log(index,player);
+    //Sacar el gameId del query
+    var url = window.location.href;
+    var gameId = url.split('?')[1];
+    socket = io('/play',{ query: gameId});
+    function foo(player,index) {
+        console.log(player,index);
         socket.emit('playCard',{player:player,index:index});
     }
+
+
   h1(class="header") #{game.game.name}
   p #{game.nickname}
   if(game.board)

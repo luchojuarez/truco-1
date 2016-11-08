@@ -119,14 +119,23 @@ Game.prototype.abort = function () {
  * Check if it's valid move and play in the current round
  */
 Game.prototype.play = function(player, action, value){
-  if(this.state == state.ABORTED)
-    throw new Error("[ERROR] GAME ABORTED...");
+  if(this.state == state.ABORTED) {
+    err = new Error("[ERROR] GAME ABORTED...");
+    err.name = 'gameAborted';
+    throw err;
+   }
 
-  if(this.currentRound.currentTurn !== player)
+  if(this.currentRound.currentTurn !== player) {
     throw new Error("[ERROR] INVALID TURN...");
+        err.name = 'invalidTurn';
+    throw err;
+  }
 
-  if(this.currentRound.fsm.cannot(action))
+  if(this.currentRound.fsm.cannot(action)) {
     throw new Error("[ERROR] INVALID MOVE...");
+    err.name = 'invalidMove';
+    throw err;
+  }
  
 
   this.currentRound.play(action, value);
