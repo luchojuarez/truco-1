@@ -98,7 +98,7 @@ playSpace.on('connection',function(socket) {
     })
 
     socket.on('playCard',function (data) {      
-        playAndSave(gameId,data.player,data.move,data.card, function(err,game) {
+        playAndSave(gameId,data.player,'playCard',data.index, function(err,game) {
             if (err) {
                 switch (err.name) {
                     case 'gameAborted':
