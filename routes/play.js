@@ -20,6 +20,38 @@ function mustBeLogged(req,res,next) {
     next();
 }
 
+function playAndSave (id,player,move,card,cb) {
+
+    var card,cb;
+    if (arguments.length == 5) {
+        card = arguments[3];
+        cb = arguments[4];
+    }
+    else {
+        cb = arguments[3];
+    };
+
+    Game.load(id,function (err,game){
+        if (err) {
+            return cb(err,null);
+        }
+        try {
+            game.play(player,move,card);
+            game.save(function (err,game) {
+                if (err) {
+                    return cb(err,null);
+                }
+                return cb(err,game);
+            })
+        }
+        catch(e) {
+            return cb(e,null);
+        }
+
+    })
+
+}
+
 function parseGame(req,res,next){
     gameId = req.query.gameId;
     Game.load(gameId,function (err,game) {
@@ -58,6 +90,29 @@ playSpace.on('connection',function(socket) {
     socket.join(playroom);
     socket.on('cardClicked',function (data) {
         console.log("se clickeo la carta ",data);
+    })
+
+    socket.on('jugar',function (data) {      
+        playAndSave(data.gameId,data.player,data.move,data.card, function(err,game) {
+            if (err) {
+                switch (err.name) {
+                    case 'gameAborted':
+                        //Handler para decirle que el juego esta cancelado
+                        break;
+                    case 'invalidMove':
+                        //Handler para decirle que al cliente que realizo una movida invalida
+                        playSpace.to(socket.id).emit('invalidMove'); //Del lado del cliente podria tirar un alert
+                        break;
+                    case 'invalidTurn':
+                        playSpace.to(socket.id).emit('invalidTurn');
+                        break;
+                    default:
+                        console.log(err);                 
+                }
+            } else {
+                playSpace.to(playroom).emit('UpdateGame',game);
+            }
+        })
     })
 
     //Comunicarse con todos los miembros de la room conectada
