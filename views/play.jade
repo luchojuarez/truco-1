@@ -8,11 +8,19 @@ block content
     var url = window.location.href;
     var gameId = url.split('?')[1];
     socket = io('/play',{ query: gameId});
+    //socket.join(playSpace);
     function foo(index,player) {
-        console.log(player,index);
-        
         socket.emit('playCard',{player:player,index:index});
     }
+    
+    socket.on('updateBoard',function (data) {
+        window.alert("updateBoard");
+        console.log("updateBoard");
+    })
+    socket.on('invalidTurn',function () {
+        console.log("salame");
+        window.alert("SALAME")
+    })
     
 
 

@@ -42,7 +42,6 @@ function playAndSave (id,player,move,cardIndex,cb) {
                 if (err) {
                     return cb(err,null);
                 }
-                console.log("intenta guardar");
                 return cb(err,game);
             })
         }
@@ -100,33 +99,35 @@ playSpace.on('connection',function(socket) {
     socket.on('playCard',function (data) {
         playAndSave(gameId,data.player,'playCard',data.index, function(err,game) {
             if (err) {
-                console.log("Error en play ",err)
                 switch (err.name) {
                     case 'gameAborted':
                         //Handler para decirle que el juego esta cancelado
                         break;
                     case 'invalidMove':
                         //Handler para decirle que al cliente que realizo una movida invalida
-                        playSpace.to(socket.id).emit('invalidMove'); //Del lado del cliente podria tirar un alert
+                        //playSpace.to(socket.id).emit('invalidMove'); //Del lado del cliente podria tirar un alert
                         break;
                     case 'invalidTurn':
-                        playSpace.to(socket.id).emit('invalidTurn');
+                        socket.emit('invalidTurn');
+                        //playSpace.to(socket.id).emit('invalidTurn');
                         break;
                     default:
-                        console.log(err);
+                        console.error(err);
                 }
-            } else {
-                console.log("OK");
-                console.log(game.player1.cards);
-                //playSpace.to(playroom).emit('updateBoard',game);
             }
+            //socket.emit('updateBoard',game);
+            console.log("hola");
+            socket.emit('updateBoard',game);
+            //playSpace.to(socket.id).emit('updateBoard',{game:game});
+            console.log("me rompi");
+
         })
     })
 
 
     socket.on('disconenct', function(){
         //abandonar la sala, y abortar el juego
-        Game.lo
+        //Game.lo
         socket.leave(playroom);
     });
 })
@@ -134,7 +135,6 @@ playSpace.on('connection',function(socket) {
 
 
 router.get('/',parseGame, function(req,res,next) {
-    //console.log(req.game.cartas,">>>>>>>>>>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<<");
     res.render('play',{game:req.game})
 })
 

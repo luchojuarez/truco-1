@@ -42,8 +42,9 @@ a {
 
 .center {
     margin: auto;
+    background-image: url('../images/green.jpg');
     border-radius: 25px;
-    background: #73AD21;
+    /*background: #73AD21;*/
     padding: 20px;
     width: 330px;
     height: 50%;
