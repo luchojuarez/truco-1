@@ -4,9 +4,7 @@ extends layout
 block content
   script.
     function foo(el) {
-        var carta = JSON.parse($(el).attr('value'));
-        console.log(carta);
-        window.alert(carta);
+        console.log(el);
         
         socket.emit('playcard', carta);
     }
@@ -21,8 +19,8 @@ block content
         p #{card.show()}
   
   div(class="center")
-    for card in game.cartas
-      img(class="card", width="90", height="120", OnClick="foo(this);",value='{"number": "#{card.number}"}',src="/images/cartas/#{card.number}-#{card.suit}.png")
+    each card,index in game.cartas
+      img(class="card", width="90", height="120", OnClick="foo(#{index});",value='{"number": "#{card.number}"}',src="/images/cartas/#{card.number}-#{card.suit}.png")
   
   div
     div(class='btn-group btn-group-lg')
