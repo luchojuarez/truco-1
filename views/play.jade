@@ -29,8 +29,8 @@ block content
         p #{card.show()}
   
   div(class="center")
-    for card in game.cartas
-      img(class="card", width="90", height="120", OnClick="foo(this);",value="#{card.number} de #{card.suit}",src="/images/cartas/#{card.number}-#{card.suit}.png")
+    each card,index in game.cartas
+      img(class="card", width="90", height="120", OnClick="foo(#{index});",value='{"number": "#{card.number}"}',src="/images/cartas/#{card.number}-#{card.suit}.png")
   
   div
     div(class='btn-group btn-group-lg')

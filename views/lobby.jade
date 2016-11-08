@@ -3,7 +3,7 @@ extends layout
 block content
   h1(class="header") Lobby
   
-  #left-column.column
+  div(class="center")
     h3 #{user.username}
       br
       div(class="group-vertical")
@@ -14,6 +14,9 @@ block content
         a(href="/")
           button.btn.btn-primary(type="button") Return
   
+  div(class="center")
+    h3 Games
+    a(id="game") hola
 
   
   script.
@@ -50,5 +53,3 @@ block content
     })
     
     
-  #right-column.column
-    a(id="game") hola
