@@ -143,7 +143,7 @@ module.exports = function(io) {
                 if (err) {
                     console.error(err.name);
                 }else {
-                    console.log(res.board);
+                    console.log(res);
                     socket.emit('update cards done',res);
                 }
             })
