@@ -159,6 +159,7 @@ module.exports = function(io) {
                 }
                 else {
                     console.log("se jugo una carta",res);
+                    socket.emit('cartaJugada',{index:data.index});
                     socket.broadcast.to(playroom).emit('updateBoard',{cartaJugada:res,newBoard:game.currentRound.board});
                 }
 
