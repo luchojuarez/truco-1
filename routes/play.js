@@ -51,7 +51,7 @@ module.exports = function(io) {
 
 
     //Functions
-    
+
 
     /**
      * Aplicar la funcion f en el juego cargado con el id pasado
@@ -59,10 +59,10 @@ module.exports = function(io) {
      * @param  {[objectId]}   id [id del juego a cargar]
      * @param  {[function]}   f  [function que toma como parametro un]
      * @param  {Function} cb [callback de los resultados]
-     */ 
+     */
     function apply(id,f,cb){
         Game.load(id, function(err,game) {
-            if (err) 
+            if (err)
                 return cb(err)
             try {
                 var res = f(game);
@@ -100,9 +100,36 @@ module.exports = function(io) {
             //console.log("se clickeo la carta ",data);
         })
 
+        //Evento de envido querido (o no quiero)
+        socket.on('quiero',function(data){
+            function quieroHandler(game) {
+                console.log(data.player,data.jugada);
+                return game.play(data.player,data.jugada);
+            }
+            apply(gameId,quieroHandler,function (err,game,res) {
+                if (err) {
+                    switch (err.name) {
+                        case 'gameAborted':
+                            //Handler para decirle que el juego esta cancelado
+                            break;
+                        case 'invalidMove':
+                            //Handler para decirle que al cliente que realizo una movida invalida
+                            //playSpace.to(socket.id).emit('invalidMove'); //Del lado del cliente podria tirar un alert
+                            break;
+                        case 'invalidTurn':
+                            playSpace.to(socket.id).emit('invalidTurn');
+                            break;
+                        default:
+                            console.error(err.name);
+                    }
+                }else {
+                    socket.broadcast.to(playroom).emit('update after quiero',{score:0});
+                }
+            })
+        })
+
         //Evento de carta jugada
         socket.on('playCard', function(data) {
-
             //Que hace con el game y que retorna?
             function playCardHandler(game){
                 let cardIndex = data.index;
@@ -132,6 +159,7 @@ module.exports = function(io) {
                 }
                 else {
                     console.log("se jugo una carta",res);
+                    socket.broadcast.to(playroom).emit('updateBoard',{cartaJugada:res,newBoard:game.currentRound.board});
                 }
 
             })
@@ -169,7 +197,7 @@ module.exports = function(io) {
                 } else {
                 //Enviar mensaje a todos los de la room excepto al que lo envia
                     console.log(game.currentRound.currentState);
-                    socket.broadcast.to(playroom).emit('cantaron',data.play);
+                    socket.broadcast.to(playroom).emit('cantaron',{jugada:data.play,player:data.player});
                 }
             })
         })
