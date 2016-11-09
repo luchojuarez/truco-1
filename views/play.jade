@@ -12,6 +12,15 @@ block content
     function foo(index,player) {
         socket.emit('playCard',{player:player,index:index});
     };
+    $( document ).ready(function() {
+        socket.emit('update cards');
+    });
+    
+    socket.on('update cards done',function (data) {
+        var board = data.board;
+        var score = data.score;
+        console.log(board[0]);
+    });
     
     function cantar(player,jugada) {
       socket.emit('jugada',{player:player,play:jugada});
@@ -21,7 +30,6 @@ block content
         $("#"+id).hide();        
     })
     socket.on('updateBoard',function (data) {
-        console.log('!{game.player}');
         var card = data.cartaJugada.number.toString()+"-"+data.cartaJugada.suit;
         var g = document.getElementById("board0");
         g.innerHTML = g.innerHTML+'<img width="90", height="120", src="/images/cartas/'+card+'.png" ></img>';

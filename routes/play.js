@@ -128,6 +128,27 @@ module.exports = function(io) {
             })
         })
 
+        socket.on('update cards',function(data){
+
+            function updateCardsHandler(game) {
+                var x = {
+                    board:game.currentRound.board,
+                    player1:game.player1,
+                    player2:game.player2,
+                    score:game.score
+                }
+                return x;
+            }
+            apply(gameId,updateCardsHandler,function (err,game,res) {
+                if (err) {
+                    console.error(err.name);
+                }else {
+                    console.log(res.board);
+                    socket.emit('update cards done',res);
+                }
+            })
+        })
+
         //Evento de carta jugada
         socket.on('playCard', function(data) {
             //Que hace con el game y que retorna?
