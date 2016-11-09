@@ -11,8 +11,11 @@ block content
     //socket.join(playSpace);
     function foo(index,player) {
         socket.emit('playCard',{player:player,index:index});
-    }
+    };
     
+    function cantar(player,jugada) {
+      socket.emit('jugada',{player:player,play:jugada});
+    }
     socket.on('updateBoard',function (data) {
         window.alert("updateBoard");
         console.log("updateBoard");
@@ -20,6 +23,10 @@ block content
     socket.on('invalidTurn',function () {
         console.log("salame");
         window.alert("SALAME")
+    })
+
+    socket.on('cantaron',function(jugada) {
+      window.alert(jugada+" pa");
     })
     
 
@@ -41,16 +48,16 @@ block content
   div
     div(class='btn-group btn-group-lg')
       if(game.plays.indexOf('envido')>0)
-        a(href="#" onclick="foo()" type="button" class="btn btn-primary") envido
+        a(href="#" onclick="cantar('#{game.player}','envido');" type="button" class="btn btn-primary") envido
       if(game.plays.indexOf('truco')>0)
-        a(href="#" type="button" class="btn btn-primary") truco
+        a(href="#" onclick="cantar('#{game.player}','truco');" type="button" class="btn btn-primary") truco
       if(game.plays.indexOf('realenvido')>0)
-        a(href="#" type="button" class="btn btn-primary") realenvido
+        a(href="#" onclick="cantar('#{game.player}','realenvido');" type="button" class="btn btn-primary") realenvido
       if(game.plays.indexOf('faltaenvido')>0)
-        a(href="#" type="button" class="btn btn-primary") faltaenvido
+        a(href="#" onclick="cantar('#{game.player}','faltaenvido');" type="button" class="btn btn-primary") faltaenvido
       if(game.plays.indexOf('retruco')>0)
-        a(href="#" type="button" class="btn btn-primary") retruco
+        a(href="#" onclick="cantar('#{game.player}','retruco');" type="button" class="btn btn-primary") retruco
        if(game.plays.indexOf('valecuatro')>0)
-        a(href="#" type="button" class="btn btn-primary") valecuatro
+        a(href="#" onclick="cantar('#{game.player}','valecuatro');" type="button" class="btn btn-primary") valecuatro
     
   

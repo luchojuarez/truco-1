@@ -126,13 +126,13 @@ Game.prototype.play = function(player, action, value){
    }
 
   if(this.currentRound.currentTurn !== player) {
-    throw new Error("[ERROR] INVALID TURN...");
+    err = new Error("[ERROR] INVALID TURN...");
         err.name = 'invalidTurn';
     throw err;
   }
 
   if(this.currentRound.fsm.cannot(action)) {
-    throw new Error("[ERROR] INVALID MOVE...");
+    err = new Error("[ERROR] INVALID MOVE...");
     err.name = 'invalidMove';
     throw err;
   }
