@@ -56,6 +56,16 @@ var RoundSchema = new Schema({
 
 });
 
+RoundSchema.pre('save',function(next) {
+    this.markModified('fsm');
+    this.markModified('board');
+    this.markModified('envidoStack');
+    this.markModified('resultados');
+    this.markModified('score');
+    this.markModified('game');
+    next();
+})
+
 var Round = mongoose.model('Round', RoundSchema);
 
 
