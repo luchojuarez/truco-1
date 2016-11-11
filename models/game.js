@@ -158,9 +158,11 @@ Game.prototype.play = function(player, action, value){
     this.status = this.const.PLAYING;
   }
 
-  //TODO: VERIFICAR SI EL JUEGO TERMINO
+  if (this.hasEnded()) {
+    //finaliza el juego y retorna el jugador que gano
+    return this.endGame();
+  };
 
-  return this.currentRound.currentTurn;
 };
 
 /*
