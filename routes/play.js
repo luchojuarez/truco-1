@@ -33,8 +33,10 @@ module.exports = function(io) {
                 p = game.player1;
                 board = game.currentRound.board;
             }
+            console.log("<>>>>>>>>>>>>>><<<<<<<<<<>>>><<<>>>><<<>>><<<<>>",game.currentRound.score);
             var objectGame = {
                 game: game,
+                score:game.currentRound.score,
                 board: board,
                 cartas: p.cards,
                 nickname: p.nickname,
@@ -135,7 +137,7 @@ module.exports = function(io) {
                     board:game.currentRound.board,
                     player1:game.player1,
                     player2:game.player2,
-                    score:game.score
+                    score:game.currentRound.score
                 }
                 return x;
             }
@@ -143,7 +145,6 @@ module.exports = function(io) {
                 if (err) {
                     console.error(err.name);
                 }else {
-                    console.log(res);
                     socket.emit('update cards done',res);
                 }
             })
