@@ -12,6 +12,7 @@ block content
     function foo(index,player) {
         socket.emit('playCard',{player:player,index:index});
     };
+    
     $( document ).ready(function() {
         socket.emit('update cards');
     });
@@ -22,12 +23,16 @@ block content
         console.log(board[0]);
     });
     
+    function test() {
+      socket.emit('test');
+    }
+
     function cantar(player,jugada) {
       socket.emit('jugada',{player:player,play:jugada});
     }
     socket.on('cartaJugada',function (data) {
-        var id = "card"+data.index.toString();
-        $("#"+id).hide();        
+        var hand = $("#hand td");
+        hand.eq(data.index).remove();        
     })
     socket.on('updateBoard',function (data) {
         var card = data.cartaJugada.number.toString()+"-"+data.cartaJugada.suit;
@@ -60,10 +65,14 @@ block content
         each card, index in game.board[0]
           img(width="90", height="120" ,src="/images/cartas/#{card.number}-#{card.suit}.png")
 
+  a(href="#" onclick="test();" type="button" class="btn btn-primary") TEST
   
   div(class="center")
-    each card,index in game.cartas
-      img(class="card", id="card#{index}",width="90", height="120", OnClick="foo(#{index},'#{game.player}');",src="/images/cartas/#{card.number}-#{card.suit}.png")
+    table
+      tr(id="hand")
+        each card,index in game.cartas
+          td
+            img(class="card", id="card#{index}",width="90", height="120", OnClick="foo(this.parentNode.cellIndex,'#{game.player}');",src="/images/cartas/#{card.number}-#{card.suit}.png")
   
   div
     div(class='btn-group btn-group-lg')
