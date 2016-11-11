@@ -122,13 +122,31 @@ module.exports = function(io) {
                             playSpace.to(socket.id).emit('invalidTurn');
                             break;
                         default:
-                            console.error(err.name);
+                            console.error(err);
                     }
                 }else {
                     socket.broadcast.to(playroom).emit('update after quiero',{score:0});
                 }
             })
         })
+
+
+        socket.on('test',function(data){
+            Game.load(gameId,function (err,g){
+                if (err)
+                    console.log(err);
+                console.log("Board:");
+                console.log(g.currentRound.board);
+                console.log("Current state");
+                console.log(g.currentRound.currentState);
+                console.log("Turno");
+                console.log(g.currentRound.currentTurn);
+                console.log(g.player1);
+                console.log(g.player2);
+                console.log("Score");
+                console.log(g.score);
+            })
+        });
 
         socket.on('update cards',function(data){
 
@@ -143,7 +161,7 @@ module.exports = function(io) {
             }
             apply(gameId,updateCardsHandler,function (err,game,res) {
                 if (err) {
-                    console.error(err.name);
+                    console.error(err);
                 }else {
                     socket.emit('update cards done',res);
                 }
@@ -176,13 +194,18 @@ module.exports = function(io) {
                             playSpace.to(socket.id).emit('invalidTurn');
                             break;
                         default:
-                            console.error(err.name);
+                            console.error(err);
                     }
                 }
                 else {
-                    console.log("se jugo una carta",res);
+                    var objeto = {
+                        newBoard:game.currentRound.board,
+                        score:game.currentRound.score,
+                        player1:game.player1,
+                        player2:game.player2
+                    }
                     socket.emit('cartaJugada',{index:data.index});
-                    playSpace.to(playroom).emit('updateBoard',{cartaJugada:res,newBoard:game.currentRound.board});
+                    playSpace.to(playroom).emit('cartaJugada',objeto);
                 }
 
             })
@@ -219,7 +242,6 @@ module.exports = function(io) {
                     }
                 } else {
                 //Enviar mensaje a todos los de la room excepto al que lo envia
-                    console.log(game.currentRound.currentState);
                     socket.broadcast.to(playroom).emit('cantaron',{jugada:data.play,player:data.player});
                 }
             })

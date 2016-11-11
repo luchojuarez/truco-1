@@ -12,28 +12,53 @@ block content
     function foo(index,player) {
         socket.emit('playCard',{player:player,index:index});
     };
+    
     $( document ).ready(function() {
         socket.emit('update cards');
-        console.log('#{game.score}')
     });
     
     socket.on('update cards done',function (data) {
         var board = data.board;
         var score = data.score;
-        console.log(score);
     });
     
+    function test() {
+      socket.emit('test');
+    }
+
     function cantar(player,jugada) {
       socket.emit('jugada',{player:player,play:jugada});
     }
     socket.on('cartaJugada',function (data) {
-        var id = "card"+data.index.toString();
-        $("#"+id).hide();        
+        var hand = $("#hand td");
+        hand.eq(data.index).remove();        
     })
+    
+    //- function insertCard(item,index){
+    //-     var tag = this.tag;
+    //-     var cartas= this.cartas; 
+    //-     var card = cartas[index].number.toString()+"-"+cartas[index].suit;
+    //-     tag.append('<img width="90", height="120", src="/images/cartas/'+card+'.png" ></img>');
+    //-     tag.html(function(i,originHTML){
+    //-         return originHTML+'<img width="90", height="120", src="/images/cartas/'+card+'.png" ></img>';
+    //-     })
+    //- }
+    //- function introduceInBoard0(item,index){
+    //-     //this tengo board[0]
+    //-     $("#board0").html=" ";
+    //-     document.getElementById("board0").innerHTML =" "; 
+    //-     this.forEach(insertCard,{tag:$("#board0"),cartas:this})
+    //- }
+    //- function introduceInBoard1(item,index){
+    //-     $("#board1").html=" ";
+    //-     document.getElementById("board1").innerHTML =" "; 
+    //-     this.forEach(insertCard,{tag:$("#board1"),cartas:this})
+    //- }
     socket.on('updateBoard',function (data) {
-        var card = data.cartaJugada.number.toString()+"-"+data.cartaJugada.suit;
-        var g = document.getElementById("board0");
-        g.innerHTML = g.innerHTML+'<img width="90", height="120", src="/images/cartas/'+card+'.png" ></img>';
+        var player;
+        var board=data.newBoard;
+        ('!{game.player}'==="player1")?player=data.player1:player=data.player2;
+        socket.emit('update cards');
     })
     socket.on('invalidTurn',function () {
         window.alert("Espera tu turno!")
@@ -60,11 +85,17 @@ block content
         each card, index in game.board[1]
           img(width="90", height="120" ,src="/images/cartas/#{card.number}-#{card.suit}.png")
 
+  a(href="#" onclick="test();" type="button" class="btn btn-primary") TEST
   
   div(class="center")
-    p acrual score round #{game.score}
-    each card,index in game.cartas
-      img(class="card", id="card#{index}",width="90", height="120", OnClick="foo(#{index},'#{game.player}');",src="/images/cartas/#{card.number}-#{card.suit}.png")
+
+    table
+      tr(id="hand")
+        p acrual score round #{game.score}
+        each card,index in game.cartas
+          td
+            img(class="card", id="card#{index}",width="90", height="120", OnClick="foo(this.parentNode.cellIndex,'#{game.player}');",src="/images/cartas/#{card.number}-#{card.suit}.png")
+
   
   div
     div(class='btn-group btn-group-lg')
