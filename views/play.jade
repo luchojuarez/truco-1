@@ -8,7 +8,7 @@ block content
     var url = window.location.href;
     var gameId = url.split('?')[1]; 
     var player = !{JSON.stringify(game.player)};
-    var plays = !{JSON.stringify(game.player)};
+    var plays = !{JSON.stringify(game.plays)};
     socket = io('/play',{ query: gameId+"&player="+player});
 
 
@@ -22,7 +22,7 @@ block content
     };
 
     function test() {
-      socket.emit('test',{plays:plays});
+      socket.emit('test');
       console.log(plays);
       //console.log(data.cartas);
       //var hand = $("#hand > td").remove();
@@ -156,17 +156,17 @@ block content
     div(id="right")
       div(class='btn-group-vertical')
         if(game.plays.indexOf('envido')>-1)
-          a(href="#" onclick="cantar('#{game.player}','envido');" type="button" class="btn btn-primary") envido
+          a(href="#" onclick="cantar('#{game.plays}','envido');" type="button" class="btn btn-primary") envido
         if(game.plays.indexOf('truco')>-1)
-          a(href="#" onclick="cantar('#{game.player}','truco');" type="button" class="btn btn-primary") truco
+          a(href="#" onclick="cantar('#{game.plays}','truco');" type="button" class="btn btn-primary") truco
         if(game.plays.indexOf('realenvido')>-1)
-          a(href="#" onclick="cantar('#{game.player}','realenvido');" type="button" class="btn btn-primary") realenvido
+          a(href="#" onclick="cantar('#{game.plays}','realenvido');" type="button" class="btn btn-primary") realenvido
         if(game.plays.indexOf('faltaenvido')>-1)
-          a(href="#" onclick="cantar('#{game.player}','faltaenvido');" type="button" class="btn btn-primary") faltaenvido
+          a(href="#" onclick="cantar('#{game.plays}','faltaenvido');" type="button" class="btn btn-primary") faltaenvido
         if(game.plays.indexOf('retruco')>-1)
-          a(href="#" onclick="cantar('#{game.player}','retruco');" type="button" class="btn btn-primary") retruco
+          a(href="#" onclick="cantar('#{game.plays}','retruco');" type="button" class="btn btn-primary") retruco
          if(game.plays.indexOf('valecuatro')>-1)
-          a(href="#" onclick="cantar('#{game.player}','valecuatro');" type="button" class="btn btn-primary") valecuatro
+          a(href="#" onclick="cantar('#{game.plays}','valecuatro');" type="button" class="btn btn-primary") valecuatro
       div(id="puntos")
         a actual score round
         br

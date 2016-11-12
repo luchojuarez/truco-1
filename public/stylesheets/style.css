@@ -11,9 +11,10 @@ h1 {
 h2 {
     text-align: center;
 }
-.win {
-    background-image: url('../images/win.jpg');
-    text-decoration-color: white;
+#win {
+    width:200px;
+    margin: auto;
+    height: auto;
 }
 
 
@@ -105,4 +106,3 @@ a {
 #notifications{
     text-align: right;
 }
-

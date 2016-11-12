@@ -165,7 +165,7 @@ module.exports = function(io) {
                 console.log(g.score);
                 console.log(g.const);
                 console.log("CURRENT STATUS: ",g.status);
-                console.log("plays",data.plays);
+                console.log("plays",g.plays);
             })
         });
 
