@@ -56,6 +56,16 @@ var RoundSchema = new Schema({
 
 });
 
+RoundSchema.pre('save',function(next) {
+    this.markModified('fsm');
+    this.markModified('board');
+    this.markModified('envidoStack');
+    this.markModified('resultados');
+    this.markModified('score');
+    this.markModified('game');
+    next();
+})
+
 var Round = mongoose.model('Round', RoundSchema);
 
 
@@ -173,7 +183,7 @@ function newTrucoFSM(){
             tround.pushEnvidoPlay(event);
         },
 
-        // Cuando se entra al estado realenvido: 
+        // Cuando se entra al estado realenvido:
         //  *apilar 3 puntos a la pila que guarda los diferentes cantos de envido (@envidoStack)
         //  *si se canto realenvido sin haberse cantado otro envido antes guardar el turno del que canto
         onenterrealenvido: function(event, from, to, carta, tround) {
@@ -183,7 +193,7 @@ function newTrucoFSM(){
             tround.pushEnvidoPlay(event);
         },
 
-        // Cuando se entra al estado faltaenvido: 
+        // Cuando se entra al estado faltaenvido:
         //  *calcula los puntos que daria la falta restando los ya acumulados en(@envidoStack) y los apila
         //  *si se canto faltaenvido sin haberse cantado otro envido antes guardar el turno del que canto
         onenterfaltaenvido: function(event, from, to, carta, tround) {
@@ -215,7 +225,7 @@ function newTrucoFSM(){
                 tround.nextTurn = tround.currentTurn;
             }
         },
-    
+
         //Despues del quiero depende de donde vino
         onafterquiero: function(event, from, to, carta, tround) {
             valueOf[from] ? tround.sumarPuntosDeEnvidoCon(true) : tround.puntosTruco++;
@@ -372,7 +382,7 @@ Round.prototype.updateRoundScore = function() {
                 break;
             }
         case 2:
-            { //2 empates, gana el 3er duelo 
+            { //2 empates, gana el 3er duelo
                 asignarPuntos(this,this.resultados[2],this.puntosTruco);
                 break;
             }

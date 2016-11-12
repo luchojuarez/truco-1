@@ -20,16 +20,11 @@ var PlayerSchema = new Schema({
 });
 
 
-PlayerSchema.statics.loadByUsername= function(name,cb){
-//Player.prototype.loadByUsername= function(name){
-    return this.findOne({nickname : name })
-        .exec(function (err,tgame) {
-        if (err){
-            cb(err);
-            console.error("GAME NOT LOADED: ",err);
-        }
-    });
-}
+PlayerSchema.pre('save',function(next) {
+    this.markModified('envidoPoints');
+    this.markModified('cards');
+    next();
+})
 
 var Player = mongoose.model('Player', PlayerSchema);
 

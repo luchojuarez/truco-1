@@ -18,9 +18,10 @@ var Schema = mongoose.Schema;
 
 var state = {
   UNSTARTED : "unstarted",
-  STARTED : "started" ,
+  PLAYING : "Init" ,
   ENDED : "ended",
-  ABORTED : "abort"
+  ABORTED : "abort",
+  NEWROUND: "newRound"
 };
 
 /*
@@ -34,7 +35,7 @@ var GameSchema = new Schema({
   currentRound: { type: Schema.Types.ObjectId , ref: 'Round' },
   rounds:       { type : Array , default : [] },
   maxScore:		  { type : Number , default : 30},
-  score:        [Number],
+  score:        { type: Array , default : [0, 0] },
   status:       { type :String , default : state.UNSTARTED },
   const:        { type: Object, default : state }
 });
@@ -43,6 +44,8 @@ var GameSchema = new Schema({
 //it will try to save that subdocument if it exists
 
 function saveSubdoc(instance, subDocName) {
+
+
   return new Promise(function(resolve, reject) {
       if (instance[subDocName]) {
         instance[subDocName].save(function(err, object) {
@@ -58,6 +61,10 @@ function saveSubdoc(instance, subDocName) {
 
 
 GameSchema.pre('save', function (next) {
+  this.markModified('rounds');
+  this.markModified('score');
+  this.markModified('status');
+  this.markModified('const');
    var game = this;
    Promise.all([saveSubdoc(game,"currentRound"),saveSubdoc(game,"player1"),saveSubdoc(game,"player2")])
     .then(function(values) {
@@ -104,34 +111,58 @@ Game.prototype.setup = function (opts) {
 
 
 Game.prototype.start = function () {
-  if (gameIsRunable && this.status == state.UNSTARTED) {
-    this.status = state.STARTED;
-    this.newRound();
+  if (gameIsRunable && this.status == this.const.UNSTARTED) {
+    if (this.currentRound)
+      this.currentRound = null;
+    this.currentHand= 'player1';
+    var round = new Round({game :this, currentTurn : this.currentHand});
+    round.resetValues();
+    round.deal();
+    this.currentRound = round;
+    this.rounds.push(round);
+    this.status = this.const.PLAYING;
     return true;
   } else {return false;}
 };
 
 Game.prototype.abort = function () {
-  this.status = state.ABORTED;
+  this.status = this.const.ABORTED;
 }
 
 /*
  * Check if it's valid move and play in the current round
  */
 Game.prototype.play = function(player, action, value){
-  if(this.state == state.ABORTED)
-    throw new Error("[ERROR] GAME ABORTED...");
+  if(this.status == this.const.ABORTED) {
+    err = new Error("[ERROR] GAME ABORTED...");
+    err.name = 'gameAborted';
+    throw err;
+   }
 
-  if(this.currentRound.currentTurn !== player)
-    throw new Error("[ERROR] INVALID TURN...");
+  if(this.currentRound.currentTurn !== player) {
+    err = new Error("[ERROR] INVALID TURN...");
+        err.name = 'invalidTurn';
+    throw err;
+  }
 
-  if(this.currentRound.fsm.cannot(action))
-    throw new Error("[ERROR] INVALID MOVE...");
- 
+  if(this.currentRound.fsm.cannot(action)) {
+    err = new Error("[ERROR] INVALID MOVE...");
+    err.name = 'invalidMove';
+    throw err;
+  }
+
 
   this.currentRound.play(action, value);
+  if (this.const.NEWROUND != this.status) {
+    this.const.PLAYING = this.currentRound.currentState;
+    this.status = this.const.PLAYING;
+  }
 
-  return this.currentRound.currentTurn;
+  if (this.hasEnded()) {
+    //finaliza el juego y retorna el jugador que gano
+    return this.endGame();
+  };
+
 };
 
 /*
@@ -141,9 +172,10 @@ Game.prototype.newRound = function(){
   this.currentRound = null;
   this.currentHand === undefined? this.currentHand= 'player1' : this.currentHand = switchPlayer(this.currentHand);
   var round = new Round({game :this, currentTurn : this.currentHand});
-
   round.resetValues();
-  if (this.status == state.STARTED) {round.deal();}
+  if (this.status == this.const.PLAYING) {round.deal();}
+  this.const.PLAYING = this.const.NEWROUND;
+  this.status = this.const.NEWROUND;
   this.currentRound = round;
   this.rounds.push(round);
 }
@@ -155,7 +187,7 @@ Game.prototype.endGame = function () {
   this.currentRound = null;
   var ganador;
   this.score[0] >= this.maxScore ? ganador=this.player1 : ganador=this.player2;
-  this.status = state.ENDED;
+  this.status = this.const.ENDED;
   return ganador;
 };
 
@@ -193,7 +225,7 @@ function recreateCards (cardarray) {
   });
 }
 
-function gameIsRunable () {  
+function gameIsRunable () {
   return (this.payer1 !== null && this.player2 !== null);
 }
 module.exports.game = Game;
