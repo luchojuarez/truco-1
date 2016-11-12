@@ -41,6 +41,7 @@ module.exports = function(io) {
             var objectGame = {
                 game: game,
                 board: board,
+                turn : game.currentRound.currentTurn,
                 cartas: p.cards,
                 nickname: p.nickname,
                 player: player,
@@ -83,6 +84,7 @@ module.exports = function(io) {
             }
         })
     };
+
 
 
     //Router middle ware setup
@@ -179,32 +181,11 @@ module.exports = function(io) {
                     errorControl(err);
                 }else {
                     statusControl(game,{maybePlayer: res});
-                    socket.broadcast.to(playroom).emit('update after quiero',{score:0});
+                    playSpace.to(playroom).emit('changeTurn',{score:game.score,turn:game.currentRound.currentTurn});
                 }
             })
         })
 
-
-
-        socket.on('update cards',function(data){
-
-            function updateCardsHandler(game) {
-                var x = {
-                    board:game.currentRound.board,
-                    player1:game.player1,
-                    player2:game.player2,
-                    score:game.score
-                }
-                return x;
-            }
-            apply(gameId,updateCardsHandler,function (err,game,res) {
-                if (err) {
-                    console.error(err);
-                }else {
-                    socket.emit('update cards done',res);
-                }
-            })
-        })
 
         //Evento de carta jugada
         socket.on('playCard', function(data) {
@@ -231,7 +212,8 @@ module.exports = function(io) {
                     socket.emit('cartaJugada',{index:data.index});
                     //playSpace.to(playroom).emit('cartaJugada',objeto);
                     statusControl(game,{maybePlayer : res.maybePlayer});
-                    playSpace.to(playroom).emit('updateBoard',{cartaJugada:res.carta,newBoard:game.currentRound.board});
+                    playSpace.to(playroom).emit('updateBoard',{cartaJugada:res.carta,newBoard:game.currentRound.board, currentTurn : game.currentRound.currentTurn});
+                    playSpace.to(playroom).emit('changeTurn',{score:game.score,turn:game.currentRound.currentTurn});
                 }
 
             })
@@ -255,6 +237,7 @@ module.exports = function(io) {
                 } else {
                 //Enviar mensaje a todos los de la room excepto al que lo envia
                     statusControl(game,{maybePlayer:res});
+                    playSpace.to(playroom).emit('changeTurn',{score:game.score,turn:game.currentRound.currentTurn});
                     socket.broadcast.to(playroom).emit('cantaron',{jugada:data.play,player:data.player});
                 }
             })
