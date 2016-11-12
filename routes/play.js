@@ -23,26 +23,29 @@ module.exports = function(io) {
         gameId = req.query.gameId;
         Game.load(gameId, function(err, game) {
             if (err) next(err);
-            var p, board, player;
+            var p, board, player,score,envidoPoints;
             if (req.user._id.toString() === game.player2.user.toString()) {
                 p = game.player2;
                 player = "player2";
                 board = [game.currentRound.board[1], game.currentRound.board[0]];
+                score = [game.score[1],game.score[0]];
+                envidoPoints = game.player2.envidoPoints;
+
             } else {
                 player = "player1";
                 p = game.player1;
                 board = game.currentRound.board;
+                score = game.score;
+                envidoPoints = game.player1.envidoPoints;
             }
-            console.log("<>>>>>>>>>>>>>><<<<<<<<<<>>>><<<>>>><<<>>><<<<>>",game.currentRound.score);
             var objectGame = {
                 game: game,
-                score:game.currentRound.score,
                 board: board,
                 cartas: p.cards,
                 nickname: p.nickname,
                 player: player,
                 user: req.user,
-                score: game.score,
+                score: score,
                 plays: game.currentRound.fsm.transitions()
             }
             req.game = objectGame;
@@ -91,19 +94,20 @@ module.exports = function(io) {
     playSpace.on('connection', function(socket) {
 
         //Common resources
+        var currentPlayer = socket.handshake.query.player;
         var gameId = socket.handshake.query.gameId;
         var playroom = 'play-' + gameId;
 
-        function statusControl(game) {
+        function statusControl(game,data) {
             switch (game.status) {
                 case game.const.NEWROUND:
                     //Que hacer cuando hay una nueva ronda
-                    playSpace.to(playroom).emit("nuevaRonda");
-                    //game.status=game.const.PLAYING;
+                    playSpace.to(playroom).emit("nuevaRonda",{hands: [game.player1.cards,game.player2.cards]});
                     break;
                 case game.const.ENDED:
-                    //Cuando termino el juego -> NO IMPLEMENTADO, NO VA A ANDAR
+                    //Cuando termino el juego
                     console.log("El juego termino");
+                    playSpace.to(playroom).emit('endGame',{player:data.maybePlayer});
                     break;
                 case game.const.ABORTED:
                     //Se aborto el juego, el juego se aborta con game.abort()
@@ -130,6 +134,9 @@ module.exports = function(io) {
                     break;
                 case 'invalidTurn':
                     playSpace.to(socket.id).emit('invalidTurn');
+                    break;
+                case 'gameEnded':
+                    playSpace.to(socket.id).emit('gameEnded');
                     break;
                 default:
                     console.error(err);
@@ -171,7 +178,7 @@ module.exports = function(io) {
                 if (err) {
                     errorControl(err);
                 }else {
-                    statusControl(game);
+                    statusControl(game,{maybePlayer: res});
                     socket.broadcast.to(playroom).emit('update after quiero',{score:0});
                 }
             })
@@ -186,7 +193,7 @@ module.exports = function(io) {
                     board:game.currentRound.board,
                     player1:game.player1,
                     player2:game.player2,
-                    score:game.currentRound.score
+                    score:game.score
                 }
                 return x;
             }
@@ -206,8 +213,8 @@ module.exports = function(io) {
                 let cardIndex = data.index;
                 let player = data.player;
                 var carta = game[player].cards[cardIndex];
-                game.play(player,'playCard',game[player].cards[cardIndex]);
-                return carta;
+                var maybePlayer = game.play(player,'playCard',game[player].cards[cardIndex]);
+                return {carta:carta,maybePlayer:maybePlayer};
             }
 
             apply(gameId,playCardHandler,function (err,game,res) {
@@ -223,8 +230,8 @@ module.exports = function(io) {
                     }
                     socket.emit('cartaJugada',{index:data.index});
                     //playSpace.to(playroom).emit('cartaJugada',objeto);
-                    playSpace.to(playroom).emit('updateBoard',{cartaJugada:res,newBoard:game.currentRound.board});
-                    statusControl(game);
+                    statusControl(game,{maybePlayer : res.maybePlayer});
+                    playSpace.to(playroom).emit('updateBoard',{cartaJugada:res.carta,newBoard:game.currentRound.board});
                 }
 
             })
@@ -247,7 +254,7 @@ module.exports = function(io) {
                     errorControl(err);
                 } else {
                 //Enviar mensaje a todos los de la room excepto al que lo envia
-                    statusControl(game);
+                    statusControl(game,{maybePlayer:res});
                     socket.broadcast.to(playroom).emit('cantaron',{jugada:data.play,player:data.player});
                 }
             })

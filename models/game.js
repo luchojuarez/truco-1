@@ -139,6 +139,11 @@ Game.prototype.play = function(player, action, value){
     throw err;
    }
 
+  if(this.status == this.const.ENDED) {
+    err = new Error("GAME HAS ENDED...");
+    err.name = 'gameEnded';
+    throw err;
+  }
   if(this.currentRound.currentTurn !== player) {
     err = new Error("[ERROR] INVALID TURN...");
         err.name = 'invalidTurn';
@@ -153,15 +158,19 @@ Game.prototype.play = function(player, action, value){
 
 
   this.currentRound.play(action, value);
-  if (this.const.NEWROUND != this.status) {
+  if (this.currentRound.currentState != 'init') {
     this.const.PLAYING = this.currentRound.currentState;
     this.status = this.const.PLAYING;
+  } else {
+    this.status = this.const.NEWROUND;
   }
 
   if (this.hasEnded()) {
     //finaliza el juego y retorna el jugador que gano
     return this.endGame();
-  };
+  } else {
+    return null;
+  }
 
 };
 
@@ -184,7 +193,6 @@ Game.prototype.newRound = function(){
 
 //borra la ronda corriente y devuelve el jugador ganador
 Game.prototype.endGame = function () {
-  this.currentRound = null;
   var ganador;
   this.score[0] >= this.maxScore ? ganador=this.player1 : ganador=this.player2;
   this.status = this.const.ENDED;

@@ -83,7 +83,6 @@ a {
     width: 500px;
 }
 
-
 .header {
     position: absolute;
     width: 100%; /* hacemos que la cabecera ocupe el ancho completo de la página */
@@ -106,3 +105,4 @@ a {
 #notifications{
     text-align: right;
 }
+
