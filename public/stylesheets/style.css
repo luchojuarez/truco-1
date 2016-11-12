@@ -26,15 +26,20 @@ h2 {
   float: left;
   text-align: center;
 }
-#left-column {
-  float: left;
-  width: 300px;
+#wrap {
+    margin: auto;
+    display: flex;
+    justify-content: center;
+    width: 600px;
+    height: 50%;
 }
 
-#right-column {
-  float: right;
-  width: 300px;
+#left, #right {
+    top: 0;
+    padding: 20px;
 }
+
+
 
 a {
   color: #00B7FF;
@@ -56,20 +61,28 @@ a {
     width="65";
     height="90";
 }
+#puntos{
+    background-image: url('/images/note.png');
+    width: 93px;
+    height: 50%;
+    background-size: contain;
+    padding-top: 26px;
+    font-family: "Brush Script MT",cursive;
+    background-repeat: no-repeat;
+}
 
 .mesa{
     /*padding: 20px;*/
+    background-image: url("/images/wood.png");
+    background-repeat: no-repeat;
+    float: right;
+    background-size: 100% 100%;
     border-radius: 25px;
     margin: auto;
     height: 260px;
     width: 500px;
-    background-image: url("/images/wood.jpg");
-    border: 3px solid black;
 }
 
-.cartas{
-    margin: auto;
-}
 
 .header {
     position: absolute;

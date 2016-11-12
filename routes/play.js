@@ -81,6 +81,7 @@ module.exports = function(io) {
         })
     };
 
+
     //Router middle ware setup
     router.use(mustBeLogged);
 
@@ -93,43 +94,53 @@ module.exports = function(io) {
         var gameId = socket.handshake.query.gameId;
         var playroom = 'play-' + gameId;
 
+        function statusControl(game) {
+            switch (game.status) {
+                case game.const.NEWROUND:
+                    //Que hacer cuando hay una nueva ronda
+                    playSpace.to(playroom).emit("nuevaRonda");
+                    //game.status=game.const.PLAYING;
+                    break;
+                case game.const.ENDED:
+                    //Cuando termino el juego -> NO IMPLEMENTADO, NO VA A ANDAR
+                    console.log("El juego termino");
+                    break;
+                case game.const.ABORTED:
+                    //Se aborto el juego, el juego se aborta con game.abort()
+                    console.log("El juego se aborto");
+                    break;
+                case game.const.PLAYING:
+                    //Se esta jugando
+                    console.log("Jugando :",game.status);
+                    break
+                default:
+                    //Otro
+                    console.log("Estado del juego: ",game.status);
+            }
+        };
+
+        function errorControl(err) {
+            switch (err.name) {
+                case 'gameAborted':
+                    //Handler para decirle que el juego esta cancelado
+                    break;
+                case 'invalidMove':
+                    //Handler para decirle que al cliente que realizo una movida invalida
+                    //playSpace.to(socket.id).emit('invalidMove'); //Del lado del cliente podria tirar un alert
+                    break;
+                case 'invalidTurn':
+                    playSpace.to(socket.id).emit('invalidTurn');
+                    break;
+                default:
+                    console.error(err);
+            }
+        }
+
         //Socket setup
         socket.join(playroom);
 
 
         //Events
-        socket.on('cardClicked', function(data) {
-            //console.log("se clickeo la carta ",data);
-        })
-
-        //Evento de envido querido (o no quiero)
-        socket.on('quiero',function(data){
-            function quieroHandler(game) {
-                console.log(data.player,data.jugada);
-                return game.play(data.player,data.jugada);
-            }
-            apply(gameId,quieroHandler,function (err,game,res) {
-                if (err) {
-                    switch (err.name) {
-                        case 'gameAborted':
-                            //Handler para decirle que el juego esta cancelado
-                            break;
-                        case 'invalidMove':
-                            //Handler para decirle que al cliente que realizo una movida invalida
-                            //playSpace.to(socket.id).emit('invalidMove'); //Del lado del cliente podria tirar un alert
-                            break;
-                        case 'invalidTurn':
-                            playSpace.to(socket.id).emit('invalidTurn');
-                            break;
-                        default:
-                            console.error(err);
-                    }
-                }else {
-                    socket.broadcast.to(playroom).emit('update after quiero',{score:0});
-                }
-            })
-        })
-
 
         socket.on('test',function(data){
             Game.load(gameId,function (err,g){
@@ -145,8 +156,28 @@ module.exports = function(io) {
                 console.log(g.player2);
                 console.log("Score");
                 console.log(g.score);
+                console.log(g.const);
+                console.log("CURRENT STATUS: ",g.status);
+                console.log("plays",data.plays);
             })
         });
+
+        //Evento de envido querido (o no quiero)
+        socket.on('quiero',function(data){
+            function quieroHandler(game) {
+                return game.play(data.player,data.jugada);
+            }
+            apply(gameId,quieroHandler,function (err,game,res) {
+                if (err) {
+                    errorControl(err);
+                }else {
+                    statusControl(game);
+                    socket.broadcast.to(playroom).emit('update after quiero',{score:0});
+                }
+            })
+        })
+
+
 
         socket.on('update cards',function(data){
 
@@ -174,7 +205,6 @@ module.exports = function(io) {
             function playCardHandler(game){
                 let cardIndex = data.index;
                 let player = data.player;
-                //podria devolver la carta jugada
                 var carta = game[player].cards[cardIndex];
                 game.play(player,'playCard',game[player].cards[cardIndex]);
                 return carta;
@@ -182,20 +212,7 @@ module.exports = function(io) {
 
             apply(gameId,playCardHandler,function (err,game,res) {
                 if (err) {
-                    switch (err.name) {
-                        case 'gameAborted':
-                            //Handler para decirle que el juego esta cancelado
-                            break;
-                        case 'invalidMove':
-                            //Handler para decirle que al cliente que realizo una movida invalida
-                            //playSpace.to(socket.id).emit('invalidMove'); //Del lado del cliente podria tirar un alert
-                            break;
-                        case 'invalidTurn':
-                            playSpace.to(socket.id).emit('invalidTurn');
-                            break;
-                        default:
-                            console.error(err);
-                    }
+                    errorControl(err);
                 }
                 else {
                     var objeto = {
@@ -205,7 +222,9 @@ module.exports = function(io) {
                         player2:game.player2
                     }
                     socket.emit('cartaJugada',{index:data.index});
-                    playSpace.to(playroom).emit('cartaJugada',objeto);
+                    //playSpace.to(playroom).emit('cartaJugada',objeto);
+                    playSpace.to(playroom).emit('updateBoard',{cartaJugada:res,newBoard:game.currentRound.board});
+                    statusControl(game);
                 }
 
             })
@@ -225,23 +244,10 @@ module.exports = function(io) {
 
             apply(gameId,playHandler,function (err,game,res) {
                 if (err) {
-                    switch (err.name) {
-                        case 'gameAborted':
-                            //Handler para decirle que el juego esta cancelado
-                            break;
-                        case 'invalidMove':
-                            console.log(err.name);
-                            //Handler para decirle que al cliente que realizo una movida invalida
-                            //playSpace.to(socket.id).emit('invalidMove'); //Del lado del cliente podria tirar un alert
-                            break;
-                        case 'invalidTurn':
-                            socket.emit('invalidTurn');
-                            break;
-                        default:
-                            console.error(err);
-                    }
+                    errorControl(err);
                 } else {
                 //Enviar mensaje a todos los de la room excepto al que lo envia
+                    statusControl(game);
                     socket.broadcast.to(playroom).emit('cantaron',{jugada:data.play,player:data.player});
                 }
             })
