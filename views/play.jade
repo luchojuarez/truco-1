@@ -35,9 +35,9 @@ block content
       socket.emit('jugada',{player:player,play:jugada});
     }
 
-    var textoTurno = function(player) {
-      console.log(player,"  ",currentTurn);
-      if (player === currentTurn) {
+    var textoTurno = function(turn) {
+        console.log("<<",player,currentTurn)
+      if (player === turn) {
         return "Te toca jugar!";
       } else {
         return "Es el turno de "+playerOfTurn.nickname;
@@ -99,12 +99,15 @@ block content
     
     
     socket.on('changeTurn',function (data){
-      console.log("Hola q ace");
-      $("#turno").replaceWith(textoTurno(player));
+      console.log("Hola q ace",textoTurno(data.turn));
+      //$("#turno").replaceWith(textoTurno(player));
+      document.getElementById("textoturno").innerHTML = textoTurno(data.turn);
       var myScore = player=="player1"? data.score:[data.score[1],data.score[0]];
       console.log(myScore);
-      $("#nosotros").contents().html(myScore[0]);
-      $("#ellos").contents().html(myScore[1]);
+      document.getElementById("nosotros").innerHTML = myScore[0];
+      document.getElementById("ellos").innerHTML = myScore[1];
+      //$("#nosotros").contents().html(myScore[0]);
+      //$("#ellos").contents().html(myScore[1]);
     });
     socket.on('update cards done',function (data) {
         var board = data.board;
@@ -187,8 +190,6 @@ block content
          if(game.plays.indexOf('valecuatro')>-1)
           a(href="#" onclick="cantar('#{game.plays}','valecuatro');" type="button" class="btn btn-primary") valecuatro
       div(id="puntos")
-        a actual score round
-        br
         table(style="width:100%")
           thead
             tr
@@ -198,7 +199,7 @@ block content
             tr
               td(id="nosotros") #{game.score[0]}
               td(id="ellos") #{game.score[1]}
-      p(id="turno")
+        a(id="textoturno") hola
 
   div(class="center")
     table
