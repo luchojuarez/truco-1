@@ -2,6 +2,7 @@
 module.exports = function(io) {
 
     //Init common resources
+    var _ = require('lodash');
     var express = require('express');
     var passport = require('passport');
     var playSpace = io.of('/play');
@@ -85,6 +86,12 @@ module.exports = function(io) {
         })
     };
 
+    function jugadas(game) {
+        var plays = game.currentRound.fsm.transitions();
+        return _.filter(plays,function (p) {
+            return p != "playCard";
+        });
+    }
 
 
     //Router middle ware setup
@@ -167,7 +174,8 @@ module.exports = function(io) {
                 console.log(g.score);
                 console.log(g.const);
                 console.log("CURRENT STATUS: ",g.status);
-                console.log("plays",data.player);
+                console.log("requestPlayer",data.player);
+                console.log("jugadas",jugadas(g));
             })
         });
 
