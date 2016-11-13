@@ -190,7 +190,7 @@ module.exports = function(io) {
                 }else {
                     statusControl(game,{maybePlayer: res});
                     console.log("<<<<<<<<<",game.currentRound.fsm.transitions());
-                    playSpace.to(playroom).emit('changeTurn',{score:game.score,turn:game.currentRound.currentTurn,plays:game.currentRound.fsm.transitions()});
+                    playSpace.to(playroom).emit('changeTurn',{score:game.score,turn:game.currentRound.currentTurn,plays:jugadas(game)});
                 }
             })
         })
@@ -222,7 +222,7 @@ module.exports = function(io) {
                     //playSpace.to(playroom).emit('cartaJugada',objeto);
                     statusControl(game,{maybePlayer : res.maybePlayer});
                     playSpace.to(playroom).emit('updateBoard',{cartaJugada:res.carta,newBoard:game.currentRound.board, currentTurn : game.currentRound.currentTurn});
-                    playSpace.to(playroom).emit('changeTurn',{score:game.score,turn:game.currentRound.currentTurn,plays:game.currentRound.fsm.transitions()});
+                    playSpace.to(playroom).emit('changeTurn',{score:game.score,turn:game.currentRound.currentTurn,plays:jugadas(game)});
                 }
 
             })
@@ -246,7 +246,7 @@ module.exports = function(io) {
                 } else {
                 //Enviar mensaje a todos los de la room excepto al que lo envia
                     statusControl(game,{maybePlayer:res});
-                    playSpace.to(playroom).emit('changeTurn',{score:game.score,turn:game.currentRound.currentTurn,plays:game.currentRound.fsm.transitions()});
+                    playSpace.to(playroom).emit('changeTurn',{score:game.score,turn:game.currentRound.currentTurn,plays:jugadas(game)});
                     socket.broadcast.to(playroom).emit('cantaron',{jugada:data.play,player:data.player});
                 }
             })
