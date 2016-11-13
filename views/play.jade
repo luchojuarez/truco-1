@@ -25,8 +25,8 @@ block content
     };
 
     function test() {
-      socket.emit('test');
-      console.log(plays);
+      socket.emit('test',{player:player});
+      console.log(player);
       //console.log(data.cartas);
       //var hand = $("#hand > td").remove();
     }
@@ -36,7 +36,6 @@ block content
     }
 
     var textoTurno = function(turn) {
-        console.log("<<",player,currentTurn)
       if (player === turn) {
         return "Te toca jugar!";
       } else {
@@ -93,21 +92,30 @@ block content
     
 
     $( document ).ready(function() {
-        $("#turno").replaceWith(textoTurno(player));
+        document.getElementById("textoturno").innerHTML = textoTurno(currentTurn);
         socket.emit('update cards');
     });
     
-    
+    function actualizarBotones(item,index){
+        console.log(item)
+        $("#botones").append("<a OnClick='cantar("+player+","+item+")',type='button', class='btn btn-primary'>"+item+"</a>")
+    }
     socket.on('changeTurn',function (data){
-      console.log("Hola q ace",textoTurno(data.turn));
-      //$("#turno").replaceWith(textoTurno(player));
-      document.getElementById("textoturno").innerHTML = textoTurno(data.turn);
-      var myScore = player=="player1"? data.score:[data.score[1],data.score[0]];
-      console.log(myScore);
-      document.getElementById("nosotros").innerHTML = myScore[0];
-      document.getElementById("ellos").innerHTML = myScore[1];
-      //$("#nosotros").contents().html(myScore[0]);
-      //$("#ellos").contents().html(myScore[1]);
+        // actualiza el texto de quien juega
+        document.getElementById("textoturno").innerHTML = textoTurno(data.turn);
+        var myScore = player=="player1"? data.score:[data.score[1],data.score[0]];
+        
+        // actualiza el puntaje de cada jugador
+        document.getElementById("nosotros").innerHTML = myScore[0];
+        document.getElementById("ellos").innerHTML = myScore[1];
+        
+        // actualiza las jugadas posibles
+        //data.plays tengo las posibles jugadas
+        $("#botones > a").remove();
+        console.log(data.plays)
+        data.plays.forEach(actualizarBotones);
+        
+        
     });
     socket.on('update cards done',function (data) {
         var board = data.board;
@@ -176,7 +184,7 @@ block content
             img(width="90", height="120" ,src="/images/cartas/#{card.number}-#{card.suit}.png")
   
     div(id="right")
-      div(class='btn-group-vertical')
+      div(class='btn-group-vertical', id="botones")
         if(game.plays.indexOf('envido')>-1)
           a(href="#" onclick="cantar('#{game.plays}','envido');" type="button" class="btn btn-primary") envido
         if(game.plays.indexOf('truco')>-1)

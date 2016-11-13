@@ -167,7 +167,7 @@ module.exports = function(io) {
                 console.log(g.score);
                 console.log(g.const);
                 console.log("CURRENT STATUS: ",g.status);
-                console.log("plays",g.plays);
+                console.log("plays",data.player);
             })
         });
 
@@ -181,7 +181,8 @@ module.exports = function(io) {
                     errorControl(err);
                 }else {
                     statusControl(game,{maybePlayer: res});
-                    playSpace.to(playroom).emit('changeTurn',{score:game.score,turn:game.currentRound.currentTurn});
+                    console.log("<<<<<<<<<",game.currentRound.fsm.transitions());
+                    playSpace.to(playroom).emit('changeTurn',{score:game.score,turn:game.currentRound.currentTurn,plays:game.currentRound.fsm.transitions()});
                 }
             })
         })
@@ -213,7 +214,7 @@ module.exports = function(io) {
                     //playSpace.to(playroom).emit('cartaJugada',objeto);
                     statusControl(game,{maybePlayer : res.maybePlayer});
                     playSpace.to(playroom).emit('updateBoard',{cartaJugada:res.carta,newBoard:game.currentRound.board, currentTurn : game.currentRound.currentTurn});
-                    playSpace.to(playroom).emit('changeTurn',{score:game.score,turn:game.currentRound.currentTurn});
+                    playSpace.to(playroom).emit('changeTurn',{score:game.score,turn:game.currentRound.currentTurn,plays:game.currentRound.fsm.transitions()});
                 }
 
             })
@@ -237,7 +238,7 @@ module.exports = function(io) {
                 } else {
                 //Enviar mensaje a todos los de la room excepto al que lo envia
                     statusControl(game,{maybePlayer:res});
-                    playSpace.to(playroom).emit('changeTurn',{score:game.score,turn:game.currentRound.currentTurn});
+                    playSpace.to(playroom).emit('changeTurn',{score:game.score,turn:game.currentRound.currentTurn,plays:game.currentRound.fsm.transitions()});
                     socket.broadcast.to(playroom).emit('cantaron',{jugada:data.play,player:data.player});
                 }
             })
