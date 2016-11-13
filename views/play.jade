@@ -32,6 +32,7 @@ block content
     }
 
     function cantar(player,jugada) {
+        console.log(">>>>>>",player,jugada)
       socket.emit('jugada',{player:player,play:jugada});
     }
 
@@ -97,8 +98,9 @@ block content
     });
     
     function actualizarBotones(item,index){
-        console.log(item)
-        $("#botones").append("<a OnClick='cantar("+player+","+item+")',type='button', class='btn btn-primary'>"+item+"</a>")
+        var p = "'"+player+"'"
+        var i = "'"+item+"'"
+        $("#botones").append('<a onclick="cantar('+p+','+i+')",type="button", class="btn btn-primary">'+item+'</a>')
     }
     socket.on('changeTurn',function (data){
         // actualiza el texto de quien juega
