@@ -21,7 +21,7 @@ block content
     //functions 
     
     function foo(index,player) {
-        socket.emit('playCard',{player:player,index:index});
+      socket.emit('playCard',{player:player,index:index});
     };
 
     function test() {
@@ -169,20 +169,15 @@ block content
 
 
     socket.on('cartaJugada',function (data) {
-        var hand = $("#hand td");
-        hand.eq(data.index).remove();        
+        if (data.player == player) {
+          var hand = $("#hand td");
+          [data.carta].forEach(insertCard,{tag:$("#board1"),cartas:[data.carta]});
+          hand.eq(data.index).remove(); 
+        } else {
+          [data.carta].forEach(insertCard,{tag:$("#board0"),cartas:[data.carta]});
+        }
     })
 
-
-    socket.on('updateBoard',function (data) {
-        var p;
-        var board=data.newBoard;
-        (player==="player1")?p=data.player1:p=data.player2;
-        //socket.emit('update cards');
-        board[0].forEach(introduceInBoard0,board[0]);
-        board[1].forEach(introduceInBoard1,board[1]);
-        
-    })
 
     socket.on('invalidTurn',function () {
         window.alert("Espera tu turno!")
@@ -218,9 +213,6 @@ block content
     socket.on('gameEnded',function (){
       window.alert("El juego ya termino");
     })
-
-
-
     
   h1(class="header") #{game.game.name}
   div(id="wrap")

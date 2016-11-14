@@ -221,10 +221,8 @@ module.exports = function(io) {
                     errorControl(err);
                 }
                 else {
-                    socket.emit('cartaJugada',{index:data.index});
-                    //playSpace.to(playroom).emit('cartaJugada',objeto);
+                    playSpace.to(playroom).emit('cartaJugada',{index:data.index,carta:res.carta,player: data.player});
                     statusControl(game,{maybePlayer : res.maybePlayer});
-                    playSpace.to(playroom).emit('updateBoard',{cartaJugada:res.carta,newBoard:game.currentRound.board, currentTurn : game.currentRound.currentTurn});
                     playSpace.to(playroom).emit('changeTurn',{score:game.score,turn:game.currentRound.currentTurn,plays:jugadas(game)});
                 }
 
