@@ -6,7 +6,8 @@
  * @param gmae [Object]: game where the round belongs
  *
  */
-
+"use strict";
+/*jslint node: true */
 var _ = require('lodash');
 var StateMachine = require("../node_modules/javascript-state-machine/state-machine.js");
 var deckModel = require("./deck");
@@ -64,7 +65,7 @@ RoundSchema.pre('save',function(next) {
     this.markModified('score');
     this.markModified('game');
     next();
-})
+});
 
 var Round = mongoose.model('Round', RoundSchema);
 
@@ -75,13 +76,6 @@ var valueOf = {
     'envido2' : 2,
     'realenvido': 3,
     'faltaenvido': -1 //Caso especial, necesita ser calculado
-};
-
-//Usado para filtrar eventos
-var raise = {
-    'truco' : true,
-    'retruco' : true,
-    'valecuatro' : true
 };
 
 //Auxiliares, no afectan en nada si son modificadas
@@ -228,7 +222,11 @@ function newTrucoFSM(){
 
         //Despues del quiero depende de donde vino
         onafterquiero: function(event, from, to, carta, tround) {
-            valueOf[from] ? tround.sumarPuntosDeEnvidoCon(true) : tround.puntosTruco++;
+            if (valueOf[from]) {
+                tround.sumarPuntosDeEnvidoCon(true);
+            } else {
+             tround.puntosTruco++;
+            }
         },
         //Si vino de algun envido le da los puntos al ganador, sino vino de envido suma puntos al truco
         //porque vino de un truco/retruco/valecuatro
@@ -257,7 +255,7 @@ Round.prototype.resetValues = function () {
     this.score = [0,0];
     this.puntosTruco = 1;
     this.envidoStack = [];
-}
+};
 
 
 
@@ -296,7 +294,7 @@ function switchPlayer(player) {
 
 //PRE: Cantidad de cartas del tablero = 2 || 4 || 6
 //dado un tablero, ve las ultimas dos cartas jugadas del tablero y retorna el jugador ganador
-Round.prototype.calcularRonda = function(board, mano) {
+Round.prototype.calcularRonda = function(board) {
     var quienAgano;
     var cartasJ1 = board[0];
     var cartasJ2 = board[1];
@@ -314,12 +312,14 @@ Round.prototype.calcularRonda = function(board, mano) {
                 quienAgano = "player2";
                 break;
             }
-        case (confrontResult == 0):
+        case (confrontResult === 0):
             {
                 quienAgano = "empate";
                 break;
             }
-    };
+        default:
+            throw new Error("Imposiburu!");
+    }
     return quienAgano;
 };
 
@@ -336,29 +336,23 @@ Round.prototype.hasEnded = function() {
         case (cartasJugadas == 6):
             {
                 return true;
-                break;
             }
-        case (this.resultados[0] === "empate"
-              && (this.resultados[1] === "player1" || this.resultados[1] === "player2")) :
+        case (this.resultados[0] === "empate" && (this.resultados[1] === "player1" || this.resultados[1] === "player2")) :
             {
                 return true;
-                break;
             }
         case (this.resultados[0] !== "empate" && this.resultados[1] === "empate"):
             {
                 return true;
-                break;
             }
-        case (this.resultados[0] === this.resultados[1]
-              && this.resultados[0] !== 'empate'):
+        case (this.resultados[0] === this.resultados[1] && this.resultados[0] !== 'empate'):
             {
                 return true;
-                break;
             }
         default:
             return false;
     }
-}
+};
 
 /*
  *Mira el ganador de la ronda y actualiza el puntaje al juego
@@ -497,9 +491,9 @@ Round.prototype.changeTurn = function(action) {
     if (action === "quiero" ||
         action === "no-quiero" ||
         action === "playCard") {
-        return this.currentTurn = this.nextTurn;
+        this.currentTurn = this.nextTurn;
     } else {
-        return this.currentTurn = switchPlayer(this.currentTurn);
+        this.currentTurn = switchPlayer(this.currentTurn);
     }
 
 };
@@ -507,7 +501,7 @@ Round.prototype.changeTurn = function(action) {
 Round.prototype.recreate = function() {
     this.fsm = newTrucoFSM();
     this.fsm.current = this.currentState;
-}
+};
 
 
 /*

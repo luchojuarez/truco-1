@@ -49,7 +49,6 @@ function onAuthorizeFail(data, message, error, accept){
 var index = require('./routes/index') (io,passportSocketIo);
     login = require('./routes/login') (io);
     register = require('./routes/register');
-    users = require('./routes/users');
     play = require('./routes/play') (io);
     lobby = require('./routes/lobby') (io);
 

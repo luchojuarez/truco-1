@@ -26,12 +26,10 @@ block content
 
     function test() {
       socket.emit('test',{player:player});
-      console.log(player);
 
     }
 
     function cantar(player,jugada) {
-        console.log(">>>>>>",player,jugada)
       socket.emit('jugada',{player:player,play:jugada});
     }
 
@@ -88,6 +86,11 @@ block content
 
     function remove(e) {
      $(this).remove();
+    }
+
+    function appendCard(boardId,card) {
+      var img = '<img width="90", height="120", src="/images/cartas/'+card.number+'-'+card.suit+'.png" ></img>';
+      $(boardId).append(img);
     }
 
     function appendJugada(elementId,play) {
@@ -152,11 +155,12 @@ block content
         // actualiza las jugadas posibles
         //data.plays tengo las posibles jugadas
         $("#botones > a").remove();
-        console.log(data.plays)
         data.plays.forEach(actualizarBotones);
         
         
     });
+
+
     socket.on('update cards done',function (data) {
         var board = data.board;
         var score = data.score;
@@ -197,19 +201,18 @@ block content
     })
 
     socket.on('nuevaRonda',function(data) {
+      window.alert("Nueva ronda, awantia");
       setTimeout(function () {
         clearBoard();
         $(".alertas").empty();
         refreshHand(data.hands);
       },1500)
-      window.alert("SE ESTA JUGANDO UNA NUEVA RONDA");
     });
 
     socket.on('endGame',function (data) {
       setTimeout(function() {
-        console.log(data.player.nickname);
         window.alert("Gano "+data.player.nickname);
-      },1000)
+      },2000)
     });
 
     socket.on('gameEnded',function (){

@@ -106,9 +106,6 @@ describe('Persistence in the database', function(){
         Game.load(gameId,function (err,loaded) {
             if (err) done(err);
             var loadedBoardLength = loaded.currentRound.board[0].length + loaded.currentRound.board[1].length;
-            console.log("cartas player 1",loaded.player1.cards);
-            console.log("cartas player 2",loaded.player2.cards);
-            console.log(loaded.currentRound.board);
             expect(savedBoardLength).to.be.eq(loadedBoardLength);
             expect(savedScore[0]).to.be.eq(loaded.score[0]);
             expect(savedScore[1]).to.be.eq(loaded.score[1]);

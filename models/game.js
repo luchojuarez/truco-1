@@ -6,13 +6,13 @@
  *
  */
 
+/*jslint node: true */
+
 var _ = require('lodash');
-var playerModel = require("./player");
 var roundModel = require("./round");
 var mongoose = require('mongoose');
 var cardModel = require("./card.js");
 var Card = cardModel.card;
-var Player = playerModel.player;
 var Round  = roundModel.round;
 var Schema = mongoose.Schema;
 
@@ -67,7 +67,7 @@ GameSchema.pre('save', function (next) {
   this.markModified('const');
    var game = this;
    Promise.all([saveSubdoc(game,"currentRound"),saveSubdoc(game,"player1"),saveSubdoc(game,"player2")])
-    .then(function(values) {
+    .then(function() {
       //Maybe do something with the data if necesary
       next();
     },error => {
@@ -78,7 +78,6 @@ GameSchema.pre('save', function (next) {
 
 //Populate non null fields
 GameSchema.statics.load = function (gameId,cb) {
-  var gameId = arguments[0], fields, cb;
   this.findById(gameId, function(err, tgame) {
     if (err) {
       cb(err,false);
@@ -86,7 +85,7 @@ GameSchema.statics.load = function (gameId,cb) {
     }
     var fields = ["currentRound","player1","player2"];
     _.remove(fields,function (prop) {
-      return (tgame[prop] == null);
+      return (tgame[prop] === null);
     });
     Game.populate(tgame,fields.join(" "),function(err,populatedGame) {
       if (err) cb(err);
@@ -127,12 +126,13 @@ Game.prototype.start = function () {
 
 Game.prototype.abort = function () {
   this.status = this.const.ABORTED;
-}
+};
 
 /*
  * Check if it's valid move and play in the current round
  */
 Game.prototype.play = function(player, action, value){
+  var err;
   if(this.status == this.const.ABORTED) {
     err = new Error("[ERROR] GAME ABORTED...");
     err.name = 'gameAborted';
@@ -146,7 +146,7 @@ Game.prototype.play = function(player, action, value){
   }
   if(this.currentRound.currentTurn !== player) {
     err = new Error("[ERROR] INVALID TURN...");
-        err.name = 'invalidTurn';
+    err.name = 'invalidTurn';
     throw err;
   }
 
@@ -187,7 +187,7 @@ Game.prototype.newRound = function(){
   this.status = this.const.NEWROUND;
   this.currentRound = round;
   this.rounds.push(round);
-}
+};
 
 //
 

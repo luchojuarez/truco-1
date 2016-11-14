@@ -1,34 +1,34 @@
-
+/*jslint node: true */
+"use strict";
 module.exports = function(io) {
 
     //Init common resources
     var _ = require('lodash');
     var express = require('express');
-    var passport = require('passport');
     var playSpace = io.of('/play');
-    var User = require('../models/user');
     var router = express.Router();
 
     var Game = require("../models/game").game;
-    var Player = require("../models/player").player;
 
    const esEnvido = {
     'envido': true,
     'envido2' : true,
     'realenvido': true,
     'faltaenvido': true
-    }
+    };
 
 
 
     //Epxress middleware
     function mustBeLogged(req, res, next) {
-        if (!req.user) {return res.redirect('/login')};
+        if (!req.user) {
+            return res.redirect('/login');
+        }
         next();
     }
 
     function parseGame(req, res, next) {
-        gameId = req.query.gameId;
+        var gameId = req.query.gameId;
         Game.load(gameId, function(err, game) {
             if (err) next(err);
             var p, board, player,score,envidoPoints;
@@ -56,10 +56,10 @@ module.exports = function(io) {
                 user: req.user,
                 score: score,
                 plays: game.currentRound.fsm.transitions()
-            }
+            };
             req.game = objectGame;
             next();
-        })
+        });
     }
 
 
@@ -77,21 +77,22 @@ module.exports = function(io) {
     function apply(id,f,cb){
         Game.load(id, function(err,game) {
             if (err)
-                return cb(err)
+                return cb(err);
+            var res;
             try {
-                var res = f(game);
+                res = f(game);
                 game.save(function(err, game) {
                     if (err) {
                         return cb(err);
                     }
                     return cb(err, game, res);
-                })
+                });
             }
             catch(e) {
                 return cb(e,game,res);
             }
-        })
-    };
+        });
+    }
 
     function jugadas(game) {
         var plays = game.currentRound.fsm.transitions();
@@ -105,10 +106,10 @@ module.exports = function(io) {
         var res = game.player1.envidoPoints - game.player2.envidoPoints;
         switch (true) {
             case (res > 0): //Gano player1
-                player = "player1"
+                player = "player1";
                 break;
             case (res < 0): //Gano player2
-                player = "player2"
+                player = "player2";
                 break;
             case (res = 0): //Empate, gana la mano
                 player = game.currentHand == "player1"?"player1":"player2";
@@ -149,12 +150,12 @@ module.exports = function(io) {
                 case game.const.PLAYING:
                     //Se esta jugando
                     console.log("Jugando :",game.status);
-                    break
+                    break;
                 default:
                     //Otro
                     console.log("Estado del juego: ",game.status);
             }
-        };
+        }
 
         function errorControl(err) {
             switch (err.name) {
@@ -200,24 +201,8 @@ module.exports = function(io) {
                 console.log("CURRENT STATUS: ",g.status);
                 console.log("requestPlayer",data.player);
                 console.log("jugadas",jugadas(g));
-            })
+            });
         });
-
-        //Evento de envido querido (o no quiero)
-/*        socket.on('quiero',function(data){
-            function quieroHandler(game) {
-                return game.play(data.player,data.jugada);
-            }
-            apply(gameId,quieroHandler,function (err,game,res) {
-                if (err) {
-                    errorControl(err);
-                }else {
-                    statusControl(game,{maybePlayer: res});
-                    console.log("<<<<<<<<<",game.currentRound.fsm.transitions());
-                    playSpace.to(playroom).emit('changeTurn',{score:game.score,turn:game.currentRound.currentTurn,plays:jugadas(game)});
-                }
-            })
-        })*/
 
 
         //Evento de carta jugada
@@ -236,12 +221,6 @@ module.exports = function(io) {
                     errorControl(err);
                 }
                 else {
-                    var objeto = {
-                        newBoard:game.currentRound.board,
-                        score:game.currentRound.score,
-                        player1:game.player1,
-                        player2:game.player2
-                    }
                     socket.emit('cartaJugada',{index:data.index});
                     //playSpace.to(playroom).emit('cartaJugada',objeto);
                     statusControl(game,{maybePlayer : res.maybePlayer});
@@ -249,8 +228,8 @@ module.exports = function(io) {
                     playSpace.to(playroom).emit('changeTurn',{score:game.score,turn:game.currentRound.currentTurn,plays:jugadas(game)});
                 }
 
-            })
-        })
+            });
+        });
 
 
         //Evento de cantar jugada
@@ -281,25 +260,25 @@ module.exports = function(io) {
                     playSpace.to(playroom).emit('changeTurn',{score:game.score,turn:game.currentRound.currentTurn,plays:jugadas(game)});
                     socket.broadcast.to(playroom).emit('cantaron',{jugada:data.play,player:data.player});
                 }
-            })
-        })
+            });
+        });
 
 
         //Disconnect handler
         socket.on('disconenct', function() {
             socket.leave(playroom);
         });
-    })
+    });
 
 
 
     //Router verbs
 
-    router.get('/', parseGame, function(req, res, next) {
+    router.get('/', parseGame, function(req, res) {
         res.render('play', {
             game: req.game
-        })
-    })
+        });
+    });
 
     return router;
 };
