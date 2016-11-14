@@ -27,9 +27,7 @@ block content
     function test() {
       socket.emit('test',{player:player});
       console.log(player);
-      appendJugada(".alertas",'no_quiero');
-      //console.log(data.cartas);
-      //var hand = $("#hand > td").remove();
+
     }
 
     function cantar(player,jugada) {
@@ -87,7 +85,6 @@ block content
         document.getElementById("board1").innerHTML =" "; 
         this.forEach(insertCard,{tag:$("#board1"),cartas:this})
     }
-
 
     function remove(e) {
      $(this).remove();
@@ -187,6 +184,14 @@ block content
         window.alert("Espera tu turno!")
     })
 
+    socket.on('envido',function(data){
+      var puntosDelOtro = player == "player1"? data.puntos[1] : data.puntos[0];
+      var texto = player == data.ganador? "Son buenas.." : "Venga mijo!";
+      setTimeout(function () {
+        window.alert("Tengo "+puntosDelOtro+"\n"+texto);
+      },1500);
+    })
+
     socket.on('cantaron',function(data) {
         appendJugada(".alertas",data.jugada);
     })
@@ -194,6 +199,7 @@ block content
     socket.on('nuevaRonda',function(data) {
       setTimeout(function () {
         clearBoard();
+        $(".alertas").empty();
         refreshHand(data.hands);
       },1500)
       window.alert("SE ESTA JUGANDO UNA NUEVA RONDA");
@@ -231,17 +237,17 @@ block content
     div(id="right")
       div(class='btn-group-vertical', id="botones")
         if(game.plays.indexOf('envido')>-1)
-          a(href="#" onclick="cantar('#{game.plays}','envido');" type="button" class="btn btn-primary") envido
+          a(href="#" onclick="cantar('#{game.player}','envido');" type="button" class="btn btn-primary") envido
         if(game.plays.indexOf('truco')>-1)
-          a(href="#" onclick="cantar('#{game.plays}','truco');" type="button" class="btn btn-primary") truco
+          a(href="#" onclick="cantar('#{game.player}','truco');" type="button" class="btn btn-primary") truco
         if(game.plays.indexOf('realenvido')>-1)
-          a(href="#" onclick="cantar('#{game.plays}','realenvido');" type="button" class="btn btn-primary") realenvido
+          a(href="#" onclick="cantar('#{game.player}','realenvido');" type="button" class="btn btn-primary") realenvido
         if(game.plays.indexOf('faltaenvido')>-1)
-          a(href="#" onclick="cantar('#{game.plays}','faltaenvido');" type="button" class="btn btn-primary") faltaenvido
+          a(href="#" onclick="cantar('#{game.player}','faltaenvido');" type="button" class="btn btn-primary") faltaenvido
         if(game.plays.indexOf('retruco')>-1)
-          a(href="#" onclick="cantar('#{game.plays}','retruco');" type="button" class="btn btn-primary") retruco
+          a(href="#" onclick="cantar('#{game.player}','retruco');" type="button" class="btn btn-primary") retruco
          if(game.plays.indexOf('valecuatro')>-1)
-          a(href="#" onclick="cantar('#{game.plays}','valecuatro');" type="button" class="btn btn-primary") valecuatro
+          a(href="#" onclick="cantar('#{game.player}','valecuatro');" type="button" class="btn btn-primary") valecuatro
       div(id="puntos")
         table(style="width:100%")
           thead

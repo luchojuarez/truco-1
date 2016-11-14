@@ -12,6 +12,13 @@ module.exports = function(io) {
     var Game = require("../models/game").game;
     var Player = require("../models/player").player;
 
+   const esEnvido = {
+    'envido': true,
+    'envido2' : true,
+    'realenvido': true,
+    'faltaenvido': true
+    }
+
 
 
     //Epxress middleware
@@ -91,6 +98,23 @@ module.exports = function(io) {
         return _.filter(plays,function (p) {
             return p != "playCard";
         });
+    }
+
+    function ganadorEnvido(game) {
+        var player;
+        var res = game.player1.envidoPoints - game.player2.envidoPoints;
+        switch (true) {
+            case (res > 0): //Gano player1
+                player = "player1"
+                break;
+            case (res < 0): //Gano player2
+                player = "player2"
+                break;
+            case (res = 0): //Empate, gana la mano
+                player = game.currentHand == "player1"?"player1":"player2";
+                break;
+        }
+        return player;
     }
 
 
@@ -236,8 +260,13 @@ module.exports = function(io) {
             function playHandler(game) {
                 let player = data.player;
                 let play = data.play;
-
-                return game.play(player,play);
+                var puntos,ganador;
+                if (play == 'quiero' && esEnvido[game.status]) {
+                    puntos= [game.player1.envidoPoints,game.player2.envidoPoints];
+                    ganador = ganadorEnvido(game);
+                }
+                var maybePlayer = (game.play(player,play));
+                return {maybePlayer:maybePlayer,envido:{ puntos:puntos, ganador: ganador}};
             }
 
             apply(gameId,playHandler,function (err,game,res) {
@@ -245,7 +274,10 @@ module.exports = function(io) {
                     errorControl(err);
                 } else {
                 //Enviar mensaje a todos los de la room excepto al que lo envia
-                    statusControl(game,{maybePlayer:res});
+                    statusControl(game,{maybePlayer:res.maybePlayer});
+                    if(res.envido.ganador) {
+                        playSpace.to(playroom).emit('envido',{puntos:res.envido.puntos,ganador:res.envido.ganador});
+                    }
                     playSpace.to(playroom).emit('changeTurn',{score:game.score,turn:game.currentRound.currentTurn,plays:jugadas(game)});
                     socket.broadcast.to(playroom).emit('cantaron',{jugada:data.play,player:data.player});
                 }
