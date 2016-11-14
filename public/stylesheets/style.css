@@ -35,19 +35,21 @@ h2 {
     height: 50%;
 }
 
-#left, #right {
+#left, #center, #right {
     top: 0;
-    padding: 20px;
+    padding: 10px;
 }
 
-
+.alertas {
+  width: 110px;
+}
 
 a {
   color: #00B7FF;
 }
 
 .center {
-    margin: auto;
+    margin: inherit;
     background-image: url('../images/green.jpg');
     border-radius: 25px;
     /*background: #73AD21;*/

@@ -27,6 +27,7 @@ block content
     function test() {
       socket.emit('test',{player:player});
       console.log(player);
+      appendJugada(".alertas",'no_quiero');
       //console.log(data.cartas);
       //var hand = $("#hand > td").remove();
     }
@@ -88,6 +89,50 @@ block content
     }
 
 
+    function remove(e) {
+     $(this).remove();
+    }
+
+    function appendJugada(elementId,play) {
+      var alert;
+      switch (play) {
+                case 'quiero':
+                    alert= '<div onclick="remove(this)" class="alert alert-success"><strong>Quiero!</strong></div>'
+                    break;
+                case 'no_quiero':
+                    alert= '<div onclick="remove(this)" class="alert alert-danger"><strong>No quiero..</strong></div>'
+                    break;
+                case 'realenvido':
+                    alert= '<div onclick="remove(this)" class="alert alert-info"><strong>Real envido!</strong></div>'
+                    break;
+                case 'faltaenvido':
+                    alert= '<div onclick="remove(this)" class="alert alert-info"><strong>Falta envido!</strong></div>'
+                    break;
+                case 'envido':
+                    alert= '<div onclick="remove(this)" class="alert alert-info"><strong>Envido</strong></div>'
+                    break;
+                case 'truco':
+                    alert= '<div onclick="remove(this)" class="alert alert-info"><strong>Truco</strong></div>'
+                    break;
+                case 'retruco':
+                    alert= '<div onclick="remove(this)" class="alert alert-info"><strong>Retruco!</strong></div>'
+                    break;
+                case 'valecuatro':
+                    alert= '<div onclick="remove(this)" class="alert alert-info"><strong>Valecuatro!</strong></div>'
+                    break;
+                default:
+                    console.error("NOPE");
+            }
+      $(elementId).append(alert);
+    }
+
+    function actualizarBotones(item,index){
+        var p = "'"+player+"'"
+        var i = "'"+item+"'"
+        $("#botones").append('<a onclick="cantar('+p+','+i+')",type="button", class="btn btn-primary">'+item+'</a>')
+    }
+
+
 
     //Socket events
     
@@ -97,11 +142,7 @@ block content
         socket.emit('update cards');
     });
     
-    function actualizarBotones(item,index){
-        var p = "'"+player+"'"
-        var i = "'"+item+"'"
-        $("#botones").append('<a onclick="cantar('+p+','+i+')",type="button", class="btn btn-primary">'+item+'</a>')
-    }
+
     socket.on('changeTurn',function (data){
         // actualiza el texto de quien juega
         document.getElementById("textoturno").innerHTML = textoTurno(data.turn);
@@ -147,12 +188,7 @@ block content
     })
 
     socket.on('cantaron',function(data) {
-        var r = confirm("cantaron "+data.jugada+" queres?");
-        if(r){
-            socket.emit('quiero',{player:'!{game.player}',jugada:"quiero"});
-        }else{
-            socket.emit('quiero',{player:'!{game.player}',jugada:"no_quiero"});
-        }
+        appendJugada(".alertas",data.jugada);
     })
 
     socket.on('nuevaRonda',function(data) {
@@ -173,10 +209,17 @@ block content
     socket.on('gameEnded',function (){
       window.alert("El juego ya termino");
     })
+
+
+
     
   h1(class="header") #{game.game.name}
   div(id="wrap")
     div(id="left")
+      div(class="alertas",id="jugadas")
+
+
+    div(id="center")
       div(class="mesa")
         p(id="board0")
           each card, index in game.board[0]

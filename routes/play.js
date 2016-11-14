@@ -180,7 +180,7 @@ module.exports = function(io) {
         });
 
         //Evento de envido querido (o no quiero)
-        socket.on('quiero',function(data){
+/*        socket.on('quiero',function(data){
             function quieroHandler(game) {
                 return game.play(data.player,data.jugada);
             }
@@ -193,7 +193,7 @@ module.exports = function(io) {
                     playSpace.to(playroom).emit('changeTurn',{score:game.score,turn:game.currentRound.currentTurn,plays:jugadas(game)});
                 }
             })
-        })
+        })*/
 
 
         //Evento de carta jugada
