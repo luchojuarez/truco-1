@@ -43,7 +43,6 @@ block content
     }
 
     function refreshHand(hands) {
-      $("#hand > td").remove();
       var cartas;
       if(hands) {
         (player === "player1")? cartas = hands[0] : cartas = hands[1];
@@ -192,7 +191,8 @@ block content
     })
 
     socket.on('nuevaRonda',function(data) {
-      window.alert("Nueva ronda, awantia");
+      $("#hand").empty();
+      window.alert("Se acabo la mentira, "+data.nextPlayer+" te toca mezclar!");
       setTimeout(function () {
         clearBoard();
         $(".alertas").empty();

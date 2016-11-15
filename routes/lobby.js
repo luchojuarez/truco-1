@@ -75,7 +75,7 @@ module.exports = function (io){
         var user = req.user;
         var p1 = new Player({ nickname: username, user: user});
         var opts = {
-            name : "New game by " + username,
+            name : "Juego de " + username,
             player1 : p1,
             maxScore : 30
         };

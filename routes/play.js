@@ -136,20 +136,18 @@ module.exports = function(io) {
             switch (game.status) {
                 case game.const.NEWROUND:
                     //Que hacer cuando hay una nueva ronda
-                    playSpace.to(playroom).emit("nuevaRonda",{hands: [game.player1.cards,game.player2.cards]});
+                    var proximo = game[game.currentHand].nickname;
+                    playSpace.to(playroom).emit("nuevaRonda",{hands: [game.player1.cards,game.player2.cards],nextPlayer: proximo});
                     break;
                 case game.const.ENDED:
                     //Cuando termino el juego
-                    console.log("El juego termino");
                     playSpace.to(playroom).emit('endGame',{player:data.maybePlayer});
                     break;
                 case game.const.ABORTED:
                     //Se aborto el juego, el juego se aborta con game.abort()
-                    console.log("El juego se aborto");
                     break;
                 case game.const.PLAYING:
                     //Se esta jugando
-                    console.log("Jugando :",game.status);
                     break;
                 default:
                     //Otro

@@ -1,6 +1,16 @@
 extends layout
 block content
-  h1(class="header") Waiting for opponent
+  .container
+  .row
+    svg(viewbox='0 0 1920 600')
+      symbol#s-text
+        text(text-anchor='middle', x='50%', y='80%') Esperando oponente... 
+      g.g-ants
+        use.text-copy(xlink:href='#s-text')
+        use.text-copy(xlink:href='#s-text')
+        use.text-copy(xlink:href='#s-text')
+        use.text-copy(xlink:href='#s-text')
+        use.text-copy(xlink:href='#s-text')
   script.
     var url = window.location.href;
     var getQuery = url.split('?')[1];
