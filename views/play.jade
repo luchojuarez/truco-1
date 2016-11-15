@@ -1,3 +1,4 @@
+
 // en user.p tengo el objeto Player y en user.u el objeto User
 // y de la misma fotma con guest
 extends layout
@@ -6,45 +7,255 @@ block content
     //Sacar el gameId del query
     var url = window.location.href;
     var gameId = url.split('?')[1];
-    socket = io('/play',{ query: gameId});
-    function foo(el) {
-        var carta = $(el).attr('value');
-        socket.emit('cardClicked',carta);
-        window.alert(carta);
+
+    var player = !{JSON.stringify(game.player)};
+    var currentTurn = !{JSON.stringify(game.turn)};
+    var playerOfTurn = !{JSON.stringify(game.game[game.player])};
+    var plays = !{JSON.stringify(game.plays)};
+    socket = io('/play',{ query: gameId+"&player="+player});
+
+
+
+
+
+    //functions 
+    
+    function foo(index,player) {
+      socket.emit('playCard',{player:player,index:index});
+    };
+
+
+    function cantar(player,jugada) {
+      socket.emit('jugada',{player:player,play:jugada});
     }
 
-    socket.on('Holis',function(data) {
-      console.log("Estoy en la room",data);
+    var textoTurno = function(turn) {
+      if (player === turn) {
+        return "Te toca jugar!";
+      } else {
+        return "Es el turno de "+playerOfTurn.nickname;
+      }
+    }
+
+    function clearBoard() {
+      $("#board0 > img").remove();
+      $("#board1 > img").remove();
+    }
+
+    function refreshHand(hands) {
+      $("#hand > td").remove();
+      var cartas;
+      if(hands) {
+        (player === "player1")? cartas = hands[0] : cartas = hands[1];
+      } else {
+        cartas = !{JSON.stringify(game.cartas)};
+      }
+      hand = $("#hand");  
+      for (var i in cartas) {
+        card = cartas[i];
+        hand.append('<td>'+
+          '<img class="card" id=card'+i+' width="90" height="120" OnClick="foo(this.parentNode.cellIndex,'+"'"+player+"'"+');" src="/images/cartas/'+card.number+"-"+card.suit+'.png" ></img>'
+          +'</td>');
+      }
+    }
+        
+    function insertCard(item,index){
+        var tag = this.tag;
+        var cartas= this.cartas; 
+        var card = cartas[index].number.toString()+"-"+cartas[index].suit;
+        //tag.append('<img width="90", height="120", src="/images/cartas/'+card+'.png" ></img>');
+        tag.html(function(i,originHTML){
+            return originHTML+'<img width="90", height="120", src="/images/cartas/'+card+'.png" ></img>';
+        })
+    }
+    function introduceInBoard0(item,index){
+        //this tengo board[0]
+        $("#board0").html=" ";
+        document.getElementById("board0").innerHTML =" "; 
+        this.forEach(insertCard,{tag:$("#board0"),cartas:this})
+    }
+    function introduceInBoard1(item,index){
+        $("#board1").html=" ";
+        document.getElementById("board1").innerHTML =" "; 
+        this.forEach(insertCard,{tag:$("#board1"),cartas:this})
+    }
+
+    function remove(e) {
+     $(this).remove();
+    }
+
+    function appendCard(boardId,card) {
+      var img = '<img width="90", height="120", src="/images/cartas/'+card.number+'-'+card.suit+'.png" ></img>';
+      $(boardId).append(img);
+    }
+
+    function appendJugada(elementId,play) {
+      var alert;
+      switch (play) {
+                case 'quiero':
+                    alert= '<div onclick="remove(this)" class="alert alert-success"><strong>Quiero!</strong></div>'
+                    break;
+                case 'no_quiero':
+                    alert= '<div onclick="remove(this)" class="alert alert-danger"><strong>No quiero..</strong></div>'
+                    break;
+                case 'realenvido':
+                    alert= '<div onclick="remove(this)" class="alert alert-info"><strong>Real envido!</strong></div>'
+                    break;
+                case 'faltaenvido':
+                    alert= '<div onclick="remove(this)" class="alert alert-info"><strong>Falta envido!</strong></div>'
+                    break;
+                case 'envido':
+                    alert= '<div onclick="remove(this)" class="alert alert-info"><strong>Envido</strong></div>'
+                    break;
+                case 'truco':
+                    alert= '<div onclick="remove(this)" class="alert alert-info"><strong>Truco</strong></div>'
+                    break;
+                case 'retruco':
+                    alert= '<div onclick="remove(this)" class="alert alert-info"><strong>Retruco!</strong></div>'
+                    break;
+                case 'valecuatro':
+                    alert= '<div onclick="remove(this)" class="alert alert-info"><strong>Valecuatro!</strong></div>'
+                    break;
+                default:
+                    console.error("NOPE");
+            }
+      $(elementId).append(alert);
+    }
+
+    function actualizarBotones(item,index){
+        var p = "'"+player+"'"
+        var i = "'"+item+"'"
+        $("#botones").append('<a onclick="cantar('+p+','+i+')",type="button", class="btn btn-primary">'+item+'</a>')
+    }
+
+
+
+    //Socket events
+    
+
+    $( document ).ready(function() {
+        document.getElementById("textoturno").innerHTML = textoTurno(currentTurn);
+        socket.emit('update cards');
+    });
+    
+
+    socket.on('changeTurn',function (data){
+        // actualiza el texto de quien juega
+        document.getElementById("textoturno").innerHTML = textoTurno(data.turn);
+        var myScore = player=="player1"? data.score:[data.score[1],data.score[0]];
+        
+        // actualiza el puntaje de cada jugador
+        document.getElementById("nosotros").innerHTML = myScore[0];
+        document.getElementById("ellos").innerHTML = myScore[1];
+        
+        // actualiza las jugadas posibles
+        //data.plays tengo las posibles jugadas
+        $("#botones > a").remove();
+        data.plays.forEach(actualizarBotones);
+        
+        
     });
 
 
-  h1(class="header") #{game.game.name}
-  p #{game.nickname}
-  if(game.board)
-    div(class="mesa")
-      p acrual score round #{game.score}
-      for card in game.board[0]
-        p #{card.show()}
-      for card in game.board[1]
-        p #{card.show()}
-  
-  div(class="center")
-    each card,index in game.cartas
-      img(class="card", width="90", height="120", OnClick="foo(#{index});",value='{"number": "#{card.number}"}',src="/images/cartas/#{card.number}-#{card.suit}.png")
-  
-  div
-    div(class='btn-group btn-group-lg')
-      if(game.plays.indexOf('envido')>0)
-        a(href="#" onclick="foo()" type="button" class="btn btn-primary") envido
-      if(game.plays.indexOf('truco')>0)
-        a(href="#" type="button" class="btn btn-primary") truco
-      if(game.plays.indexOf('realenvido')>0)
-        a(href="#" type="button" class="btn btn-primary") realenvido
-      if(game.plays.indexOf('faltaenvido')>0)
-        a(href="#" type="button" class="btn btn-primary") faltaenvido
-      if(game.plays.indexOf('retruco')>0)
-        a(href="#" type="button" class="btn btn-primary") retruco
-       if(game.plays.indexOf('valecuatro')>0)
-        a(href="#" type="button" class="btn btn-primary") valecuatro
+    socket.on('update cards done',function (data) {
+        var board = data.board;
+        var score = data.score;
+    });
+
+
+
+    socket.on('cartaJugada',function (data) {
+        if (data.player == player) {
+          var hand = $("#hand td");
+          [data.carta].forEach(insertCard,{tag:$("#board1"),cartas:[data.carta]});
+          hand.eq(data.index).remove(); 
+        } else {
+          [data.carta].forEach(insertCard,{tag:$("#board0"),cartas:[data.carta]});
+        }
+    })
+
+
+    socket.on('invalidTurn',function () {
+        window.alert("Espera tu turno!")
+    })
+
+    socket.on('envido',function(data){
+      var puntosDelOtro = player == "player1"? data.puntos[1] : data.puntos[0];
+      var texto = player == data.ganador? "Son buenas.." : "Venga mijo!";
+      setTimeout(function () {
+        window.alert("Tengo "+puntosDelOtro+"\n"+texto);
+      },1500);
+    })
+
+    socket.on('cantaron',function(data) {
+        appendJugada(".alertas",data.jugada);
+    })
+
+    socket.on('nuevaRonda',function(data) {
+      window.alert("Nueva ronda, awantia");
+      setTimeout(function () {
+        clearBoard();
+        $(".alertas").empty();
+        refreshHand(data.hands);
+      },1500)
+    });
+
+    socket.on('endGame',function (data) {
+      setTimeout(function() {
+        window.alert("Gano "+data.player.nickname);
+      },2000)
+    });
+
+    socket.on('gameEnded',function (){
+      window.alert("El juego ya termino");
+    })
     
+  h1(class="header") #{game.game.name}
+  div(id="wrap")
+    div(id="left")
+      div(class="alertas",id="jugadas")
+
+
+    div(id="center")
+      div(class="mesa")
+        p(id="board0")
+          each card, index in game.board[0]
+            img(width="90", height="120" ,src="/images/cartas/#{card.number}-#{card.suit}.png")
+        p(id="board1")
+          each card, index in game.board[1]
+            img(width="90", height="120" ,src="/images/cartas/#{card.number}-#{card.suit}.png")
+  
+    div(id="right")
+      div(class='btn-group-vertical', id="botones")
+        if(game.plays.indexOf('envido')>-1)
+          a(href="#" onclick="cantar('#{game.player}','envido');" type="button" class="btn btn-primary") envido
+        if(game.plays.indexOf('truco')>-1)
+          a(href="#" onclick="cantar('#{game.player}','truco');" type="button" class="btn btn-primary") truco
+        if(game.plays.indexOf('realenvido')>-1)
+          a(href="#" onclick="cantar('#{game.player}','realenvido');" type="button" class="btn btn-primary") realenvido
+        if(game.plays.indexOf('faltaenvido')>-1)
+          a(href="#" onclick="cantar('#{game.player}','faltaenvido');" type="button" class="btn btn-primary") faltaenvido
+        if(game.plays.indexOf('retruco')>-1)
+          a(href="#" onclick="cantar('#{game.player}','retruco');" type="button" class="btn btn-primary") retruco
+         if(game.plays.indexOf('valecuatro')>-1)
+          a(href="#" onclick="cantar('#{game.player}','valecuatro');" type="button" class="btn btn-primary") valecuatro
+      div(id="puntos")
+        table(style="width:100%")
+          thead
+            tr
+              th Nosotros
+              th Ellos
+          tbody
+            tr
+              td(id="nosotros") #{game.score[0]}
+              td(id="ellos") #{game.score[1]}
+        a(id="textoturno") hola
+
+  div(class="center")
+    table
+      tr(id="hand")
+        each card,index in game.cartas
+          td
+            img(class="card", id="card#{index}",width="90", height="120", OnClick="foo(this.parentNode.cellIndex,'#{game.player}');",src="/images/cartas/#{card.number}-#{card.suit}.png")
+  
   

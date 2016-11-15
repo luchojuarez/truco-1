@@ -11,9 +11,10 @@ h1 {
 h2 {
     text-align: center;
 }
-.win {
-    background-image: url('../images/win.jpg');
-    text-decoration-color: white;
+#win {
+    width:200px;
+    margin: auto;
+    height: auto;
 }
 
 
@@ -26,14 +27,21 @@ h2 {
   float: left;
   text-align: center;
 }
-#left-column {
-  float: left;
-  width: 300px;
+#wrap {
+    margin: auto;
+    display: flex;
+    justify-content: center;
+    width: 600px;
+    height: 50%;
 }
 
-#right-column {
-  float: right;
-  width: 300px;
+#left, #center, #right {
+    top: 0;
+    padding: 10px;
+}
+
+.alertas {
+  width: 110px;
 }
 
 a {
@@ -41,9 +49,10 @@ a {
 }
 
 .center {
-    margin: auto;
+    margin: inherit;
+    background-image: url('../images/green.jpg');
     border-radius: 25px;
-    background: #73AD21;
+    /*background: #73AD21;*/
     padding: 20px;
     width: 330px;
     height: 50%;
@@ -55,19 +64,26 @@ a {
     width="65";
     height="90";
 }
+#puntos{
+    background-image: url('/images/note.png');
+    width: 93px;
+    height: 50%;
+    background-size: contain;
+    padding-top: 26px;
+    font-family: "Brush Script MT",cursive;
+    background-repeat: no-repeat;
+}
 
 .mesa{
     /*padding: 20px;*/
+    background-image: url("/images/wood.png");
+    background-repeat: no-repeat;
+    float: right;
+    background-size: 100% 100%;
     border-radius: 25px;
     margin: auto;
-    height: 250px;
+    height: 260px;
     width: 500px;
-    background-image: url("/images/wood.jpg");
-    border: 3px solid black;
-}
-
-.cartas{
-    margin: auto;
 }
 
 .header {
