@@ -24,10 +24,6 @@ block content
       socket.emit('playCard',{player:player,index:index});
     };
 
-    function test() {
-      socket.emit('test',{player:player});
-
-    }
 
     function cantar(player,jugada) {
       socket.emit('jugada',{player:player,play:jugada});
@@ -263,5 +259,3 @@ block content
             img(class="card", id="card#{index}",width="90", height="120", OnClick="foo(this.parentNode.cellIndex,'#{game.player}');",src="/images/cartas/#{card.number}-#{card.suit}.png")
   
   
- 
-  a(onclick="test();" class="btn btn-primary") TEST

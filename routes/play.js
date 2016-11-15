@@ -183,27 +183,6 @@ module.exports = function(io) {
 
         //Events
 
-        socket.on('test',function(data){
-            Game.load(gameId,function (err,g){
-                if (err)
-                    console.log(err);
-                console.log("Board:");
-                console.log(g.currentRound.board);
-                console.log("Current state");
-                console.log(g.currentRound.currentState);
-                console.log("Turno");
-                console.log(g.currentRound.currentTurn);
-                console.log(g.player1);
-                console.log(g.player2);
-                console.log("Score");
-                console.log(g.score);
-                console.log(g.const);
-                console.log("CURRENT STATUS: ",g.status);
-                console.log("requestPlayer",data.player);
-                console.log("jugadas",jugadas(g));
-            });
-        });
-
 
         //Evento de carta jugada
         socket.on('playCard', function(data) {
