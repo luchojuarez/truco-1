@@ -92,11 +92,18 @@ passport.deserializeUser(User.deserializeUser())
 
 // mongoose
 //mongoose.connect('mongodb://lucho:heroku@ds161210.mlab.com:61210/truco');
-var mongoURI = "mongodb://lucho:heroku@ds161210.mlab.com:61210/truco";
-var MongoDB = mongoose.connect(mongoURI).connection;
-MongoDB.on('error', function(err) { console.log("--------",err.message); });
-MongoDB.once('open', function() {
-  console.log("-----------------------mongodb connection open");
+var options = { server: { socketOptions: { keepAlive: 300000, connectTimeoutMS: 30000 } },
+                replset: { socketOptions: { keepAlive: 300000, connectTimeoutMS : 30000 } } };
+
+var mongodbUri = 'mongodb://lucho:heroku@ds161210.mlab.com:61210/truco';
+
+mongoose.connect(mongodbUri, options);
+var conn = mongoose.connection;
+
+conn.on('error', console.error.bind(console, 'connection error:'));
+
+conn.once('open', function() {
+  // Wait for the database connection to establish, then start the app.
 });
 
 // catch 404 and forward to error handler
