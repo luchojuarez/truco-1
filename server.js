@@ -22,7 +22,7 @@ app.io  = io;
 io.use(passportSocketIo.authorize({
   cookieParser: cookieParser,
   store: sessionStore,
-  key:          'connect.sid',      
+  key:          'connect.sid',
   secret:       'keyboard cat',
   success:      onAuthorizeSuccess,  // *optional* callback on success - read more below
   fail:         onAuthorizeFail,     // *optional* callback on fail/error - read more below
@@ -91,8 +91,19 @@ passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser())
 
 // mongoose
-mongoose.connect('mongodb://localhost/truco-development');
+//mongoose.connect('mongodb://lucho:heroku@ds161210.mlab.com:61210/truco');
 
+var mongodbUri = 'mongodb://lucho:heroku@ds161210.mlab.com:61210/truco';
+
+mongoose.connect(mongodbUri);
+var conn = mongoose.connection;
+
+conn.on('error', console.error.bind(console, 'connection error:'));
+
+conn.once('open', function() {
+    console.log("db open");
+  // Wait for the database connection to establish, then start the app.
+});
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
