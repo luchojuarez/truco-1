@@ -92,17 +92,16 @@ passport.deserializeUser(User.deserializeUser())
 
 // mongoose
 //mongoose.connect('mongodb://lucho:heroku@ds161210.mlab.com:61210/truco');
-var options = { server: { socketOptions: { keepAlive: 300000, connectTimeoutMS: 30000 } },
-                replset: { socketOptions: { keepAlive: 300000, connectTimeoutMS : 30000 } } };
 
 var mongodbUri = 'mongodb://lucho:heroku@ds161210.mlab.com:61210/truco';
 
-mongoose.connect(mongodbUri, options);
+mongoose.connect(mongodbUri);
 var conn = mongoose.connection;
 
 conn.on('error', console.error.bind(console, 'connection error:'));
 
 conn.once('open', function() {
+    console.log("db open");
   // Wait for the database connection to establish, then start the app.
 });
 
