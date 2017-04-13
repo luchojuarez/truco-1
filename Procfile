@@ -1,1 +1,1 @@
-web: NODE_ENV=development node ./bin/www
+web: NODE_ENV=development node /bin/www
