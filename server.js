@@ -94,9 +94,9 @@ passport.deserializeUser(User.deserializeUser())
 //mongoose.connect('mongodb://lucho:heroku@ds161210.mlab.com:61210/truco');
 var mongoURI = "mongodb://lucho:heroku@ds161210.mlab.com:61210/truco";
 var MongoDB = mongoose.connect(mongoURI).connection;
-MongoDB.on('error', function(err) { console.log(err.message); });
+MongoDB.on('error', function(err) { console.log("--------",err.message); });
 MongoDB.once('open', function() {
-  console.log("mongodb connection open");
+  console.log("-----------------------mongodb connection open");
 });
 
 // catch 404 and forward to error handler
