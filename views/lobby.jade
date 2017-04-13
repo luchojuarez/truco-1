@@ -34,15 +34,6 @@ block content
         }
     }
     
-    /*function chooseGame(index) {
-        var usuario = !{JSON.stringify(user)};
-        socket.emit("let's play",{
-            gameId:games[index].id,
-            user:usuario,
-        })
-        window.alert(games[index].id);
-    }*/
-    
     $( document ).ready(function() {
         socket.emit('load games', {id: socket.id });
     });
